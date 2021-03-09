@@ -17,7 +17,7 @@ namespace Netdb
         {
             if (!IsModerator(Context.User))
             {
-                await Embedbuilder("You have to be a moderator to use this command", Color.DarkRed);
+                Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed,Context.Channel);
                 return;
             }
 
@@ -29,7 +29,7 @@ namespace Netdb
 
                 if (await IsAvailable(content[1]))
                 {
-                    await Embedbuilder("This movie/series is already in the library", Color.DarkRed);
+                    Tools.Embedbuilder("This movie/series is already in the library", Color.DarkRed,Context.Channel);
                     return;
                 }
                 else
@@ -97,7 +97,7 @@ namespace Netdb
                 else
                 {
                     reader.Close();
-                    await Embedbuilder("This movie is not available.", Color.DarkRed);
+                    Tools.Embedbuilder("This movie is not available.", Color.DarkRed, Context.Channel);
                     return;
                 }
             }
@@ -107,13 +107,13 @@ namespace Netdb
             {
                 if (!int.TryParse(content[2], out int age))
                 {
-                    await Embedbuilder("The age must be a number", Color.DarkRed);
+                    Tools.Embedbuilder("The age must be a number", Color.DarkRed, Context.Channel);
                     return;
                 }
 
                 if (age < 0 || age > 21)
                 {
-                    await Embedbuilder("Age must be between 0 and 21", Color.DarkRed);
+                    Tools.Embedbuilder("Age must be between 0 and 21", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -131,7 +131,7 @@ namespace Netdb
 
                 if (content[2] == "")
                 {
-                    await Embedbuilder("Please provide a description", Color.DarkRed);
+                    Tools.Embedbuilder("Please provide a description", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -152,7 +152,7 @@ namespace Netdb
 
                 if (description.Length > 300)
                 {
-                    await Embedbuilder("Descritpion must be less than 300 charactars", Color.DarkRed);
+                    Tools.Embedbuilder("Descritpion must be less than 300 charactars", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -176,7 +176,7 @@ namespace Netdb
                     return;
                 }
 
-                await Embedbuilder("The releasedate must be a number between 1888 and " + DateTime.Now.Year, Color.DarkRed);
+                Tools.Embedbuilder("The releasedate must be a number between 1888 and " + DateTime.Now.Year, Color.DarkRed, Context.Channel);
             }
             else if (content[1] == "length")
             {
@@ -188,7 +188,7 @@ namespace Netdb
                     return;
                 }
 
-                await Embedbuilder("The length must be a number greater than 0", Color.DarkRed);
+                Tools.Embedbuilder("The length must be a number greater than 0", Color.DarkRed, Context.Channel);
             }
             else if (content[1] == "image")
             {
@@ -196,7 +196,7 @@ namespace Netdb
 
                 if (attachments.Count == 0)
                 {
-                    await Embedbuilder("You have to attach a file", Color.Blue);
+                    Tools.Embedbuilder("You have to attach a file", Color.Blue, Context.Channel);
                     return;
                 }
 
@@ -209,7 +209,7 @@ namespace Netdb
                     byte[] ImageData = mywebclient.DownloadData(fileurl);
 
                     var cmd = Program._con.CreateCommand();
-                    cmd.CommandText = $"update moviedata set image = @image where id = '{Getid(content[0])}';";
+                    cmd.CommandText = $"update moviedata set image = @image where id = '{Tools.Getid(content[0])}';";
 
                     var blob = new MySqlParameter("@image", MySqlDbType.MediumBlob, ImageData.Length)
                     {
@@ -226,12 +226,12 @@ namespace Netdb
                 }
                 else
                 {
-                    await Embedbuilder("The file has to be a png!", Color.Blue);
+                    Tools.Embedbuilder("The file has to be a png!", Color.Blue, Context.Channel);
                 }
             }
             else
             {
-                await Embedbuilder("Your are missing an operator", Color.DarkRed);
+                Tools.Embedbuilder("Your are missing an operator", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -242,13 +242,13 @@ namespace Netdb
         {
             if (!IsModerator(Context.User))
             {
-                await Embedbuilder("You have to be a moderator to use this command", Color.DarkRed);
+                Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed, Context.Channel);
                 return;
             }
 
             if (await IsAvailable(moviename))
             {
-                int id = Getid(moviename);
+                int id = Tools.Getid(moviename);
 
                 Tools.RunCommand($"update moviedata set movieName = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where movieName = '{moviename}';");
 
@@ -260,7 +260,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("This movie is not available", Color.DarkRed);
+                Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -271,7 +271,7 @@ namespace Netdb
         {
             if (!IsModerator(Context.User))
             {
-                await Embedbuilder("You have to be a moderator to use this command", Color.DarkRed);
+                Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed, Context.Channel);
                 return;
             }
 
@@ -284,7 +284,7 @@ namespace Netdb
 
             if (await IsAvailable(moviename))
             {
-                await Embedbuilder("This movie is already available", Color.DarkRed);
+                Tools.Embedbuilder("This movie is already available", Color.DarkRed, Context.Channel);
                 return;
             }
 
@@ -294,7 +294,7 @@ namespace Netdb
 
             if (reader.Read())
             {
-                await Embedbuilder("This movie is already in the What's next list", Color.DarkRed);
+                Tools.Embedbuilder("This movie is already in the What's next list", Color.DarkRed, Context.Channel);
                 reader.Close();
                 return;
             }
@@ -319,7 +319,7 @@ namespace Netdb
 
                 if (!reader.Read())
                 {
-                    await Embedbuilder("There is currently nothing missing", Color.Green);
+                    Tools.Embedbuilder("There is currently nothing missing", Color.Green, Context.Channel);
                     reader.Close();
                     return;
                 }
@@ -373,7 +373,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You have to be a moderator to do this", Color.DarkRed);
+                Tools.Embedbuilder("You have to be a moderator to do this", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -392,7 +392,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You have to be a moderator to do this", Color.DarkRed);
+                Tools.Embedbuilder("You have to be a moderator to do this", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -404,7 +404,7 @@ namespace Netdb
             {
                 if (IsModerator(user))
                 {
-                    await Embedbuilder(user.Username + " is already a moderator", Color.DarkRed);
+                    Tools.Embedbuilder(user.Username + " is already a moderator", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -413,7 +413,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You are not allowed to do this", Color.DarkRed);
+                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -426,7 +426,7 @@ namespace Netdb
             {
                 if (!IsModerator(user))
                 {
-                    await Embedbuilder(user.Username + " is not a moderator", Color.DarkRed);
+                    Tools.Embedbuilder(user.Username + " is not a moderator", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -435,7 +435,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You are not allowed to do this", Color.DarkRed);
+                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -573,7 +573,7 @@ namespace Netdb
             else
             {
                 reader.Close();
-                await Embedbuilder("You are not a moderator", Color.DarkRed);
+                Tools.Embedbuilder("You are not a moderator", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -589,7 +589,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You are not allowed to do this", Color.DarkRed);
+                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -607,7 +607,7 @@ namespace Netdb
 
                 if (files.Length == 0)
                 {
-                    await Embedbuilder("No backups available", Color.DarkRed);
+                    Tools.Embedbuilder("No backups available", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -628,7 +628,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You are not allowed to do this", Color.DarkRed);
+                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -653,7 +653,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You are not allowed to do this", Color.DarkRed);
+                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
             }
         }
 
@@ -663,13 +663,13 @@ namespace Netdb
         {
             if (Context.User.Id == 487265499785199616)
             {
-                await Embedbuilder("Disconnected", Color.DarkRed);
+                Tools.Embedbuilder("Disconnected", Color.DarkRed, Context.Channel);
 
                 await Program._client.StopAsync();
             }
             else
             {
-                await Embedbuilder("I don't think i will", Color.DarkRed);
+                Tools.Embedbuilder("I don't think i will", Color.DarkRed, Context.Channel);
             }
 
         }
@@ -699,29 +699,6 @@ namespace Netdb
             return false;
         }
 
-        public static int Getid(string moviename)
-        {
-            int id;
-
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where movieName = '" + moviename + "';";
-            var reader = cmd.ExecuteReader();
-
-            if (reader.Read())
-            {
-                id = (int)reader["id"];
-                reader.Close();
-                return id;
-            }
-            reader.Close();
-            return 0;
-        }
-
         public static bool IsModerator(IUser user)
         {
             var cmd = Program._con.CreateCommand();
@@ -735,14 +712,6 @@ namespace Netdb
             }
             reader.Close();
             return false;
-        }
-
-        public async Task Embedbuilder(string description, Color color)
-        {
-            var eb = new EmbedBuilder();
-            eb.WithColor(color);
-            eb.WithDescription(description);
-            await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
     }
 }
