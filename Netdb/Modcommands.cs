@@ -103,105 +103,105 @@ namespace Netdb
             }
             content[1] = content[1].Replace(" ", "");
 
-                if (content[1] == "age")
+            if (content[1] == "age")
+            {
+                if (!int.TryParse(content[2], out int age))
                 {
-                    if (!int.TryParse(content[2], out int age))
-                    {
-                        await Embedbuilder("The age must be a number", Color.DarkRed);
-                        return;
-                    }
+                    await Embedbuilder("The age must be a number", Color.DarkRed);
+                    return;
+                }
 
-                    if (age < 0 || age > 21)
-                    {
-                        await Embedbuilder("Age must be between 0 and 21", Color.DarkRed);
-                        return;
-                    }
+                if (age < 0 || age > 21)
+                {
+                    await Embedbuilder("Age must be between 0 and 21", Color.DarkRed);
+                    return;
+                }
 
                 if (age == 0)
                 {
                     age = 69;
                 }
 
-                    Tools.RunCommand($"update moviedata set age = '{age}' where movieName = '{content[0]}'; ");
-                    await Context.Message.AddReactionAsync(new Emoji("✅"));
-                    Tools.UpdateContentadded(Context.User);
-                }
-                else if (content[1] == "description")
-                {
+                Tools.RunCommand($"update moviedata set age = '{age}' where movieName = '{content[0]}'; ");
+                await Context.Message.AddReactionAsync(new Emoji("✅"));
+                Tools.UpdateContentadded(Context.User);
+            }
+            else if (content[1] == "description")
+            {
 
                 if (content[2] == "")
                 {
-                    await Embedbuilder("Please provide a description",Color.DarkRed);
+                    await Embedbuilder("Please provide a description", Color.DarkRed);
                     return;
                 }
 
                 if (content[2].StartsWith(" "))
                 {
-                    content[2] = content[2].Remove(0,1);
+                    content[2] = content[2].Remove(0, 1);
                 }
 
                 string description = content[2];
 
-                    if (content.Length > 2)
+                if (content.Length > 2)
+                {
+                    for (int i = 3; i < content.Length; i++)
                     {
-                        for (int i = 3; i < content.Length; i++)
-                        {
-                            description += ", " + content[i];
-                        }
+                        description += ", " + content[i];
                     }
+                }
 
-                    if (description.Length > 300)
-                    {
-                        await Embedbuilder("Descritpion must be less than 300 charactars", Color.DarkRed);
-                        return;
-                    }
+                if (description.Length > 300)
+                {
+                    await Embedbuilder("Descritpion must be less than 300 charactars", Color.DarkRed);
+                    return;
+                }
 
-                    Tools.RunCommand($"update moviedata set description = '{description}' where movieName = '{content[0]}'; ");
+                Tools.RunCommand($"update moviedata set description = '{description}' where movieName = '{content[0]}'; ");
+                await Context.Message.AddReactionAsync(new Emoji("✅"));
+                Tools.UpdateContentadded(Context.User);
+            }
+            else if (content[1] == "genres")
+            {
+                Tools.RunCommand($"update moviedata set genres = '{content[2]}' where movieName = '{content[0]}'; ");
+                await Context.Message.AddReactionAsync(new Emoji("✅"));
+                Tools.UpdateContentadded(Context.User);
+            }
+            else if (content[1] == "releasedate" || content[1] == "rd")
+            {
+                if (int.TryParse(content[2], out int releasedate) && releasedate < DateTime.Now.Year + 1 && releasedate > 1888)
+                {
+                    Tools.RunCommand($"update moviedata set releaseDate = '{Convert.ToInt32(content[2])}' where movieName = '{content[0]}'; ");
                     await Context.Message.AddReactionAsync(new Emoji("✅"));
                     Tools.UpdateContentadded(Context.User);
+                    return;
                 }
-                else if (content[1] == "genres")
+
+                await Embedbuilder("The releasedate must be a number between 1888 and " + DateTime.Now.Year, Color.DarkRed);
+            }
+            else if (content[1] == "length")
+            {
+                if (int.TryParse(content[2], out int length) && length > 0)
                 {
-                    Tools.RunCommand($"update moviedata set genres = '{content[2]}' where movieName = '{content[0]}'; ");
+                    Tools.RunCommand($"update moviedata set movieLength = '{Convert.ToInt32(content[2])   }' where movieName = '{content[0]}'; ");
                     await Context.Message.AddReactionAsync(new Emoji("✅"));
                     Tools.UpdateContentadded(Context.User);
+                    return;
                 }
-                else if (content[1] == "releasedate" || content[1] == "rd")
-                {
-                    if (int.TryParse(content[2], out int releasedate) && releasedate < DateTime.Now.Year + 1 && releasedate > 1888)
-                    {
-                        Tools.RunCommand($"update moviedata set releaseDate = '{Convert.ToInt32(content[2])}' where movieName = '{content[0]}'; ");
-                        await Context.Message.AddReactionAsync(new Emoji("✅"));
-                        Tools.UpdateContentadded(Context.User);
-                        return;
-                    }
 
-                    await Embedbuilder("The releasedate must be a number between 1888 and " + DateTime.Now.Year, Color.DarkRed);
+                await Embedbuilder("The length must be a number greater than 0", Color.DarkRed);
+            }
+            else if (content[1] == "image")
+            {
+                var attachments = Context.Message.Attachments;
+
+                if (attachments.Count == 0)
+                {
+                    await Embedbuilder("You have to attach a file", Color.Blue);
+                    return;
                 }
-                else if (content[1] == "length")
+
+                if (attachments.ElementAt(0).Filename.EndsWith(".png"))
                 {
-                    if (int.TryParse(content[2], out int length) && length > 0)
-                    {
-                        Tools.RunCommand($"update moviedata set movieLength = '{Convert.ToInt32(content[2])   }' where movieName = '{content[0]}'; ");
-                        await Context.Message.AddReactionAsync(new Emoji("✅"));
-                        Tools.UpdateContentadded(Context.User);
-                        return;
-                    }
-
-                    await Embedbuilder("The length must be a number greater than 0", Color.DarkRed);
-                }
-                else if (content[1] == "image")
-                {
-                    var attachments = Context.Message.Attachments;
-
-                    if (attachments.Count == 0)
-                    {
-                        await Embedbuilder("You have to attach a file", Color.Blue);
-                        return;
-                    }
-
-                    if (attachments.ElementAt(0).Filename.EndsWith(".png"))
-                    {
                     string fileurl = attachments.ElementAt(0).Url;
 
                     WebClient mywebclient = new WebClient();
@@ -211,7 +211,7 @@ namespace Netdb
                     var cmd = Program._con.CreateCommand();
                     cmd.CommandText = $"update moviedata set image = @image where id = '{Getid(content[0])}';";
 
-                    var blob = new MySqlParameter("@image",MySqlDbType.MediumBlob, ImageData.Length)
+                    var blob = new MySqlParameter("@image", MySqlDbType.MediumBlob, ImageData.Length)
                     {
                         Value = ImageData
                     };
@@ -224,15 +224,15 @@ namespace Netdb
 
                     Tools.UpdateContentadded(Context.User);
                 }
-                    else
-                    {
-                        await Embedbuilder("The file has to be a png!", Color.Blue);
-                    }
-                }
                 else
                 {
-                    await Embedbuilder("Your are missing an operator", Color.DarkRed);
+                    await Embedbuilder("The file has to be a png!", Color.Blue);
                 }
+            }
+            else
+            {
+                await Embedbuilder("Your are missing an operator", Color.DarkRed);
+            }
         }
 
         [Command("remove")]
@@ -242,7 +242,7 @@ namespace Netdb
         {
             if (!IsModerator(Context.User))
             {
-                await Embedbuilder("You have to be a moderator to use this command",Color.DarkRed);
+                await Embedbuilder("You have to be a moderator to use this command", Color.DarkRed);
                 return;
             }
 
@@ -319,14 +319,14 @@ namespace Netdb
 
                 if (!reader.Read())
                 {
-                    await Embedbuilder("There is currently nothing missing",Color.Green);
+                    await Embedbuilder("There is currently nothing missing", Color.Green);
                     reader.Close();
                     return;
                 }
 
                 while ((string)reader["movieName"] == "null")
                 {
-                    reader.Read();                  
+                    reader.Read();
                 }
 
                 EmbedBuilder eb = new EmbedBuilder();
@@ -367,13 +367,13 @@ namespace Netdb
 
                 reader.Close();
 
-                eb.AddField("Missing",missing);
+                eb.AddField("Missing", missing);
 
                 await Context.Channel.SendMessageAsync("", false, eb.Build());
             }
             else
             {
-                await Embedbuilder("You have to be a moderator to do this",Color.DarkRed);
+                await Embedbuilder("You have to be a moderator to do this", Color.DarkRed);
             }
         }
 
@@ -404,7 +404,7 @@ namespace Netdb
             {
                 if (IsModerator(user))
                 {
-                    await Embedbuilder(user.Username + " is already a moderator",Color.DarkRed);
+                    await Embedbuilder(user.Username + " is already a moderator", Color.DarkRed);
                     return;
                 }
 
@@ -413,7 +413,7 @@ namespace Netdb
             }
             else
             {
-                await Embedbuilder("You are not allowed to do this",Color.DarkRed);
+                await Embedbuilder("You are not allowed to do this", Color.DarkRed);
             }
         }
 
@@ -426,7 +426,7 @@ namespace Netdb
             {
                 if (!IsModerator(user))
                 {
-                    await Embedbuilder(user.Username + " is not a moderator",Color.DarkRed);
+                    await Embedbuilder(user.Username + " is not a moderator", Color.DarkRed);
                     return;
                 }
 
@@ -516,7 +516,7 @@ namespace Netdb
         }
 
         [Command("mystats")]
-        [Alias("ms","stats")]
+        [Alias("ms", "stats")]
         [Summary("Shows stats from a moderator")]
         public async Task Mystats(IUser user = null)
         {
@@ -548,7 +548,7 @@ namespace Netdb
             {
                 DateTime since = (DateTime)reader["since"];
 
-                eb.AddField("Moderator since",since.ToString("dddd, dd MMMM yyyy"));
+                eb.AddField("Moderator since", since.ToString("dddd, dd MMMM yyyy"));
                 eb.AddField("Content added", reader["contentadded"]);
 
                 reader.Close();
@@ -559,7 +559,7 @@ namespace Netdb
 
                 int reviews = 0;
 
-                while(reader.Read())
+                while (reader.Read())
                 {
                     reviews++;
                 }
@@ -573,7 +573,7 @@ namespace Netdb
             else
             {
                 reader.Close();
-                await Embedbuilder("You are not a moderator",Color.DarkRed);
+                await Embedbuilder("You are not a moderator", Color.DarkRed);
             }
         }
 
@@ -607,7 +607,7 @@ namespace Netdb
 
                 if (files.Length == 0)
                 {
-                    await Embedbuilder("No backups available",Color.DarkRed);
+                    await Embedbuilder("No backups available", Color.DarkRed);
                     return;
                 }
 
@@ -621,7 +621,7 @@ namespace Netdb
 
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.WithTitle("Netdb's Backups");
-                eb.AddField("Most recent Backups",backups);
+                eb.AddField("Most recent Backups", backups);
                 eb.WithFooter(x => x.Text = ((double)size / (double)1000000000).ToString("F2") + "Gb");
 
                 await Context.Channel.SendMessageAsync("", false, eb.Build());
@@ -635,7 +635,7 @@ namespace Netdb
         [Command("restore")]
         [Alias("r")]
         [Summary("Restores a database backup")]
-        public async Task Loadbackup([Remainder]DateTime backuptime)
+        public async Task Loadbackup([Remainder] DateTime backuptime)
         {
             if (Context.User.Id == 487265499785199616)
             {
