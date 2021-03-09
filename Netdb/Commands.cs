@@ -24,31 +24,19 @@ namespace Netdb
         [Summary("shows you your searched movie")]
         public async Task Search([Remainder]string search)
         {
-            if (!Tools.IsAvailable(search))
+            if (!Tools.IsAvailableId(search))
             {
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + search + "';";
-                var reader = await cmd.ExecuteReaderAsync();
-
-                if (reader.Read())
-                {
-                    if ((string)reader["movieName"] == "null")
-                    {
-                        Tools.Embedbuilder("This movie is not available", Color.DarkRed,Context.Channel);
-                        reader.Close();
-                        return;
-                    }
-                    reader.Close();
-                }
-                else
-                {
-                    Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
-                    reader.Close();
-                    return;
-                }
+                Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
+                return;
             }
 
-            Tools.wirdnuwild(search, (ITextChannel)Context.Channel);
+            Tools.Search(search,out EmbedBuilder eb,out FileStream stream,out string name);
+
+            eb.WithTitle($"**{name.ToUpper()}**");
+
+            await Context.Channel.SendFileAsync(stream, "example.png", embed: eb.Build());
+
+            stream.Close();
         }
 
         [Command("rate")]
@@ -78,7 +66,7 @@ namespace Netdb
                 }
 
                 reader.Close();
-                id = Convert.ToInt32(moviename); ;
+                id = Convert.ToInt32(moviename);
             }
             else
             {
@@ -115,32 +103,35 @@ namespace Netdb
         [Command("recommend")]
         [Alias("rec")]
         [Summary("Recommend a movie to a certain user")]
-        public async Task Recommand(IUser user, [Remainder]string movie)
+        public async Task Recommend(IUser user, [Remainder]string movie)
         {
-            if (!Tools.IsAvailable(movie))
+            if (!Tools.IsAvailableId(movie))
             {
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + movie + "';";
-                var reader = await cmd.ExecuteReaderAsync();
-
-                if (reader.Read())
-                {
-                    if ((string)reader["movieName"] == "null")
-                    {
-                        Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
-                        reader.Close();
-                        return;
-                    }
-                    reader.Close();
-                }
-                else
-                {
-                    Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
-                    reader.Close();
-                    return;
-                }
+                Tools.Embedbuilder("This movie/series is not available",Color.DarkRed,Context.Channel);
+                return;
             }
-            Tools.wirdnuwild2pointO(movie,user);
+
+            if (user.IsBot)
+            {
+                Tools.Embedbuilder("You can't send recommondation to other bots",Color.DarkRed,Context.Channel);
+                return;
+            }
+
+            Tools.Search(movie,out EmbedBuilder eb, out FileStream stream,out string name);
+
+            eb.WithAuthor(Context.User);
+            eb.WithTitle("Recommended:\n**" + name.ToUpper() +"**");
+
+            try
+            {
+                await user.SendFileAsync(stream, "example.png", embed: eb.Build());
+            }
+            catch (Exception)
+            {
+                Tools.Embedbuilder("Can't send message to this user", Color.DarkRed, Context.Channel);
+            }
+
+            stream.Close();
         }
 
         [Command("watchlist")]
