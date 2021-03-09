@@ -48,7 +48,7 @@ namespace Netdb
                 }
             }
 
-            Tools.wirdnuwild(search, Context.Channel);
+            Tools.wirdnuwild(search, (ITextChannel)Context.Channel);
         }
 
         [Command("rate")]
@@ -113,20 +113,34 @@ namespace Netdb
         }
 
         [Command("recommend")]
-        [Alias("r")]
+        [Alias("rec")]
         [Summary("Recommend a movie to a certain user")]
-        public async Task Recommand(IUser user, string movie)
+        public async Task Recommand(IUser user, [Remainder]string movie)
         {
-            if (Tools.IsAvailable(movie))
+            if (!Tools.IsAvailable(movie))
             {
-                await user.SendMessageAsync(movie);
+                var cmd = Program._con.CreateCommand();
+                cmd.CommandText = "select * from moviedata where id = '" + movie + "';";
+                var reader = await cmd.ExecuteReaderAsync();
 
-                
+                if (reader.Read())
+                {
+                    if ((string)reader["movieName"] == "null")
+                    {
+                        Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
+                        reader.Close();
+                        return;
+                    }
+                    reader.Close();
+                }
+                else
+                {
+                    Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
+                    reader.Close();
+                    return;
+                }
             }
-            else
-            {
-
-            }
+            Tools.wirdnuwild2pointO(movie,user);
         }
 
         [Command("watchlist")]
@@ -435,34 +449,6 @@ namespace Netdb
             }
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
-        }
-
-        [Command("help")]
-        [Alias("h")]
-        [Summary("Helps")]
-        public async Task Help()
-        {
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.WithColor(Color.Gold);
-            eb.WithTitle("`Prefix: " + Program.prefix + "`");
-            eb.WithDescription("use " + Program.prefix + "help {commandname} for specific information about the command");
-
-            List<CommandInfo> commands = Program._commands.Commands.ToList();
-
-            foreach (CommandInfo command in commands)
-            {
-                if (command.Name == "add")
-                {
-                    break;
-                }
-
-                // Get the command Summary attribute information
-                string embedFieldText = command.Summary ?? "No description available\n";
-
-                eb.AddField(command.Name, embedFieldText);
-            }
-
-            await ReplyAsync("", false, eb.Build());
         }
 
         [Command("info")]
