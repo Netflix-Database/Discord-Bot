@@ -15,7 +15,7 @@ namespace Netdb
         [Summary("adds a movie or series to the database")]
         public async Task Add([Remainder] string input)
         {
-            if (!IsModerator(Context.User))
+            if (!Tools.IsModerator(Context.User))
             {
                 Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed,Context.Channel);
                 return;
@@ -27,7 +27,7 @@ namespace Netdb
             {
                 content[1] = content[1].Trim();
 
-                if (await IsAvailable(content[1]))
+                if (Tools.IsAvailable(content[1]))
                 {
                     Tools.Embedbuilder("This movie/series is already in the library", Color.DarkRed,Context.Channel);
                     return;
@@ -83,7 +83,7 @@ namespace Netdb
 
             content[0] = content[0].Trim();
 
-            if (!await IsAvailable(content[0]))
+            if (!Tools.IsAvailable(content[0]))
             {
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = "select * from moviedata where id = '" + content[0] + "';";
@@ -128,7 +128,6 @@ namespace Netdb
             }
             else if (content[1] == "description")
             {
-
                 if (content[2] == "")
                 {
                     Tools.Embedbuilder("Please provide a description", Color.DarkRed, Context.Channel);
@@ -240,13 +239,13 @@ namespace Netdb
         [Summary("Removes a movie from the library")]
         public async Task Remove([Remainder] string moviename)
         {
-            if (!IsModerator(Context.User))
+            if (!Tools.IsModerator(Context.User))
             {
                 Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed, Context.Channel);
                 return;
             }
 
-            if (await IsAvailable(moviename))
+            if (Tools.IsAvailable(moviename))
             {
                 int id = Tools.Getid(moviename);
 
@@ -269,7 +268,7 @@ namespace Netdb
         [Summary("Add movies/series that are coming to Netflix")]
         public async Task Next(string date, [Remainder] string moviename)
         {
-            if (!IsModerator(Context.User))
+            if (!Tools.IsModerator(Context.User))
             {
                 Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed, Context.Channel);
                 return;
@@ -282,7 +281,7 @@ namespace Netdb
 
             DateTime realeasedate = Convert.ToDateTime(date + DateTime.Now.Year.ToString());
 
-            if (await IsAvailable(moviename))
+            if (Tools.IsAvailable(moviename))
             {
                 Tools.Embedbuilder("This movie is already available", Color.DarkRed, Context.Channel);
                 return;
@@ -311,7 +310,7 @@ namespace Netdb
         [Summary("Shows what's missing in the Database")]
         public async Task ShowMissing()
         {
-            if (IsModerator(Context.User))
+            if (Tools.IsModerator(Context.User))
             {
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = $"select * from moviedata where description = 'null' or age = '0' or movieLength = '0' or releasedate = '0' or image is null;";
@@ -382,7 +381,7 @@ namespace Netdb
         [Summary("Updates something in the Db")]
         public async Task Update()
         {
-            if (IsModerator(Context.User))
+            if (Tools.IsModerator(Context.User))
             {
                 Program.BackupDB();
                 Program.GetMostsearched();
@@ -402,7 +401,7 @@ namespace Netdb
         {
             if (Context.User.Id == 487265499785199616)
             {
-                if (IsModerator(user))
+                if (Tools.IsModerator(user))
                 {
                     Tools.Embedbuilder(user.Username + " is already a moderator", Color.DarkRed, Context.Channel);
                     return;
@@ -424,7 +423,7 @@ namespace Netdb
         {
             if (Context.User.Id == 487265499785199616)
             {
-                if (!IsModerator(user))
+                if (!Tools.IsModerator(user))
                 {
                     Tools.Embedbuilder(user.Username + " is not a moderator", Color.DarkRed, Context.Channel);
                     return;
@@ -672,46 +671,6 @@ namespace Netdb
                 Tools.Embedbuilder("I don't think i will", Color.DarkRed, Context.Channel);
             }
 
-        }
-
-        public async Task<bool> IsAvailable(string search)
-        {
-            if (search == "null")
-            {
-                return false;
-            }
-
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where MovieName = '" + search + "';";
-            var reader = await cmd.ExecuteReaderAsync();
-
-            if (await reader.ReadAsync())
-            {
-                await reader.CloseAsync();
-                return true;
-            }
-            reader.Close();
-            return false;
-        }
-
-        public static bool IsModerator(IUser user)
-        {
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moderation where userid = '{user.Id}';";
-            var reader = cmd.ExecuteReader();
-
-            if (reader.Read())
-            {
-                reader.Close();
-                return true;
-            }
-            reader.Close();
-            return false;
         }
     }
 }
