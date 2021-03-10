@@ -17,7 +17,7 @@ namespace Netdb
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Gold);
             eb.WithTitle("`Prefix: " + Program.prefix + "`");
-            eb.WithDescription("use " + Program.prefix + "help {commandname} for specific information about the command");
+            eb.WithDescription("use " + Program.prefix + "help [command] for detailed help");
 
             List<CommandInfo> commands = Program._commands.Commands.ToList();
 
@@ -48,7 +48,6 @@ namespace Netdb
                 eb.WithTitle("**" + command + "**");
                 eb.WithDescription(desc);
                 eb.AddField("Alias", alias);
-                eb.AddField("Uses", uses);
             }
             else
             {
