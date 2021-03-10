@@ -44,7 +44,7 @@ namespace Netdb
             {
                 if (modReq && !Tools.IsModerator(Context.User))
                 {
-                    Tools.Embedbuilder($"No command found. Use {Program.prefix}help to get a overview over all commands.", Color.DarkRed,Context.Channel);
+                    Tools.Embedbuilder($"No command found. Use {Program.prefix}help to get a overview over all commands.", Color.DarkRed, Context.Channel);
                     return;
                 }
 
