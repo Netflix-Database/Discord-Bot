@@ -415,6 +415,10 @@ namespace Netdb
                     {
                         eb.WithDescription("Something is missing");
                     }
+                    else if (result.ErrorReason == " The input text has too many parameters.")
+                    {
+                        eb.WithDescription("That's too much");
+                    }
                     else
                     {
                         eb.WithDescription("An error occured");

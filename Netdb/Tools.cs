@@ -171,6 +171,32 @@ namespace Netdb
             return false;
         }
 
+        public static bool IsAvailableId(string search)
+        {
+            if (!Tools.IsAvailable(search))
+            {
+                var cmd = Program._con.CreateCommand();
+                cmd.CommandText = "select * from moviedata where id = '" + search + "';";
+                var reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    if ((string)reader["movieName"] == "null")
+                    {
+                        reader.Close();
+                        return false;
+                    }
+                    reader.Close();
+                }
+                else
+                {
+                    reader.Close();
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static void RunCommand(string command)
         {
             var cmd = Program._con.CreateCommand();
@@ -232,17 +258,15 @@ namespace Netdb
             return false;
         }
 
-        public static void wirdnuwild(string search,ISocketMessageChannel channel)
+        public static void Search(string search,out EmbedBuilder eb, out FileStream stream,out string name)
         {
-            Tools.GetMovieData(search, out MovieData movie);
-            Tools.GetTime(movie.Length, out int hour, out int min);
+            GetMovieData(search, out MovieData movie);
+            name = movie.Name;
+            GetTime(movie.Length, out int hour, out int min);
 
-            var eb = new EmbedBuilder();
-            FileStream stream = new FileStream("test.dat", FileMode.Create);
-
-            byte[] image;
-
-            image = movie.Image;
+            stream = new FileStream("nedsofest.auni", FileMode.Create);
+            eb = new EmbedBuilder();
+            byte[] image = movie.Image;
 
             for (int i = 0; i < image.Length; i++)
             {
@@ -254,7 +278,6 @@ namespace Netdb
             eb.WithImageUrl("attachment://example.png");
 
             eb.WithColor(Color.Blue);
-            eb.WithTitle("**" + movie.Name.ToUpper() + "**");
 
             string embeddate;
             if (movie.Releasedate == 0)
@@ -319,7 +342,6 @@ namespace Netdb
                 }
             }
 
-
             if (movie.Description == "null")
             {
                 movie.Description = "N/A";
@@ -359,13 +381,6 @@ namespace Netdb
             eb.WithFooter(footer => footer.Text = "#" + movie.Id.ToString("D5"));
 
             channel.SendFileAsync(stream, "example.png", embed: eb.Build());
-        }
-
-        public static async Task Delete(IMessage msg, int delay)
-        {
-            await Task.Delay(delay * 1000);
-            await msg.DeleteAsync();
-
         }
     }
 }
