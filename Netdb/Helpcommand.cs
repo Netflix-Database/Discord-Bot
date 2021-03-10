@@ -61,7 +61,9 @@ namespace Netdb
                 }
                 else if (Tools.IsModerator(Context.User))
                 {
-
+                    eb.WithTitle("**" + command + "**");
+                    eb.WithDescription(string.IsNullOrEmpty(desc) ? "-" : desc);
+                    eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
                 }
             }
             else
