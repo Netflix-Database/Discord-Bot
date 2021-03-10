@@ -40,38 +40,28 @@ namespace Netdb
         [Command]
         public async Task Help(string command)
         {
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.WithColor(Color.Gold);
-
             if (CommandDB.GetCommandData(command, out string alias, out string desc, out string short_desc, out bool modReq, out int uses))
             {
+                if (modReq && !Tools.IsModerator(Context.User))
+                {
+                    Tools.Embedbuilder($"No command found. Use {Program.prefix}help to get a overview over all commands.", Color.DarkRed,Context.Channel);
+                    return;
+                }
+
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.WithColor(Color.Gold);
+
                 eb.WithTitle("**" + command + "**");
                 eb.WithDescription(desc);
-                eb.AddField("Alias", alias);
+                eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
+                eb.WithDescription(string.IsNullOrEmpty(short_desc) ? "No description available" : short_desc);
 
-                string descritpion = desc ?? "No description available\n";
-
-                eb.AddField("Syntax", descritpion);
-
-                if (!modReq)
-                {
-                   
-
-            
-                }
-                else if (Tools.IsModerator(Context.User))
-                {
-                    eb.WithTitle("**" + command + "**");
-                    eb.WithDescription(string.IsNullOrEmpty(desc) ? "-" : desc);
-                    eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
-                }
+                await ReplyAsync("", false, eb.Build());
             }
             else
             {
-                eb.AddField("No command found.", $"Use {Program.prefix}help to get a overview over all commands.");
+                Tools.Embedbuilder($"No command found. Use {Program.prefix}help to get a overview over all commands.", Color.DarkRed, Context.Channel);
             }
-
-            await ReplyAsync("", false, eb.Build());
         }
 
     }
