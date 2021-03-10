@@ -424,7 +424,7 @@ namespace Netdb
                     var msg = await message.Channel.SendMessageAsync("", false, eb.Build());
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    Delete(msg, 5000);
+                    Delete(msg, 5000 );
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
 

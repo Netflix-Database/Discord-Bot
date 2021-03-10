@@ -445,7 +445,7 @@ namespace Netdb
         [Command("info")]
         [Alias("i")]
         [Summary("Gives information about the bot")]
-        public async Task Info()    
+        public async Task Info()
         {
             int movies = 0;
             int series = 0;
