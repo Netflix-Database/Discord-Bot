@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Threading;
 
 namespace Netdb
 {
@@ -379,8 +380,12 @@ namespace Netdb
             eb.AddField("Review:", text);
 
             eb.WithFooter(footer => footer.Text = "#" + movie.Id.ToString("D5"));
+        }
 
-            channel.SendFileAsync(stream, "example.png", embed: eb.Build());
+        public static async Task Delete(IMessage msg,int delay)
+        {
+            Thread.Sleep(delay*1000);
+            await msg.DeleteAsync();
         }
     }
 }

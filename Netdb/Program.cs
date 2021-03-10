@@ -425,7 +425,6 @@ namespace Netdb
                     }
 
                     var msg = await message.Channel.SendMessageAsync("", false, eb.Build());
-
                     Tools.Delete(msg, 5);
                 }
 
