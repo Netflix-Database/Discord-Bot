@@ -360,5 +360,12 @@ namespace Netdb
 
             channel.SendFileAsync(stream, "example.png", embed: eb.Build());
         }
+
+        public static async Task Delete(IMessage msg, int delay)
+        {
+            await Task.Delay(delay * 1000);
+            await msg.DeleteAsync();
+
+        }
     }
 }

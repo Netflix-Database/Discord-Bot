@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -12,9 +13,9 @@ namespace Netdb
     class Program
     {
         public static string prefix = "#"; //prefix
-        const string connectionstring = "Server=127.0.0.1;Database=sys;Uid=root;Pwd=Geheimnis123!;";
-
-        public static MySqlConnection _con = new MySqlConnection(connectionstring);
+        string connectionstring;
+        string token;
+        public static MySqlConnection _con;
 
         //Botstats
         public static DateTime startedAt = DateTime.Now;
@@ -28,7 +29,6 @@ namespace Netdb
 
         public async Task RunBotAsync()
         {
-            
             _client = new DiscordSocketClient();
             _commands = new CommandService();
 
@@ -41,7 +41,11 @@ namespace Netdb
 
             await RegisterCommandsAsync();
 
-            string token = "ODAyMjM3NTYyNjI1MTk2MDg0.YAsT8w.CPTBECeOYiax-MgyUrvj27qaSfM";
+            string[] input = File.ReadAllLines("token.txt");
+
+            token = input[1];
+            connectionstring = input[0];
+            _con = new MySqlConnection(connectionstring);
 
             await _client.SetActivityAsync(new Game("Netflix", ActivityType.Watching));
 
@@ -416,24 +420,13 @@ namespace Netdb
                         eb.WithDescription("An error occured");
                     }
 
-
                     var msg = await message.Channel.SendMessageAsync("", false, eb.Build());
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    Delete(msg, 5);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    Tools.Delete(msg, 5);
                 }
 
                 if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
             }
-        }
-
-        // zum löschen von nachrichten
-        public async Task Delete(IMessage msg, int delay)
-        {
-            await Task.Delay(delay * 1000);
-            await msg.DeleteAsync();
-
         }
     }
 }
