@@ -39,13 +39,14 @@ namespace Netdb
         {
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Gold);
-            eb.WithTitle("`Prefix: " + Program.prefix + "`");
 
             if (CommandDB.GetCommandData(command, out string alias, out string desc, out string short_desc, out bool modReq, out int uses))
             {
-                string description = $"Alias: {alias} \n{desc}";
-
-                eb.AddField(command, description);
+                eb.WithTitle("**" + command + "**");
+                eb.WithDescription(desc);
+                eb.AddField("Alias", alias);
+                eb.AddField("Uses", uses);
+                eb.AddField("Mod", modReq);
             }
             else
             {

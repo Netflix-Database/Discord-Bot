@@ -1,2 +1,0 @@
-Server=127.0.0.1;Database=sys;Uid=root;Pwd=Geheimnis123!;
-ODAyMjM3NTYyNjI1MTk2MDg0.YAsT8w.CPTBECeOYiax-MgyUrvj27qaSfM
