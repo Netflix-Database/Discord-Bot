@@ -21,7 +21,7 @@ namespace Netdb
 
         [Command("search")]
         [Alias("s")]
-        [Summary("shows you your searched movie")]
+        [Summary("Shows you your searched movie")]
         public async Task Search([Remainder]string search)
         {
             if (!Tools.IsAvailableId(search))

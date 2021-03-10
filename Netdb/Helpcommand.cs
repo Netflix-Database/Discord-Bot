@@ -23,7 +23,7 @@ namespace Netdb
 
             foreach (CommandInfo command in commands)
             {
-                if (command.Name == "help")
+                if (command.Name == "Help")
                 {
                     break;
                 }
