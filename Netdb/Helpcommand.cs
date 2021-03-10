@@ -40,7 +40,7 @@ namespace Netdb
         [Command]
         public async Task Help(string command)
         {
-            if (CommandDB.GetCommandData(command, out string alias, out string desc, out string short_desc, out bool modReq, out int uses))
+            if (CommandDB.GetCommandData(command, out string cmdA, out string alias, out string desc, out string short_desc, out bool modReq, out int uses))
             {
                 if (modReq && !Tools.IsModerator(Context.User))
                 {
@@ -51,7 +51,7 @@ namespace Netdb
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.WithColor(Color.Gold);
 
-                eb.WithTitle("**" + command + "**");
+                eb.WithTitle("**" + cmdA + "**");
                 eb.WithDescription(desc);
                 eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
                 eb.WithDescription(string.IsNullOrEmpty(short_desc) ? "No description available" : short_desc);

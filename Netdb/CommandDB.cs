@@ -31,13 +31,14 @@ namespace Netdb
         /// <param name="mod_required">Returns if mod is required</param>
         /// <param name="uses">Returns how often that command was executed</param>
         /// <returns>Returns if command was found</returns>
-        public static bool GetCommandData(string command, out string alias, out string description, out string short_description, out bool mod_required, out int uses)
+        public static bool GetCommandData(string command, out string commandA, out string alias, out string description, out string short_description, out bool mod_required, out int uses)
         {
             alias = "";
             description = "";
             short_description = "";
             mod_required = false;
             uses = 0;
+            commandA = command;
 
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select * from commands where command = '{command}';";
@@ -61,6 +62,7 @@ namespace Netdb
                 r = cmd.ExecuteReader();
                 if (r.Read())
                 {
+                    commandA = r[1].ToString();
                     alias = r[2].ToString();
                     short_description = r[3].ToString();
                     description = r[4].ToString();
