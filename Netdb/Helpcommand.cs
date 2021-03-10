@@ -23,7 +23,7 @@ namespace Netdb
 
             foreach (CommandInfo command in commands)
             {
-                if (command.Name == "add")
+                if (command.Name == "help")
                 {
                     break;
                 }
@@ -49,7 +49,6 @@ namespace Netdb
                 eb.WithDescription(desc);
                 eb.AddField("Alias", alias);
                 eb.AddField("Uses", uses);
-                eb.AddField("Mod", modReq);
             }
             else
             {
