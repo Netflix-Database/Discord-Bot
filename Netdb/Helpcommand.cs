@@ -17,7 +17,7 @@ namespace Netdb
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Gold);
             eb.WithTitle("`Prefix: " + Program.prefix + "`");
-            eb.WithDescription("use " + Program.prefix + "help {commandname} for specific information about the command");
+            eb.WithDescription("use " + Program.prefix + "help [command] for detailed help");
 
             List<CommandInfo> commands = Program._commands.Commands.ToList();
 
@@ -45,10 +45,18 @@ namespace Netdb
 
             if (CommandDB.GetCommandData(command, out string alias, out string desc, out string short_desc, out bool modReq, out int uses))
             {
-                eb.WithTitle("**" + command + "**");
-                eb.WithDescription(desc);
-                eb.AddField("Alias", alias);
-                eb.AddField("Uses", uses);
+                if (!modReq)
+                {
+                    eb.WithTitle("**" + command + "**");
+                    eb.WithDescription(desc);
+                    eb.AddField("Alias", alias);
+                }
+                else if (Tools.IsModerator(Context.User))
+                {
+                    eb.WithTitle("**" + command + "**");
+                    eb.WithDescription(desc);
+                    eb.AddField("Alias", alias);
+                }
             }
             else
             {
