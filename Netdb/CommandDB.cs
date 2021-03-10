@@ -88,8 +88,9 @@ namespace Netdb
         /// <param name="short_description">Array of all short descriptions</param>
         /// <param name="mod_required">Array of all mod_required property</param>
         /// <param name="uses">Array of all uses states</param>
-        public static void GetCommandDataOfAllCommands(out string[] alias, out string[] description, out string[] short_description, out bool[] mod_required, out int[] uses)
+        public static void GetCommandDataOfAllCommands(out string[] commands, out string[] alias, out string[] description, out string[] short_description, out bool[] mod_required, out int[] uses)
         {
+            List<string> cmdN = new List<string>();
             List<string> aliasN = new List<string>();
             List<string> short_DN = new List<string>();
             List<string> DN = new List<string>();
@@ -101,6 +102,7 @@ namespace Netdb
             var r = cmd.ExecuteReader();
             while (r.Read())
             {
+                cmdN.Add(r[1].ToString());
                 aliasN.Add(r[2].ToString());
                 short_DN.Add(r[3].ToString());
                 DN.Add(r[4].ToString());
@@ -108,6 +110,7 @@ namespace Netdb
                 usesN.Add(int.Parse(r[6].ToString()));
             }
 
+            commands = cmdN.ToArray();
             alias = aliasN.ToArray();
             description = DN.ToArray();
             short_description = short_DN.ToArray();
