@@ -417,7 +417,6 @@ namespace Netdb
         }
 
         [Command("deop")]
-        [Alias("p")]
         [Summary("Deop's a user")]
         public async Task Deop(IUser user)
         {
@@ -632,7 +631,7 @@ namespace Netdb
         }
 
         [Command("restore")]
-        [Alias("r")]
+        [Alias("res")]
         [Summary("Restores a database backup")]
         public async Task Loadbackup([Remainder] DateTime backuptime)
         {
@@ -657,6 +656,7 @@ namespace Netdb
         }
 
         [Command("disconnect")]
+        [Alias("dc")]
         [Summary("Disconnects the bot")]
         public async Task Disconnect()
         {
