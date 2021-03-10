@@ -48,14 +48,14 @@ namespace Netdb
                 if (!modReq)
                 {
                     eb.WithTitle("**" + command + "**");
-                    eb.WithDescription(desc);
-                    eb.AddField("Alias", alias);
+                    eb.WithDescription(string.IsNullOrEmpty(desc) ? "-" : desc);
+                    eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
                 }
                 else if (Tools.IsModerator(Context.User))
                 {
                     eb.WithTitle("**" + command + "**");
-                    eb.WithDescription(desc);
-                    eb.AddField("Alias", alias);
+                    eb.WithDescription(string.IsNullOrEmpty(desc) ? "-" : desc);
+                    eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
                 }
             }
             else
