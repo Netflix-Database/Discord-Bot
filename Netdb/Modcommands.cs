@@ -12,7 +12,7 @@ namespace Netdb
     public class Modcommands : ModuleBase<SocketCommandContext>
     {
         [Command("add")]
-        [Summary("adds a movie or series to the database")]
+        [Summary("Adds a movie or series to the database")]
         public async Task Add([Remainder] string input)
         {
             if (!Tools.IsModerator(Context.User))
