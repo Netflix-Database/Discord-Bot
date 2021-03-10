@@ -45,17 +45,23 @@ namespace Netdb
 
             if (CommandDB.GetCommandData(command, out string alias, out string desc, out string short_desc, out bool modReq, out int uses))
             {
+                eb.WithTitle("**" + command + "**");
+                eb.WithDescription(desc);
+                eb.AddField("Alias", alias);
+
+                string descritpion = desc ?? "No description available\n";
+
+                eb.AddField("Syntax", descritpion);
+
                 if (!modReq)
                 {
-                    eb.WithTitle("**" + command + "**");
-                    eb.WithDescription(desc);
-                    eb.AddField("Alias", alias);
+                   
+
+            
                 }
                 else if (Tools.IsModerator(Context.User))
                 {
-                    eb.WithTitle("**" + command + "**");
-                    eb.WithDescription(desc);
-                    eb.AddField("Alias", alias);
+
                 }
             }
             else
