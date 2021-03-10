@@ -17,18 +17,21 @@ namespace Netdb
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Gold);
             eb.WithTitle("`Prefix: " + Program.prefix + "`");
-            eb.WithDescription("use " + Program.prefix + "help [command] for more detailed help");
+            eb.WithDescription("use " + Program.prefix + "help {commandname} for specific information about the command");
 
-            CommandDB.GetCommandDataOfAllCommands(out string[] commands, out string[] aliase, out string[] desc, out string[] short_desc, out bool[] modReq, out int[] uses);
+            List<CommandInfo> commands = Program._commands.Commands.ToList();
 
-            for (int i = 0; i < commands.Length; i++)
+            foreach (CommandInfo command in commands)
             {
-                if (!modReq[i])
+                if (command.Name == "add")
                 {
-                    string description = $"Alias: {aliase[i]} \n{short_desc[i]}";
-
-                    eb.AddField(commands[i], description);
+                    break;
                 }
+
+                // Get the command Summary attribute information
+                string embedFieldText = command.Summary ?? "No description available\n";
+
+                eb.AddField(command.Name, embedFieldText);
             }
 
             await ReplyAsync("", false, eb.Build());
