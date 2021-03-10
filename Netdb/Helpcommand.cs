@@ -51,10 +51,10 @@ namespace Netdb
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.WithColor(Color.Gold);
 
-                eb.WithTitle("**" + cmdA + "**");
-                eb.WithDescription(desc);
-                eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
+                eb.WithTitle("**" + command + "**");
                 eb.WithDescription(string.IsNullOrEmpty(short_desc) ? "No description available" : short_desc);
+                eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
+                eb.AddField("Syntax",string.IsNullOrEmpty(desc) ? "No syntax available" : desc);
 
                 await ReplyAsync("", false, eb.Build());
             }
