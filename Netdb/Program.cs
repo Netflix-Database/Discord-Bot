@@ -63,6 +63,8 @@ namespace Netdb
 
                 GetBestReviewed();
 
+                CommandDB.Setup();
+
                 /*try
                 {
                     GetMostPopular();
