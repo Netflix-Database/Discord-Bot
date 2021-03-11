@@ -40,27 +40,30 @@ namespace Netdb
         [Command]
         public async Task Help(string command)
         {
-            if (CommandDB.GetCommandData(command, out string cmdA, out string alias, out string desc, out string short_desc, out bool modReq, out int uses))
+            if (CommandDB.GetCommandData(command, out string name, out string alias, out string syntax, out string desc, out bool modReq, out int uses))
             {
                 if (modReq && !Tools.IsModerator(Context.User))
                 {
-                    Tools.Embedbuilder($"No command found. Use {Program.prefix}help to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                    Tools.Embedbuilder($"No command found. Use `{Program.prefix}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
                     return;
                 }
 
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.WithColor(Color.Gold);
 
-                eb.WithTitle("**" + cmdA + "**");
-                eb.WithDescription(string.IsNullOrEmpty(short_desc) ? "No description available" : short_desc);
+                eb.WithTitle("**" + name + "**");
+                eb.WithDescription(string.IsNullOrEmpty(desc) ? "No description available" : desc);
                 eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
-                eb.AddField("Syntax",string.IsNullOrEmpty(desc) ? "No syntax available" : desc);
+
+                syntax = syntax.Trim();
+
+                eb.AddField("Syntax",string.IsNullOrEmpty(syntax) ? "No syntax available" : $"`{Program.prefix + name} " + syntax + "`");
 
                 await ReplyAsync("", false, eb.Build());
             }
             else
             {
-                Tools.Embedbuilder($"No command found. Use {Program.prefix}help to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                Tools.Embedbuilder($"No command found. Use `{Program.prefix}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
             }
         }
 

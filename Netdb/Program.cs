@@ -64,15 +64,6 @@ namespace Netdb
                 GetBestReviewed();
 
                 CommandDB.Setup();
-
-                /*try
-                {
-                    GetMostPopular();
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }*/
             }
             catch (Exception)
             {
@@ -140,52 +131,6 @@ namespace Netdb
                 cmd.CommandText = $"update mostsearched set name = '{series[i].Name}' where id = '{i + 51}';";
                 cmd.ExecuteNonQuery();
             }
-        }
-
-        public static void GetMostPopular()
-        {
-            var cmd = _con.CreateCommand();
-            cmd.CommandText = "SELECT * FROM bestreviewed";
-            var reader = cmd.ExecuteReader();
-
-            MovieData[] bestreviewedmovies = new MovieData[50];
-            MovieData[] bestreviewedseries = new MovieData[50];
-
-            int count = 0;
-            while (reader.Read())
-            {
-                bestreviewedmovies[count].Name = (string)reader["name"];
-                bestreviewedseries[count + 50].Name = (string)reader["name"];
-
-                count++;
-            }
-
-            reader.Close();
-
-            cmd = _con.CreateCommand();
-            cmd.CommandText = "SELECT * FROM mostsearched";
-            reader = cmd.ExecuteReader();
-
-            MovieData[] mostsearchedmovies = new MovieData[50];
-            MovieData[] mostsearchedseries = new MovieData[50];
-
-            count = 0;
-            while (reader.Read())
-            {
-                mostsearchedmovies[count].Name = (string)reader["name"];
-                mostsearchedseries[count].Name = (string)reader["name"];
-
-                count++;
-            }
-
-            reader.Close();
-
-            MovieData[] popularmovies = new MovieData[50];
-            MovieData[] popularseries = new MovieData[50];
-
-
-
-
         }
 
         public static void GetBestReviewed()

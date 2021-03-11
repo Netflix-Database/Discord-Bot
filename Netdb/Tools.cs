@@ -203,6 +203,8 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = command;
             cmd.ExecuteNonQuery();
+
+            cmd.Dispose();
         }
 
         public static bool Reader(string input)

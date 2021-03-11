@@ -218,12 +218,20 @@ namespace Netdb
                 }
                 else if (input == "remove" || input == "r")
                 {
-                    Tools.RunCommand($"delete from userdata where userid = '{Context.User.Id}' and movieid = '{Tools.Getid(moviename)}';");
-
-                    await Context.Message.AddReactionAsync(new Emoji("✅"));
-                    return;
+                    if (Tools.Exists(Tools.Getid(moviename), Context.User.Id))
+                    {
+                        Tools.RunCommand($"delete from userdata where userid = '{Context.User.Id}' and movieid = '{Tools.Getid(moviename)}';");
+                        await Context.Message.AddReactionAsync(new Emoji("✅"));
+                        return;
+                    }
+                    else
+                    {
+                        Tools.Embedbuilder("This movie/series is not in your watchlist", Color.DarkRed, Context.Channel);
+                        return;
+                    }
                 }
             }
+
             Tools.Embedbuilder("Couldn't find the movie", Color.DarkRed, Context.Channel);
         }
 
