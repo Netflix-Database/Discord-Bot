@@ -51,6 +51,8 @@ namespace Netdb
 
             await _client.LoginAsync(TokenType.Bot, token);
 
+            _client.JoinedGuild += _client_JoinedGuild;
+
             try
             {
                 _con.Open();
@@ -77,6 +79,15 @@ namespace Netdb
             await SendMessages(time);
 
             await Task.Delay(-1);
+        }
+
+        private async Task _client_JoinedGuild(SocketGuild arg)
+        {
+            EmbedBuilder eb = new EmbedBuilder();
+
+            eb.WithDescription("Helo");
+
+            await arg.DefaultChannel.SendMessageAsync("", false, eb.Build());
         }
 
         public static void GetMostsearched()
