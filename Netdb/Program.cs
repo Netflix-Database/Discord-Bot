@@ -12,7 +12,6 @@ namespace Netdb
 {
     class Program
     {
-        public static string prefix = "#"; //prefix
         string connectionstring;
         string token;
         public static MySqlConnection _con;
@@ -66,6 +65,7 @@ namespace Netdb
                 GetBestReviewed();
 
                 CommandDB.Setup();
+                PrefixManager.Setup();
             }
             catch (Exception)
             {
@@ -328,6 +328,8 @@ namespace Netdb
             if (message.Author.IsBot) return;
 
             int argPos = 0;
+            string prefix = PrefixManager.GetPrefixFromGuildId(((SocketGuildChannel)arg.Channel).Guild.Id);
+
             if (message.HasStringPrefix(prefix, ref argPos))
             {
                 if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
