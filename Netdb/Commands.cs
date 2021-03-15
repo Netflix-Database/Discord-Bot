@@ -43,14 +43,23 @@ namespace Netdb
         [Summary ("Changes the Prefix for the server")]
         public async Task Prefix(string prefix)
         {
+            prefix = prefix.Remove('\\');
+
             if (prefix.Length <= 10)
             {
-                PrefixManager.ChangePrefixForGuild(Context.Guild.Id, prefix);
-                Tools.Embedbuilder($"Prefix changed to `{prefix}`.", Color.Gold, Context.Channel);
+                if (((SocketGuildUser)Context.User).GuildPermissions.Administrator)
+                {
+                    PrefixManager.ChangePrefixForGuild(Context.Guild.Id, prefix);
+                    Tools.Embedbuilder($"Prefix changed to `{prefix}`.", Color.Gold, Context.Channel);
+                }
+                else
+                {
+                    Tools.Embedbuilder($"You need to be a moderator.", Color.Red, Context.Channel);
+                }
             }
             else
             {
-                Tools.Embedbuilder($"Prefix has a maximum length of 10.", Color.Gold, Context.Channel);
+                Tools.Embedbuilder($"Prefix has a maximum length of 10.", Color.Red, Context.Channel);
             }
         }
 
