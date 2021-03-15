@@ -43,7 +43,10 @@ namespace Netdb
         [Summary ("Changes the Prefix for the server")]
         public async Task Prefix(string prefix)
         {
-            prefix = prefix.Remove('\\');
+            if (prefix.Length == 0)
+            {
+                Tools.Embedbuilder("Prefix contains wrong characters",Color.DarkRed, Context.Channel);
+            }
 
             if (prefix.Length <= 10)
             {
@@ -54,7 +57,7 @@ namespace Netdb
                 }
                 else
                 {
-                    Tools.Embedbuilder($"You need to be a moderator.", Color.Red, Context.Channel);
+                    Tools.Embedbuilder($"You need to have administrator.", Color.Red, Context.Channel);
                 }
             }
             else
