@@ -140,6 +140,8 @@ namespace Netdb
             try
             {
                 await user.SendFileAsync(stream, "example.png", embed: eb.Build());
+
+                Tools.Embedbuilder("Recommendation sent successful",Color.Green, Context.Channel);
             }
             catch (Exception)
             {
