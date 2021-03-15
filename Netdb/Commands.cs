@@ -39,6 +39,21 @@ namespace Netdb
             stream.Close();
         }
 
+        [Command ("prefix")]
+        [Summary ("Changes the Prefix for the server")]
+        public async Task Prefix(string prefix)
+        {
+            if (prefix.Length <= 10)
+            {
+                PrefixManager.ChangePrefixForGuild(Context.Guild.Id, prefix);
+                Tools.Embedbuilder($"Prefix changed to `{prefix}`.", Color.Gold, Context.Channel);
+            }
+            else
+            {
+                Tools.Embedbuilder($"Prefix has a maximum length of 10.", Color.Gold, Context.Channel);
+            }
+        }
+
         [Command("rate")]
         [Alias("r")]
         [Summary("With this command you can rate movies/series")]
@@ -444,7 +459,7 @@ namespace Netdb
             }
             else
             {
-                eb.WithDescription("Subscribe with `" + Program.prefix + "sc` to get a daily notification about what's new");
+                eb.WithDescription("Subscribe with `" + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "sc` to get a daily notification about what's new");
             }
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
