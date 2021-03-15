@@ -142,6 +142,9 @@ namespace Netdb
                 cmd.CommandText = $"update mostsearched set name = '{series[i].Name}' where id = '{i + 51}';";
                 cmd.ExecuteNonQuery();
             }
+
+            reader.Dispose();
+            cmd.Dispose();
         }
 
         public static void GetBestReviewed()
@@ -238,6 +241,9 @@ namespace Netdb
                 cmd.CommandText = $"update bestreviewed set name = '{series[i].Name}' where id = '{i + 51}';";
                 cmd.ExecuteNonQuery();
             }
+
+            reader.Dispose();
+            cmd.Dispose();
         }
 
         public static void BackupDB()
@@ -307,6 +313,9 @@ namespace Netdb
             cmd = Program._con.CreateCommand();
             cmd.CommandText = $"update subscriberlist set lastupdated = '{DateTime.Now:yyyy-MM-dd}'";
             cmd.ExecuteNonQuery();
+
+            reader.Dispose();
+            cmd.Dispose();
         }
 
         public static Task Client_Log(LogMessage arg)
