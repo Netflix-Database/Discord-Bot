@@ -43,6 +43,12 @@ namespace Netdb
         [Summary ("Changes the Prefix for the server")]
         public async Task Prefix(string prefix)
         {
+            if (Context.Channel.GetType() == typeof(SocketDMChannel))
+            {
+                Tools.Embedbuilder("You can't use this in a dm",Color.DarkRed, Context.Channel);
+                return;
+            }
+
             if (prefix.Length == 0)
             {
                 Tools.Embedbuilder("Prefix contains wrong characters",Color.DarkRed, Context.Channel);

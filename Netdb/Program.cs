@@ -337,7 +337,13 @@ namespace Netdb
             if (message.Author.IsBot) return;
 
             int argPos = 0;
-            string prefix = PrefixManager.GetPrefixFromGuildId(((SocketGuildChannel)arg.Channel).Guild.Id);
+
+            string prefix = "#";
+
+            if (arg.Channel.GetType() == typeof(SocketGuildChannel))
+            {
+                prefix = PrefixManager.GetPrefixFromGuildId(((SocketGuildChannel)arg.Channel).Guild.Id);
+            }
 
             if (message.HasStringPrefix(prefix, ref argPos))
             {
