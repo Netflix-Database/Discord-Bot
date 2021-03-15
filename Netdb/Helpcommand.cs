@@ -16,8 +16,8 @@ namespace Netdb
         {
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Gold);
-            eb.WithTitle("`Prefix: " + Program.prefix + "`");
-            eb.WithDescription("use " + Program.prefix + "help [command] for detailed help");
+            eb.WithTitle("`Prefix: " + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "`");
+            eb.WithDescription("use " + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "help [command] for detailed help");
 
             List<CommandInfo> commands = Program._commands.Commands.ToList();
 
@@ -44,7 +44,7 @@ namespace Netdb
             {
                 if (modReq && !Tools.IsModerator(Context.User))
                 {
-                    Tools.Embedbuilder($"No command found. Use `{Program.prefix}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                    Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Guild.Id)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -57,13 +57,13 @@ namespace Netdb
 
                 syntax = syntax.Trim();
 
-                eb.AddField("Syntax",string.IsNullOrEmpty(syntax) ? "No syntax available" : $"`{Program.prefix + name} " + syntax + "`");
+                eb.AddField("Syntax",string.IsNullOrEmpty(syntax) ? "No syntax available" : $"`{PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + name} " + syntax + "`");
 
                 await ReplyAsync("", false, eb.Build());
             }
             else
             {
-                Tools.Embedbuilder($"No command found. Use `{Program.prefix}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Guild.Id)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
             }
         }
 
