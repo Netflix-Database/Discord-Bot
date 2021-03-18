@@ -383,11 +383,5 @@ namespace Netdb
 
             eb.WithFooter(footer => footer.Text = "#" + movie.Id.ToString("D5"));
         }
-
-        public static async Task Delete(IMessage msg,int delay)
-        {
-            Thread.Sleep(delay*1000);
-            await msg.DeleteAsync();
-        }
     }
 }

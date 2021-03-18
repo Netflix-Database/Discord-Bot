@@ -84,8 +84,9 @@ namespace Netdb
         private async Task _client_JoinedGuild(SocketGuild arg)
         {
             EmbedBuilder eb = new EmbedBuilder();
-
-            eb.WithDescription("Helo");
+            eb.WithColor(Color.Blue);
+            eb.WithTitle("Hi");
+            eb.WithDescription("use `#help` to get an overview of all commands");
 
             await arg.DefaultChannel.SendMessageAsync("", false, eb.Build());
         }
@@ -345,7 +346,7 @@ namespace Netdb
                 prefix = PrefixManager.GetPrefixFromGuildId(((SocketGuildChannel)arg.Channel).Guild.Id);
             }
 
-            if (message.HasStringPrefix(prefix, ref argPos))
+            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
             {
                 if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
                 {
@@ -399,11 +400,7 @@ namespace Netdb
                         eb.WithDescription("An error occured");
                     }
 
-                    var msg = await message.Channel.SendMessageAsync("", false, eb.Build());
-
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    //Tools.Delete(msg, 5);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    await message.Channel.SendMessageAsync("", false, eb.Build());
                 }
 
                 if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);

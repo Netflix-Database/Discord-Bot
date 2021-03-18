@@ -308,7 +308,7 @@ namespace Netdb
         [Command("missing")]
         [Alias("m")]
         [Summary("Shows what's missing in the Database")]
-        public async Task ShowMissing()
+        public async Task ShowMissing(int i = 0)
         {
             if (Tools.IsModerator(Context.User))
             {
