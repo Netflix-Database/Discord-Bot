@@ -506,7 +506,7 @@ namespace Netdb
             int reviews = 0;
 
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where type = `{0}`;";
+                cmd.CommandText = $"select * from moviedata where type = '{0}';";
                 var reader = await cmd.ExecuteReaderAsync();
 
                 while (reader.Read())
@@ -516,7 +516,7 @@ namespace Netdb
                 reader.Close();
 
             cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moviedata where type = `{1}`;";
+            cmd.CommandText = $"select * from moviedata where type = '{1}';";
             reader = await cmd.ExecuteReaderAsync();
 
             while (reader.Read())
