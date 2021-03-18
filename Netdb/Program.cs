@@ -340,12 +340,7 @@ namespace Netdb
 
             int argPos = 0;
 
-            string prefix = mainPrefix;
-
-            if (arg.Channel.GetType() == typeof(SocketGuildChannel))
-            {
-                prefix = PrefixManager.GetPrefixFromGuildId(((SocketGuildChannel)arg.Channel).Guild.Id);
-            }
+            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
 
             if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
             {
@@ -366,7 +361,7 @@ namespace Netdb
                     }
                 }
 
-                CommandDB.CommandUsed(message.Content.Substring(PrefixManager.GetPrefixFromGuildId(((SocketGuildChannel)arg.Channel).Guild.Id).Length).Split(" ")[0]);
+                CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 
                 var result = await _commands.ExecuteAsync(context, argPos, _services);
                 commandsexecuted++;

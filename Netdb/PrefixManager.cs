@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -23,10 +26,16 @@ namespace Netdb
         /// </summary>
         /// <param name="id">guildId</param>
         /// <returns>Prefix</returns>
-        public static string GetPrefixFromGuildId(ulong id)
+        public static string GetPrefixFromGuildId(IChannel channel)
         {
+            if (channel.GetType() == typeof(SocketDMChannel))
+            {
+                return Program.mainPrefix;
+            }
+            IGuildChannel guildchannel = (IGuildChannel)channel;
+
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select prefix from prefixes where guildId = '{id.ToString()}'";
+            cmd.CommandText = $"select prefix from prefixes where guildId = '{guildchannel.Id.ToString()}'";
             var r = cmd.ExecuteReader();
 
             if (r.Read())
@@ -42,8 +51,8 @@ namespace Netdb
                 r.Close();
                 r.Dispose();
                 cmd.Dispose();
-                InsertGuildPrefix(id);
-                return GetPrefixFromGuildId(id);
+                InsertGuildPrefix(guildchannel.Id);
+                return GetPrefixFromGuildId(guildchannel);
             }
         }
 
