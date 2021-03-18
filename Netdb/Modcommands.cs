@@ -323,6 +323,11 @@ namespace Netdb
                     return;
                 }
 
+                for (int y = i; y > 0; y--)
+                {
+                    reader.Read();
+                }
+
                 while ((string)reader["movieName"] == "null")
                 {
                     reader.Read();
