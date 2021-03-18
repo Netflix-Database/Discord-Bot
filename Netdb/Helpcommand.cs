@@ -44,6 +44,12 @@ namespace Netdb
         [Command]
         public async Task Help(string command)
         {
+            if (Tools.ValidateSQLValues(command, Context.Channel))
+            {
+                return;
+            }
+
+
             if (CommandDB.GetCommandData(command, out string name, out string alias, out string syntax, out string desc, out bool modReq, out int uses))
             {
                 if (modReq && !Tools.IsModerator(Context.User))

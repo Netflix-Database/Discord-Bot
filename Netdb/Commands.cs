@@ -24,7 +24,10 @@ namespace Netdb
         [Summary("Shows you your searched movie")]
         public async Task Search([Remainder]string search)
         {
-            Tools.ValidateSQLValues(ref search);
+            if (Tools.ValidateSQLValues(search, Context.Channel))
+            {
+                return;
+            }
 
             if (!Tools.IsAvailableId(search))
             {
@@ -45,7 +48,10 @@ namespace Netdb
         [Summary ("Changes the Prefix for the server")]
         public async Task Prefix(string prefix)
         {
-            Tools.ValidateSQLValues(ref prefix);
+            if (Tools.ValidateSQLValues(prefix, Context.Channel))
+            {
+                return;
+            }
 
             if (Context.Channel.GetType() == typeof(SocketDMChannel))
             {
@@ -81,7 +87,10 @@ namespace Netdb
         [Summary("With this command you can rate movies/series")]
         public async Task RateMovie(int points, [Remainder] string moviename)
         {
-            Tools.ValidateSQLValues(ref moviename);
+            if (Tools.ValidateSQLValues(moviename, Context.Channel))
+            {
+                return;
+            }
 
             if (points < 1 || points > 10)
             {
@@ -146,7 +155,10 @@ namespace Netdb
         [Summary("Recommend a movie to a certain user")]
         public async Task Recommend(IUser user, [Remainder]string movie)
         {
-            Tools.ValidateSQLValues(ref movie);
+            if (Tools.ValidateSQLValues(movie, Context.Channel))
+            {
+                return;
+            }
 
             if (!Tools.IsAvailableId(movie))
             {
@@ -184,8 +196,10 @@ namespace Netdb
         [Summary("Add or remove movies to your watchlist")]
         public async Task Watchlist(string input, [Remainder] string moviename = null)
         {
-            Tools.ValidateSQLValues(ref input);
-            Tools.ValidateSQLValues(ref moviename);
+            if (Tools.ValidateSQLValues(moviename, Context.Channel) || Tools.ValidateSQLValues(input, Context.Channel))
+            {
+                return;
+            }
 
             if (input == "clear" || input == "c")
             {
