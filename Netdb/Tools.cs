@@ -40,41 +40,106 @@ namespace Netdb
             return 0;
         }
 
-        public static string ValidateSQLValues(ref string values)
+        public static bool ValidateSQLValues(string values, ISocketMessageChannel c)
         {
-            for (int j = 0; j < values.Length; j++)
+            int sus = 0;
+
+            if (values.Contains(';'))
             {
-                if (j < 0)
-                {
-                    j = 0;
-                }
-
-                if (values[j] == ';')
-                {
-                    values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
-                    j--;
-                }
-
-                if (values[j] == '\'')
-                {
-                    values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
-                    j--;
-                }
-
-                if (values[j] == '=')
-                {
-                    values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
-                    j--;
-                }
-
-                if (values[j] == '\\')
-                {
-                    values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
-                    j--;
-                }
+                sus++;
             }
 
-            return values;
+            if (values.Contains("drop"))
+            {
+                sus++;
+            }
+
+            if (values.Contains("table"))
+            {
+                sus++;
+            }
+
+            if (values.Contains('\''))
+            {
+                sus++;
+            }
+
+            if (values.Contains('='))
+            {
+                sus++;
+            }
+
+            if (values.Contains("update"))
+            {
+                sus++;
+            }
+
+            if (sus >= 3)
+            {
+                Tools.Embedbuilder("This command might me harmful to our database.", Color.Red, c);
+
+                return true;
+            }
+            else
+            {
+                if (sus > 0)
+                {
+                    Console.WriteLine($"Kinda sus value detected on sus lvl {sus}: " + values);
+                }
+
+                return false;
+            }
+        }
+
+        public static bool ValidateSQLValues(string values)
+        {
+            int sus = 0;
+
+            if (values.Contains(';'))
+            {
+                sus++;
+            }
+
+            if (values.Contains("drop"))
+            {
+                sus++;
+            }
+
+            if (values.Contains("table"))
+            {
+                sus++;
+            }
+
+            if (values.Contains('\''))
+            {
+                sus++;
+            }
+
+            if (values.Contains('='))
+            {
+                sus++;
+            }
+
+            if (values.Contains("update"))
+            {
+                sus++;
+            }
+
+            if (sus >= 3)
+            {
+                Console.WriteLine("suuusss command, stopped");
+
+                return true;
+            }
+            else
+            {
+                if (sus > 0)
+                {
+                    Console.WriteLine($"Kinda sus value detected on sus lvl {sus}: " + values);
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
