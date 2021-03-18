@@ -15,7 +15,7 @@ namespace Netdb
         public static void Setup()
         {
             var cmd = Program._con.CreateCommand();
-            string command = "CREATE TABLE IF NOT EXISTS `sys`.`commands` (`id` INT NOT NULL AUTO_INCREMENT,`command` VARCHAR(45) NULL,`alias` VARCHAR(10) NULL,`short_description` VARCHAR(100) NULL,`syntax` VARCHAR(100) NULL,`mod_required` TINYINT NULL,`uses` INT NULL,PRIMARY KEY(`id`)); ALTER TABLE `sys`.`commands` CHANGE COLUMN `uses` `uses` INT NULL DEFAULT 0;";
+            string command = "CREATE TABLE IF NOT EXISTS 'sys'.'commands' ('id' INT NOT NULL AUTO_INCREMENT,'command' VARCHAR(45) NULL,'alias' VARCHAR(10) NULL,'short_description' VARCHAR(100) NULL,'syntax' VARCHAR(100) NULL,'mod_required' TINYINT NULL,'uses' INT NULL,PRIMARY KEY('id')); ALTER TABLE 'sys'.'commands' CHANGE COLUMN 'uses' 'uses' INT NULL DEFAULT 0;";
             cmd.CommandText = command;
             cmd.ExecuteNonQuery();
             cmd.Dispose();
