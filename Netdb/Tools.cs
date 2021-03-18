@@ -66,6 +66,12 @@ namespace Netdb
                     values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
                     j--;
                 }
+
+                if (values[j] == '\\')
+                {
+                    values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
+                    j--;
+                }
             }
 
             return values;
