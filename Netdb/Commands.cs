@@ -93,6 +93,8 @@ namespace Netdb
 
             if (!Tools.IsAvailable(moviename))
             {
+                //update pls
+
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = "select * from moviedata where id = `" + moviename + "`;";
                 var reader = await cmd.ExecuteReaderAsync();
