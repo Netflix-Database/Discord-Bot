@@ -1,4 +1,4 @@
-https://discordapp.com/api/guilds/623873641679028244/widget.png?style=shield
+<iframe src="https://discord.com/widget?id=623873641679028244&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
 # Netdb
 
