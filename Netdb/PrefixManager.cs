@@ -44,7 +44,6 @@ namespace Netdb
                 r.Close();
                 r.Dispose();
                 cmd.Dispose();
-                Console.WriteLine(res);
                 return res;
             }
             else

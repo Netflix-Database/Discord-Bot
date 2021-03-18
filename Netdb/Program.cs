@@ -37,7 +37,9 @@ namespace Netdb
                 .AddSingleton(_commands)
                 .BuildServiceProvider();
 
-            _client.Log += Client_Log;     
+            _client.Log += Client_Log;
+
+            _client.JoinedGuild += _client_JoinedGuild;
 
             await RegisterCommandsAsync();
 
@@ -50,8 +52,6 @@ namespace Netdb
             await _client.SetActivityAsync(new Game("Netflix", ActivityType.Watching));
 
             await _client.LoginAsync(TokenType.Bot, token);
-
-            _client.JoinedGuild += _client_JoinedGuild;
 
             try
             {
@@ -335,6 +335,11 @@ namespace Netdb
         private async Task HandleCommandAsync(SocketMessage arg)
         {
             var message = arg as SocketUserMessage;
+            if (message == null)
+            {
+                return;
+            }
+
             var context = new SocketCommandContext(_client, message);
             if (message.Author.IsBot) return;
 
