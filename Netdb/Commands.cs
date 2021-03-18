@@ -160,16 +160,27 @@ namespace Netdb
                 return;
             }
 
-            if (!Tools.IsAvailableId(movie))
+            if (user.IsBot)
             {
-                Tools.Embedbuilder("This movie/series is not available",Color.DarkRed,Context.Channel);
+                Tools.Embedbuilder("You can't send recommondation to other bots", Color.DarkRed, Context.Channel);
                 return;
             }
 
-            if (user.IsBot)
+            if (!Tools.IsAvailableId(movie))
             {
-                Tools.Embedbuilder("You can't send recommondation to other bots",Color.DarkRed,Context.Channel);
-                return;
+                if (Tools.IsAvailableId(movie))
+                {
+                    var cmd = Program._con.CreateCommand();
+                    cmd.CommandText = "select * from moviedata where movieName = '" + movie + "';";
+                    var reader = cmd.ExecuteReader();
+
+                    movie = (string)reader["movieName"];
+                }
+                else
+                {
+                    Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
+                    return;
+                }
             }
 
             Tools.Search(movie,out EmbedBuilder eb, out FileStream stream,out string name);

@@ -127,8 +127,6 @@ namespace Netdb
 
             if (sus >= 3)
             {
-                Console.WriteLine("suuusss command, stopped");
-
                 return true;
             }
             else

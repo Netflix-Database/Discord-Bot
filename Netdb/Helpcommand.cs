@@ -49,7 +49,6 @@ namespace Netdb
                 return;
             }
 
-
             if (CommandDB.GetCommandData(command, out string name, out string alias, out string syntax, out string desc, out bool modReq, out int uses))
             {
                 if (modReq && !Tools.IsModerator(Context.User))
@@ -60,13 +59,9 @@ namespace Netdb
 
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.WithColor(Color.Gold);
-
                 eb.WithTitle("**" + name + "**");
                 eb.WithDescription(string.IsNullOrEmpty(desc) ? "No description available" : desc);
                 eb.AddField("Alias", string.IsNullOrEmpty(alias) ? "-" : alias);
-
-                syntax = syntax.Trim();
-
                 eb.AddField("Syntax",syntax == "-" ? $"`{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name}`" : $"`{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name} " + syntax + "`");
                 eb.AddField("Used", uses + " times");
 
