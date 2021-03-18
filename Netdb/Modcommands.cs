@@ -105,6 +105,7 @@ namespace Netdb
                     reader.Close();
                     Tools.Embedbuilder("This movie is not available.", Color.DarkRed, Context.Channel);
                     reader.Dispose();
+                    cmd.Dispose();
                     return;
                 }
             }
@@ -330,6 +331,8 @@ namespace Netdb
             {
                 Tools.Embedbuilder("This movie is already in the What's next list", Color.DarkRed, Context.Channel);
                 reader.Close();
+                reader.Dispose();
+                cmd.Dispose();
                 return;
             }
 
@@ -338,6 +341,9 @@ namespace Netdb
             Tools.UpdateContentadded(Context.User);
             Tools.RunCommand($"insert into comingsoon (moviename,releasedate) values ('{moviename}','{realeasedate:yyyy-MM-dd}');");
             await Context.Message.AddReactionAsync(new Emoji("✅"));
+
+            reader.Dispose();
+            cmd.Dispose();
         }
 
         [Command("missing")]
@@ -409,6 +415,9 @@ namespace Netdb
                 eb.AddField("Missing", missing);
 
                 await Context.Channel.SendMessageAsync("", false, eb.Build());
+
+                reader.Dispose();
+                cmd.Dispose();
             }
             else
             {
@@ -537,6 +546,9 @@ namespace Netdb
                 reader.Close();
                 Tools.Embedbuilder("You are not a moderator", Color.DarkRed, Context.Channel);
             }
+
+            reader.Dispose();
+            cmd.Dispose();
         }
 
         [Command("backup")]
