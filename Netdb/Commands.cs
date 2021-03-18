@@ -490,7 +490,7 @@ namespace Netdb
             }
             else
             {
-                eb.WithDescription("Subscribe with `" + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "sc` to get a daily notification about what's new");
+                eb.WithDescription("Subscribe with `" + PrefixManager.GetPrefixFromGuildId(Context.Channel) + "sc` to get a daily notification about what's new");
             }
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
@@ -548,6 +548,5 @@ namespace Netdb
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
-
     }
 }

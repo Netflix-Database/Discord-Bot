@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace Netdb
 {
     [Group("help")]
+    [Summary("Lists all commands with their description")]
     public class Helpcommand : ModuleBase<SocketCommandContext>
     {
         [Command]
@@ -16,8 +17,11 @@ namespace Netdb
         {
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Gold);
-            eb.WithTitle("`Prefix: " + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "`");
-            eb.WithDescription("use " + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "help [command] for detailed help");
+
+            string id = PrefixManager.GetPrefixFromGuildId(Context.Channel);
+
+            eb.WithTitle("`Prefix: " + id + "`");
+            eb.WithDescription("use " + id + "help [command] for detailed help");
 
             List<CommandInfo> commands = Program._commands.Commands.ToList();
 
@@ -44,7 +48,7 @@ namespace Netdb
             {
                 if (modReq && !Tools.IsModerator(Context.User))
                 {
-                    Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Guild.Id)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                    Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Channel)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -57,13 +61,14 @@ namespace Netdb
 
                 syntax = syntax.Trim();
 
-                eb.AddField("Syntax",string.IsNullOrEmpty(syntax) ? "No syntax available" : $"`{PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + name} " + syntax + "`");
+                eb.AddField("Syntax",syntax == "-" ? $"`{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name}`" : $"`{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name} " + syntax + "`");
+                eb.AddField("Used", uses + " times");
 
                 await ReplyAsync("", false, eb.Build());
             }
             else
             {
-                Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Guild.Id)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Channel)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
             }
         }
 
