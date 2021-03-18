@@ -24,6 +24,8 @@ namespace Netdb
         [Summary("Shows you your searched movie")]
         public async Task Search([Remainder]string search)
         {
+            Tools.ValidateSQLValues(ref search);
+
             if (!Tools.IsAvailableId(search))
             {
                 Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
@@ -43,6 +45,8 @@ namespace Netdb
         [Summary ("Changes the Prefix for the server")]
         public async Task Prefix(string prefix)
         {
+            Tools.ValidateSQLValues(ref prefix);
+
             if (Context.Channel.GetType() == typeof(SocketDMChannel))
             {
                 Tools.Embedbuilder("You can't use this in a dm",Color.DarkRed, Context.Channel);
@@ -77,6 +81,8 @@ namespace Netdb
         [Summary("With this command you can rate movies/series")]
         public async Task RateMovie(int points, [Remainder] string moviename)
         {
+            Tools.ValidateSQLValues(ref moviename);
+
             if (points < 1 || points > 10)
             {
                 Tools.Embedbuilder("Your review has to be betweeen 1 and 10",Color.DarkRed, Context.Channel);
@@ -138,6 +144,8 @@ namespace Netdb
         [Summary("Recommend a movie to a certain user")]
         public async Task Recommend(IUser user, [Remainder]string movie)
         {
+            Tools.ValidateSQLValues(ref movie);
+
             if (!Tools.IsAvailableId(movie))
             {
                 Tools.Embedbuilder("This movie/series is not available",Color.DarkRed,Context.Channel);
@@ -174,6 +182,9 @@ namespace Netdb
         [Summary("Add or remove movies to your watchlist")]
         public async Task Watchlist(string input, [Remainder] string moviename = null)
         {
+            Tools.ValidateSQLValues(ref input);
+            Tools.ValidateSQLValues(ref moviename);
+
             if (input == "clear" || input == "c")
             {
                 Tools.RunCommand($"delete from userdata where userid = '{Context.User.Id}';");
