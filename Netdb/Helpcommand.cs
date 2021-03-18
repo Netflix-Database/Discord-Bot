@@ -54,7 +54,7 @@ namespace Netdb
             {
                 if (modReq && !Tools.IsModerator(Context.User))
                 {
-                    Tools.Embedbuilder($"No command found. Use '{PrefixManager.GetPrefixFromGuildId(Context.Channel)}help' to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                    Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Channel)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
                     return;
                 }
 
@@ -67,14 +67,14 @@ namespace Netdb
 
                 syntax = syntax.Trim();
 
-                eb.AddField("Syntax",syntax == "-" ? $"'{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name}'" : $"'{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name} " + syntax + "'");
+                eb.AddField("Syntax",syntax == "-" ? $"`{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name}`" : $"`{PrefixManager.GetPrefixFromGuildId(Context.Channel) + name} " + syntax + "`");
                 eb.AddField("Used", uses + " times");
 
                 await ReplyAsync("", false, eb.Build());
             }
             else
             {
-                Tools.Embedbuilder($"No command found. Use '{PrefixManager.GetPrefixFromGuildId(Context.Channel)}help' to get a overview over all commands.", Color.DarkRed, Context.Channel);
+                Tools.Embedbuilder($"No command found. Use `{PrefixManager.GetPrefixFromGuildId(Context.Channel)}help` to get a overview over all commands.", Color.DarkRed, Context.Channel);
             }
         }
 

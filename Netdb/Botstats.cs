@@ -8,11 +8,11 @@ using Discord.Commands;
 namespace Netdb
 {
     [Group("botstats")]
-    class Botstats : ModuleBase<SocketCommandContext>
+    [Alias("bs")]
+    [Summary("Show stats about the bot")]
+    public class Botstats : ModuleBase<SocketCommandContext>
     {
         [Command]
-        [Alias("bs")]
-        [Summary("Show stats about the bot")]
         public async Task NormalBotstats()
         {
             int reviews = 0;
