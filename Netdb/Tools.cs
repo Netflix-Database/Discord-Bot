@@ -93,9 +93,11 @@ namespace Netdb
 
         public static bool ValidateSQLValues(string values)
         {
+            values = values.ToLower();
+
             int sus = 0;
 
-            if (values.Contains(';'))
+            if (values.ToLower().Contains(';'))
             {
                 sus++;
             }
