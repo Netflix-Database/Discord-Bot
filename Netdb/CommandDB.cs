@@ -130,11 +130,6 @@ namespace Netdb
         /// <param name="command">Command to update count from</param>
         public static void CommandUsed(string command)
         {
-            if (Tools.ValidateSQLValues(command))
-            {
-                return;
-            }
-
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"update sys.commands set uses = uses + 1 where command = '{command}';";
             cmd.ExecuteNonQuery();

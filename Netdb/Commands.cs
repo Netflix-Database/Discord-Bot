@@ -174,7 +174,13 @@ namespace Netdb
                     cmd.CommandText = "select * from moviedata where movieName = '" + movie + "';";
                     var reader = cmd.ExecuteReader();
 
+                    reader.Read();
+
                     movie = (string)reader["movieName"];
+
+                    reader.Close();
+                    reader.Dispose();
+                    cmd.Dispose();
                 }
                 else
                 {
@@ -566,14 +572,23 @@ namespace Netdb
 
             eb.WithColor(Color.Gold);
             eb.WithTitle("Netdb");
-            eb.WithDescription("Super Cooler Bot");
+            eb.WithDescription("a simple Netflix bot");
             eb.AddField("Server", Context.Client.Guilds.Count);
             eb.AddField("Ping", Context.Client.Latency);
             eb.AddField("Currently in the database","movies: `" + movies + "` \n series: `" + series + "` \n reviews: `" + reviews + "`");
             eb.AddField("Invite the Bot", "[here](https://discord.com/oauth2/authorize?client_id=802237562625196084&scope=bot&permissions=518208)");
-            eb.WithFooter("made by Yannick Füreder");
+            eb.WithFooter("made by Yannick Füreder and Traunbauer Elias");
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
+        }
+
+        [Command("report")]
+        [Summary("Report bugs pls")]
+        public async Task Report([Remainder] string report)
+        {
+            IUser user = Program._client.GetUser(487265499785199616);
+
+            user.SendMessageAsync(Context.User.Username + " " + report);
         }
     }
 }

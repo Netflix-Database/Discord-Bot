@@ -39,10 +39,17 @@ namespace Netdb
             reader.Close();
             return 0;
         }
-
+        /// <summary>
+        /// Checks if someone tried to do an sql injection
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="c"></param>
+        /// <returns>bool</returns>
         public static bool ValidateSQLValues(string values, ISocketMessageChannel c)
         {
             int sus = 0;
+
+            values = values.ToLower();
 
             if (values.Contains(';'))
             {
