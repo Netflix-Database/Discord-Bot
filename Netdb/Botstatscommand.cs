@@ -81,5 +81,38 @@ namespace Netdb
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
+
+        [Command]
+        public async Task botstats(string command)
+        {
+            EmbedBuilder eb = new EmbedBuilder();
+
+            eb.WithColor(Color.DarkTeal);
+
+            bool modd = Tools.IsModerator(Context.User);
+
+            if (!(Program._con.State.ToString() == "Closed") && (command == "commands" || command == "cmds"))
+            {
+                eb.WithTitle("Command stats");
+
+                CommandDB.GetCommandDataOfAllCommands(out string[] name, out string[] alias, out string[] desc, out string[] shoert_Desc, out bool[] mod, out int[] uses);
+
+                for (int i = 0; i < name.Length; i++)
+                {
+                    if (mod[i] && !modd)
+                    {
+                        continue;
+                    }
+
+                    eb.AddField(name[i], "Uses: " + uses[i]);
+                }
+
+                await Context.Channel.SendMessageAsync("", false, eb.Build());
+                return;
+            }
+
+            eb.WithTitle("Unknow argument.");
+            await Context.Channel.SendMessageAsync("", false, eb.Build());
+        }
     }
 }
