@@ -596,7 +596,7 @@ namespace Netdb
         [Summary("Disconnects the bot")]
         public async Task Disconnect()
         {
-            if (Context.User.Id == 487265499785199616)
+            if (Context.User.Id == 487265499785199616 || Context.User.Id == 300571683507404800)
             {
                 Tools.Embedbuilder("Disconnected", Color.DarkRed, Context.Channel);
 

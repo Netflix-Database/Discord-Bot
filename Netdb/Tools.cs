@@ -40,27 +40,6 @@ namespace Netdb
             return 0;
         }
 
-        public static void ValidateSQLValues(string[] values)
-        {
-            for (int i = 0; i < values.Length; i++)
-            {
-                for (int j = 0; j < values[i].Length; j++)
-                {
-                    if (values[i][j] == ';')
-                    {
-                        values[i] = values[i].Substring(0, j) + values[i].Substring(j + 1 < values[i].Length ? j + 1 : values[i].Length - 1);
-                        j--;
-                    }
-
-                    if (values[i][j] == '\'')
-                    {
-                        values[i] = values[i].Substring(0, j) + values[i].Substring(j + 1 < values[i].Length ? j + 1 : values[i].Length - 1);
-                        j--;
-                    }
-                }
-            }
-        }
-
         public static string ValidateSQLValues(ref string values)
         {
             for (int j = 0; j < values.Length; j++)
@@ -72,6 +51,12 @@ namespace Netdb
                 }
 
                 if (values[j] == '\'')
+                {
+                    values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
+                    j--;
+                }
+
+                if (values[j] == '=')
                 {
                     values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
                     j--;
