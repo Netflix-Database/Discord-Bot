@@ -365,6 +365,8 @@ namespace Netdb
                     }
                 }
 
+                CommandDB.CommandUsed(message.Content.Substring(PrefixManager.GetPrefixFromGuildId(((SocketGuildChannel)arg.Channel).Guild.Id).Length).Split(" ")[0]);
+
                 var result = await _commands.ExecuteAsync(context, argPos, _services);
                 commandsexecuted++;
 
