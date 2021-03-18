@@ -76,7 +76,7 @@ namespace Netdb
 
             if (sus >= 3)
             {
-                Tools.Embedbuilder("This command might be harmful to our database.", Color.Red, c);
+                Tools.Embedbuilder("This command might be harmful to our database. Click [here](https://bfy.tw/QZLb) to see what has gone wrong.", Color.Red, c);
 
                 return true;
             }
