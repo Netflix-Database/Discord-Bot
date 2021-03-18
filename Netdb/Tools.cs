@@ -49,11 +49,13 @@ namespace Netdb
                     if (values[i][j] == ';')
                     {
                         values[i] = values[i].Substring(0, j) + values[i].Substring(j + 1 < values[i].Length ? j + 1 : values[i].Length - 1);
+                        j--;
                     }
 
                     if (values[i][j] == '\'')
                     {
                         values[i] = values[i].Substring(0, j) + values[i].Substring(j + 1 < values[i].Length ? j + 1 : values[i].Length - 1);
+                        j--;
                     }
                 }
             }
@@ -66,11 +68,13 @@ namespace Netdb
                 if (values[j] == ';')
                 {
                     values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
+                    j--;
                 }
 
                 if (values[j] == '\'')
                 {
                     values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
+                    j--;
                 }
             }
 
