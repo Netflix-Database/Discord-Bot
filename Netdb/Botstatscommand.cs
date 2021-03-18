@@ -10,10 +10,10 @@ namespace Netdb
     [Group("botstats")]
     [Alias("bs")]
     [Summary("Show stats about the bot")]
-    public class Botstats : ModuleBase<SocketCommandContext>
+    public class Botstatscommand : ModuleBase<SocketCommandContext>
     {
         [Command]
-        public async Task NormalBotstats()
+        public async Task botstats()
         {
             int reviews = 0;
             int subscribtions = 0;
