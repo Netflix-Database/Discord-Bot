@@ -241,6 +241,7 @@ namespace Netdb
 
         public static void RunCommand(string command)
         {
+            ValidateSQLValues(ref command);
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = command;
             cmd.ExecuteNonQuery();
@@ -250,6 +251,8 @@ namespace Netdb
 
         public static bool Reader(string input)
         {
+            ValidateSQLValues(ref input);
+
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = input;
             var reader = cmd.ExecuteReader();
