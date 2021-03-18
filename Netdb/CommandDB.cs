@@ -40,6 +40,8 @@ namespace Netdb
             uses = 0;
             commandA = command;
 
+            Tools.ValidateSQLValues(ref command);
+
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select * from commands where command = '{command}';";
             var r = cmd.ExecuteReader();
@@ -130,6 +132,8 @@ namespace Netdb
         /// <param name="command">Command to update count from</param>
         public static void CommandUsed(string command)
         {
+            Tools.ValidateSQLValues(ref command);
+
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"update sys.commands set uses = uses + 1 where command = '{command}';";
             cmd.ExecuteNonQuery();

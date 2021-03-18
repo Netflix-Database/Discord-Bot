@@ -15,6 +15,8 @@ namespace Netdb
         [Summary("Adds a movie or series to the database")]
         public async Task Add([Remainder] string input)
         {
+            Tools.ValidateSQLValues(ref input);
+
             if (!Tools.IsModerator(Context.User))
             {
                 Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed,Context.Channel);
@@ -239,6 +241,8 @@ namespace Netdb
         [Summary("Removes a movie from the library")]
         public async Task Remove([Remainder] string moviename)
         {
+            Tools.ValidateSQLValues(ref moviename);
+
             if (!Tools.IsModerator(Context.User))
             {
                 Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed, Context.Channel);
@@ -268,6 +272,9 @@ namespace Netdb
         [Summary("Add movies/series that are coming to Netflix")]
         public async Task Next(string date, [Remainder] string moviename)
         {
+            Tools.ValidateSQLValues(ref date);
+            Tools.ValidateSQLValues(ref moviename);
+
             if (!Tools.IsModerator(Context.User))
             {
                 Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed, Context.Channel);
