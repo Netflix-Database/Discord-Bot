@@ -104,7 +104,7 @@ namespace Netdb
                         continue;
                     }
 
-                    eb.AddField(name[i], "Uses: " + uses[i]);
+                    eb.AddField(name[i], "Uses: " + uses[i], true);
                 }
 
                 await Context.Channel.SendMessageAsync("", false, eb.Build());
