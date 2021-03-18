@@ -20,7 +20,7 @@ namespace Netdb
 
             string id = PrefixManager.GetPrefixFromGuildId(Context.Channel);
 
-            eb.WithTitle("'Prefix: " + id + "'");
+            eb.WithTitle("`Prefix: " + id + "`");
             eb.WithDescription("use " + id + "help [command] for detailed help");
 
             List<CommandInfo> commands = Program._commands.Commands.ToList();
