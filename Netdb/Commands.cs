@@ -69,7 +69,7 @@ namespace Netdb
                 if (((SocketGuildUser)Context.User).GuildPermissions.Administrator)
                 {
                     PrefixManager.ChangePrefixForGuild(Context.Guild.Id, prefix);
-                    Tools.Embedbuilder($"Prefix changed to '{prefix}'.", Color.Gold, Context.Channel);
+                    Tools.Embedbuilder($"Prefix changed to `{prefix}`.", Color.Gold, Context.Channel);
                 }
                 else
                 {
