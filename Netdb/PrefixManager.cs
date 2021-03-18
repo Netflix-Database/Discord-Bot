@@ -52,7 +52,7 @@ namespace Netdb
                 r.Dispose();
                 cmd.Dispose();
                 InsertGuildPrefix(guildchannel.Id);
-                return GetPrefixFromGuildId(guildchannel);
+                return GetPrefixFromGuildId(channel);
             }
         }
 
