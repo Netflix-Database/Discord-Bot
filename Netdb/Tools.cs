@@ -44,6 +44,11 @@ namespace Netdb
         {
             for (int j = 0; j < values.Length; j++)
             {
+                if (j < 0)
+                {
+                    j = 0;
+                }
+
                 if (values[j] == ';')
                 {
                     values = values.Substring(0, j) + values.Substring(j + 1 < values.Length ? j + 1 : values.Length - 1);
