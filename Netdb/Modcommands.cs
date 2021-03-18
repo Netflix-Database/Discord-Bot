@@ -268,6 +268,16 @@ namespace Netdb
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
+            else if (Tools.IsAvailableId(moviename))
+            {
+                Tools.RunCommand($"update moviedata set movieName = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where id = '{moviename}';");
+
+                Tools.RunCommand($"delete from userdata where movieid = '{moviename}';");
+
+                Tools.RunCommand($"delete from reviewsdata where movieid = '{moviename}';");
+
+                await Context.Message.AddReactionAsync(new Emoji("✅"));
+            }
             else
             {
                 Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);

@@ -558,7 +558,7 @@ namespace Netdb
             eb.WithDescription("Super Cooler Bot");
             eb.AddField("Server", Context.Client.Guilds.Count);
             eb.AddField("Ping", Context.Client.Latency);
-            eb.AddField("Currently in the database","movies: '" + movies + "' \n series: '" + series + "' \n reviews: '" + reviews + "'");
+            eb.AddField("Currently in the database","movies: `" + movies + "` \n series: `" + series + "` \n reviews: `" + reviews + "`");
             eb.AddField("Invite the Bot", "[here](https://discord.com/oauth2/authorize?client_id=802237562625196084&scope=bot&permissions=518208)");
             eb.WithFooter("made by Yannick Füreder");
 
