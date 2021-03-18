@@ -174,7 +174,13 @@ namespace Netdb
                     cmd.CommandText = "select * from moviedata where movieName = '" + movie + "';";
                     var reader = cmd.ExecuteReader();
 
+                    reader.Read();
+
                     movie = (string)reader["movieName"];
+
+                    reader.Close();
+                    reader.Dispose();
+                    cmd.Dispose();
                 }
                 else
                 {

@@ -39,7 +39,12 @@ namespace Netdb
             reader.Close();
             return 0;
         }
-
+        /// <summary>
+        /// Checks if someone tried to do an sql injection
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="c"></param>
+        /// <returns>bool</returns>
         public static bool ValidateSQLValues(string values, ISocketMessageChannel c)
         {
             int sus = 0;
@@ -78,55 +83,6 @@ namespace Netdb
             {
                 Tools.Embedbuilder("This command might be harmful to our database. Click [here](https://bfy.tw/QZLb) to see what has gone wrong.", Color.Red, c);
 
-                return true;
-            }
-            else
-            {
-                if (sus > 0)
-                {
-                    Console.WriteLine($"Kinda sus value detected on sus lvl {sus}: " + values);
-                }
-
-                return false;
-            }
-        }
-
-        public static bool ValidateSQLValues(string values)
-        {
-            int sus = 0;
-
-            if (values.Contains(';'))
-            {
-                sus++;
-            }
-
-            if (values.Contains("drop"))
-            {
-                sus++;
-            }
-
-            if (values.Contains("table"))
-            {
-                sus++;
-            }
-
-            if (values.Contains('\''))
-            {
-                sus++;
-            }
-
-            if (values.Contains('='))
-            {
-                sus++;
-            }
-
-            if (values.Contains("update"))
-            {
-                sus++;
-            }
-
-            if (sus >= 3)
-            {
                 return true;
             }
             else
