@@ -15,6 +15,7 @@ namespace Netdb
         string connectionstring;
         string token;
         public static MySqlConnection _con;
+        public static string mainPrefix = "#";
 
         //Botstats
         public static DateTime startedAt = DateTime.Now;
@@ -339,7 +340,7 @@ namespace Netdb
 
             int argPos = 0;
 
-            string prefix = "#";
+            string prefix = mainPrefix;
 
             if (arg.Channel.GetType() == typeof(SocketGuildChannel))
             {

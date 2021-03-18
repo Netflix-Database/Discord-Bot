@@ -16,8 +16,15 @@ namespace Netdb
         {
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Gold);
-            eb.WithTitle("`Prefix: " + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "`");
-            eb.WithDescription("use " + PrefixManager.GetPrefixFromGuildId(Context.Guild.Id) + "help [command] for detailed help");
+
+            string id = Program.mainPrefix;
+            if (Context.Channel.GetType() == typeof(IGuildChannel))
+            {
+                id = PrefixManager.GetPrefixFromGuildId(Context.Guild.Id);
+            }
+
+            eb.WithTitle("`Prefix: " + id + "`");
+            eb.WithDescription("use " + id + "help [command] for detailed help");
 
             List<CommandInfo> commands = Program._commands.Commands.ToList();
 
