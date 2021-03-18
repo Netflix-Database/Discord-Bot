@@ -63,6 +63,9 @@ namespace Netdb
                     series++;
                 }
                 reader.Close();
+
+                await reader.DisposeAsync();
+                await cmd.DisposeAsync();
             }
 
             EmbedBuilder eb = new EmbedBuilder();

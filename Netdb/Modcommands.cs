@@ -104,6 +104,7 @@ namespace Netdb
                 {
                     reader.Close();
                     Tools.Embedbuilder("This movie is not available.", Color.DarkRed, Context.Channel);
+                    reader.Dispose();
                     return;
                 }
             }
@@ -228,6 +229,8 @@ namespace Netdb
                     await Context.Message.AddReactionAsync(new Emoji("✅"));
 
                     Tools.UpdateContentadded(Context.User);
+
+                    cmd.Dispose();
                 }
                 else
                 {
@@ -423,8 +426,8 @@ namespace Netdb
                 Program.BackupDB();
                 Program.GetMostsearched();
                 Program.GetBestReviewed();
-                //Program.GetMostPopular();
 
+                await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else
             {
