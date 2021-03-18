@@ -20,11 +20,7 @@ namespace Netdb
             int movies = 0;
             int series = 0;
 
-            if (Program._con.State.ToString() == "Closed")
-            {
-
-            }
-            else
+            if (!(Program._con.State.ToString() == "Closed"))
             {
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = $"select * from reviewsdata;";
@@ -85,6 +81,5 @@ namespace Netdb
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
-
     }
 }

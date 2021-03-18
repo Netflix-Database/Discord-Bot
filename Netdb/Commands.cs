@@ -537,6 +537,5 @@ namespace Netdb
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
-
     }
 }
