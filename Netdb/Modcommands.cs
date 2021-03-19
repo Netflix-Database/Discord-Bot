@@ -477,7 +477,7 @@ namespace Netdb
                     return;
                 }
 
-                Tools.RunCommand($"delete from moderation where userid = '{user.Id}';");
+                Tools.RunCommand($"update moderation set ismod = '{0}' where userid = '{user.Id}';");
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else

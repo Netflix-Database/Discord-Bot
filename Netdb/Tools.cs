@@ -353,7 +353,7 @@ namespace Netdb
         public static bool IsModerator(IUser user)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moderation where userid = '{user.Id}';";
+            cmd.CommandText = $"select * from moderation where userid = '{user.Id}' and ismod = '{1}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
