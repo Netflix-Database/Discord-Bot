@@ -16,6 +16,14 @@ namespace Netdb
         private int _averagereview;
         private double _totalreview;
         private byte[] _image;
+        private string _netflixid;
+
+        public string Netflixid
+        {
+            get { return _netflixid; }
+            set { _netflixid = value; }
+        }
+
 
         public byte[] Image
         {

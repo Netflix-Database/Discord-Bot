@@ -207,12 +207,22 @@ namespace Netdb
             }
 
 
+            string link;
+            if (redar["netflixid"] == DBNull.Value)
+            {
+                link = ("https://www.netflix.com/search?q=" + redar["movieName"]).Replace(" ", "");
+            }
+            else
+            {
+                link = "https://www.netflix.com/title/" + redar["netflixid"];
+            }
+
             movie = new MovieData
             {
                 Age = (int)redar["age"],
                 Description = (string)redar["description"],
                 Id = (int)redar["id"],
-                Link = ("https://www.netflix.com/search?q=" + redar["movieName"]).Replace(" ", ""),
+                Link = link,
                 Name = (string)redar["movieName"],
                 Type = Convert.ToBoolean(redar["type"]),
                 Releasedate = (int)redar["releaseDate"],
@@ -220,7 +230,7 @@ namespace Netdb
                 Genres = (string)redar["genres"],
                 AverageReview = ((int)redar["reviews"] != 0) ? (int)redar["reviewpoints"] / (int)redar["reviews"] : 0,
                 Review = (int)redar["reviews"],
-                Image = image
+                Image = image,
             };
 
             int searchcounter = (int)redar["searchcounter"] + 1;

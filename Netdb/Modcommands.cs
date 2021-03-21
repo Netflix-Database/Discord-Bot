@@ -624,6 +624,9 @@ namespace Netdb
                 await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
+
+                cmd.Dispose();
+                mb.Dispose();
             }
             else
             {
