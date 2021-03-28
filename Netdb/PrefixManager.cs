@@ -18,7 +18,7 @@ namespace Netdb
         }
 
         /// <summary>
-        /// Get prefix for a guild. iF never used, inserts default
+        /// Get prefix for a guild. if never used, inserts default
         /// </summary>
         /// <param name="id">guildId</param>
         /// <returns>Prefix</returns>

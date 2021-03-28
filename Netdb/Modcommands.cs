@@ -20,7 +20,6 @@ namespace Netdb
                 return;
             }
 
-
             if (!Tools.IsModerator(Context.User))
             {
                 Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed,Context.Channel);
@@ -237,6 +236,24 @@ namespace Netdb
                 {
                     Tools.Embedbuilder("The file has to be a png!", Color.Blue, Context.Channel);
                 }
+            }
+            else if (content[1] == "id")
+            {
+                if (content[2].Length != 8)
+                {
+                    Tools.Embedbuilder("This is not a valid id", Color.DarkRed, Context.Channel);
+                    return;
+                }
+
+                if (!int.TryParse(content[2], out int id))
+                {
+                    Tools.Embedbuilder("The id must be a number", Color.DarkRed, Context.Channel);
+                    return;
+                }
+
+                Tools.RunCommand($"update moviedata set netflixid = '{id}' where movieName = '{content[0]}'; ");
+                await Context.Message.AddReactionAsync(new Emoji("✅"));
+                Tools.UpdateContentadded(Context.User);
             }
             else
             {
@@ -619,10 +636,13 @@ namespace Netdb
 
                 cmd.Connection = Program._con;
 
+                await Context.Message.AddReactionAsync(new Emoji("⌛"));
+
                 mb.ImportFromFile(file);
 
                 await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
 
+                await Context.Message.RemoveReactionAsync(new Emoji("⌛"),Program._client.CurrentUser);
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
 
                 cmd.Dispose();

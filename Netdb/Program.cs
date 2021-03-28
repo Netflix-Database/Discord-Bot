@@ -58,22 +58,20 @@ namespace Netdb
                 _con.Open();
 
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Connection Open"));
-
-                SetupDB();
-
-                BackupDB();
-
-                GetMostsearched();
-
-                GetBestReviewed();
-
-                CommandDB.Setup();
-                PrefixManager.Setup();
             }
             catch (Exception)
             {
                 await Client_Log(new LogMessage(LogSeverity.Info,"System", "Database Connection Closed"));
             }
+
+            BackupDB();
+
+            GetMostsearched();
+
+            GetBestReviewed();
+
+            CommandDB.Setup();
+            PrefixManager.Setup();
 
             await _client.StartAsync();
 
@@ -82,22 +80,6 @@ namespace Netdb
             await SendMessages(time);
 
             await Task.Delay(-1);
-        }
-
-        private static void SetupDB()
-        {
-            if (_con.State == System.Data.ConnectionState.Open)
-            {
-                string[] cmds = File.ReadAllText("db.setup").Split('|');
-
-                for (int i = 0; i < cmds.Length; i++)
-                {
-                    var cmd = _con.CreateCommand();
-                    cmd.CommandText = cmds[i];
-                    cmd.ExecuteNonQuery();
-                    cmd.Dispose();
-                }
-            }
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)

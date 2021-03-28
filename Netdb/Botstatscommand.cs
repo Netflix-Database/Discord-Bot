@@ -6,16 +6,18 @@ namespace Netdb
 {
     [Group("botstats")]
     [Alias("bs")]
-    [Summary("Show stats about the bot")]
+    [Summary("Shows stats about the bot")]
     public class Botstatscommand : ModuleBase<SocketCommandContext>
     {
         [Command]
+        [Summary("Shows stats about the bot")]
         public async Task botstats()
         {
             int reviews = 0;
             int subscribtions = 0;
             int movies = 0;
             int series = 0;
+            int commandsexecutedlifetime = 0;
 
             if (!(Program._con.State.ToString() == "Closed"))
             {
@@ -61,6 +63,16 @@ namespace Netdb
                 }
                 reader.Close();
 
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from commands;";
+                reader = await cmd.ExecuteReaderAsync();
+
+                while (reader.Read())
+                {
+                    commandsexecutedlifetime += (int)reader["uses"];
+                }
+                reader.Close();
+
                 await reader.DisposeAsync();
                 await cmd.DisposeAsync();
             }
@@ -72,7 +84,7 @@ namespace Netdb
 
             eb.AddField("Bot started", Program.startedAt.ToString("HH:mm:ss") + " CET");
             eb.AddField("Commands executed since start", Program.commandsexecuted);
-            eb.AddField("Commands executed lifetime", "Soon");
+            eb.AddField("Commands executed lifetime", commandsexecutedlifetime);
             eb.AddField("Database connection", Program._con.State);
             eb.AddField("Subscriber", subscribtions);
             eb.AddField("Movies", movies);
@@ -82,8 +94,10 @@ namespace Netdb
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
 
-        [Command]
-        public async Task botstats(string command)
+        [Command ("commands")]
+        [Alias("cmds")]
+        [Summary("Shows stats about the bot")]
+        public async Task commands()
         {
             EmbedBuilder eb = new EmbedBuilder();
 
@@ -91,7 +105,7 @@ namespace Netdb
 
             bool modd = Tools.IsModerator(Context.User);
 
-            if (!(Program._con.State.ToString() == "Closed") && (command == "commands" || command == "cmds"))
+            if (Program._con.State == System.Data.ConnectionState.Open)
             {
                 eb.WithTitle("Command stats");
 
@@ -99,12 +113,10 @@ namespace Netdb
 
                 for (int i = 0; i < name.Length; i++)
                 {
-                    if (mod[i] && !modd)
+                    if (name[i] != "disconnect")
                     {
-                        continue;
+                        eb.AddField(name[i], "Uses: " + uses[i], true);
                     }
-
-                    eb.AddField(name[i], "Uses: " + uses[i], true);
                 }
 
                 await Context.Channel.SendMessageAsync("", false, eb.Build());

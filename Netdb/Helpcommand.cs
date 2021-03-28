@@ -19,7 +19,7 @@ namespace Netdb
             string id = PrefixManager.GetPrefixFromGuildId(Context.Channel);
 
             eb.WithTitle("`Prefix: " + id + "`");
-            eb.WithDescription("use " + id + "help [command] for detailed help");
+            eb.WithDescription("use `" + id + "help [command]` for detailed help");
 
             List<CommandInfo> commands = Program._commands.Commands.ToList();
 
@@ -30,11 +30,16 @@ namespace Netdb
                     break;
                 }
 
-                // Get the command Summary attribute information
-                string embedFieldText = command.Summary ?? "No description available\n";
+                if (command.Name != "botstats" && command.Name != "commands")
+                {
+                    // Get the command Summary attribute information
+                    string embedFieldText = command.Summary ?? "No description available\n";
 
-                eb.AddField(command.Name, embedFieldText);
+                    eb.AddField(command.Name, embedFieldText);
+                }
             }
+
+            eb.AddField("botstats", "Shows stats about the bot");
 
             await ReplyAsync("", false, eb.Build());
         }
