@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
+using System.Text;
 
 namespace Netdb
 {
@@ -43,7 +44,17 @@ namespace Netdb
 
             await RegisterCommandsAsync();
 
-            string[] input = File.ReadAllLines("token.txt");
+            string[] input = new string[1];
+
+            try
+            {
+                input = File.ReadAllLines(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "token.txt", Encoding.UTF8);
+            }
+            catch (Exception)
+            {
+                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "token.txt geht ned");
+            }
+            
 
             token = input[1];
             connectionstring = input[0];
@@ -64,14 +75,36 @@ namespace Netdb
                 await Client_Log(new LogMessage(LogSeverity.Info,"System", "Database Connection Closed"));
             }
 
-            BackupDB();
+            try
+            {
+                BackupDB();
+            }
+            catch (Exception)
+            {
+                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "db backup geht ned");
+            }
 
-            GetMostsearched();
+            try
+            {
+                GetMostsearched();
 
-            GetBestReviewed();
+                GetBestReviewed();
+            }
+            catch (Exception)
+            {
 
-            CommandDB.Setup();
-            PrefixManager.Setup();
+                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "listn gehn ned");
+            }
+
+            try
+            {
+                CommandDB.Setup();
+                PrefixManager.Setup();
+            }
+            catch (Exception)
+            {
+                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "trauni setups gehn ned");
+            }
 
             await _client.StartAsync();
 
@@ -257,17 +290,10 @@ namespace Netdb
 
             cmd.Connection = _con;
 
-            try
-            {
-                mb.ExportToFile(path);
-            }
-            catch (Exception ex)
-            {
-
-                File.WriteAllText("log.txt",ex.ToString());
-            }
+            mb.ExportToFile(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + path);
 
             mb.Dispose();
+            cmd.Dispose();
 
             Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup Created")).GetAwaiter().GetResult();
         }

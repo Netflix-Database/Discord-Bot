@@ -6,6 +6,7 @@ using Discord.Commands;
 using System.IO;
 using System.Net;
 using MySql.Data.MySqlClient;
+using System.Reflection;
 
 namespace Netdb
 {
@@ -591,7 +592,7 @@ namespace Netdb
         {
             if (Context.User.Id == 487265499785199616)
             {
-                string[] files = Directory.GetFiles("DB_Backups");
+                string[] files = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups");
                 FileInfo fi;
                 string backups = "";
                 long size = 0;
@@ -606,7 +607,7 @@ namespace Netdb
                 {
                     fi = new FileInfo(files[i]);
 
-                    backups += "`" + fi.CreationTime + "` Backup \n";
+                    backups += "`" + fi.Name + "`\n";
                     size += fi.Length;
                 }
 
@@ -626,11 +627,10 @@ namespace Netdb
         [Command("restore")]
         [Alias("res")]
         [Summary("Restores a database backup")]
-        public async Task Loadbackup([Remainder] DateTime backuptime)
+        public async Task Loadbackup(string filename)
         {
             if (Context.User.Id == 487265499785199616)
             {
-                string path = Path.Combine("DB_Backups", backuptime.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_") + "_backup.sql");
                 MySqlCommand cmd = new MySqlCommand();
                 MySqlBackup mb = new MySqlBackup(cmd);
 
@@ -638,7 +638,7 @@ namespace Netdb
 
                 await Context.Message.AddReactionAsync(new Emoji("⌛"));
 
-                mb.ImportFromFile(path);
+                mb.ImportFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups", filename));
 
                 await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
 
