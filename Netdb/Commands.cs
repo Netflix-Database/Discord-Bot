@@ -40,6 +40,7 @@ namespace Netdb
             await Context.Channel.SendFileAsync(stream, "example.png", embed: eb.Build());
 
             stream.Close();
+            stream.Flush();
         }
 
         [Command ("prefix")]

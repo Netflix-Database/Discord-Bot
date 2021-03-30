@@ -630,7 +630,7 @@ namespace Netdb
         {
             if (Context.User.Id == 487265499785199616)
             {
-                string file = "DB_Backups/" + backuptime.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_") + "_backup.sql";
+                string path = Path.Combine("DB_Backups", backuptime.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_") + "_backup.sql");
                 MySqlCommand cmd = new MySqlCommand();
                 MySqlBackup mb = new MySqlBackup(cmd);
 
@@ -638,7 +638,7 @@ namespace Netdb
 
                 await Context.Message.AddReactionAsync(new Emoji("⌛"));
 
-                mb.ImportFromFile(file);
+                mb.ImportFromFile(path);
 
                 await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
 

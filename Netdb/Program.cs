@@ -250,13 +250,24 @@ namespace Netdb
 
         public static void BackupDB()
         {
-            string file = "DB_Backups/" + DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":","_") + "_backup.sql";
+            string path = Path.Combine("DB_Backups", DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_") + "_backup.sql");
+
             MySqlCommand cmd = new MySqlCommand();
             MySqlBackup mb = new MySqlBackup(cmd);
 
             cmd.Connection = _con;
 
-            mb.ExportToFile(file);
+            try
+            {
+                mb.ExportToFile(path);
+            }
+            catch (Exception ex)
+            {
+
+                File.WriteAllText("log.txt",ex.ToString());
+            }
+
+            mb.Dispose();
 
             Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup Created")).GetAwaiter().GetResult();
         }
