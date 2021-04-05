@@ -75,36 +75,14 @@ namespace Netdb
                 await Client_Log(new LogMessage(LogSeverity.Info,"System", "Database Connection Closed"));
             }
 
-            try
-            {
                 BackupDB();
-            }
-            catch (Exception)
-            {
-                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "db backup geht ned");
-            }
 
-            try
-            {
                 GetMostsearched();
 
                 GetBestReviewed();
-            }
-            catch (Exception)
-            {
 
-                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "listn gehn ned");
-            }
-
-            try
-            {
                 CommandDB.Setup();
                 PrefixManager.Setup();
-            }
-            catch (Exception)
-            {
-                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "trauni setups gehn ned");
-            }
 
             await _client.StartAsync();
 
@@ -283,19 +261,27 @@ namespace Netdb
 
         public static void BackupDB()
         {
-            string path = Path.Combine("DB_Backups", DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_") + "_backup.sql");
+            try
+            {
+                string path = Path.Combine("DB_Backups", DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_") + "_backup.sql");
 
-            MySqlCommand cmd = new MySqlCommand();
-            MySqlBackup mb = new MySqlBackup(cmd);
+                MySqlCommand cmd = new MySqlCommand();
+                MySqlBackup mb = new MySqlBackup(cmd);
 
-            cmd.Connection = _con;
+                cmd.Connection = _con;
 
-            mb.ExportToFile(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + path);
+                mb.ExportToFile(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + path);
 
-            mb.Dispose();
-            cmd.Dispose();
+                mb.Dispose();
+                cmd.Dispose();
 
-            Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup Created")).GetAwaiter().GetResult();
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup Created")).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
          
         private async Task SendMessages(DateTime executiontime)

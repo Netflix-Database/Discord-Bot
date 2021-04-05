@@ -631,22 +631,30 @@ namespace Netdb
         {
             if (Context.User.Id == 487265499785199616)
             {
-                MySqlCommand cmd = new MySqlCommand();
-                MySqlBackup mb = new MySqlBackup(cmd);
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand();
+                    MySqlBackup mb = new MySqlBackup(cmd);
 
-                cmd.Connection = Program._con;
+                    cmd.Connection = Program._con;
 
-                await Context.Message.AddReactionAsync(new Emoji("⌛"));
+                    await Context.Message.AddReactionAsync(new Emoji("⌛"));
 
-                mb.ImportFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups", filename));
+                    mb.ImportFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups", filename));
 
-                await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
+                    await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
 
-                await Context.Message.RemoveReactionAsync(new Emoji("⌛"),Program._client.CurrentUser);
-                await Context.Message.AddReactionAsync(new Emoji("✅"));
+                    await Context.Message.RemoveReactionAsync(new Emoji("⌛"), Program._client.CurrentUser);
+                    await Context.Message.AddReactionAsync(new Emoji("✅"));
 
-                cmd.Dispose();
-                mb.Dispose();
+                    cmd.Dispose();
+                    mb.Dispose();
+                }
+                catch (Exception ex)
+                {
+
+                    await Context.Message.ReplyAsync(ex.ToString());
+                }
             }
             else
             {
