@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using Discord.WebSocket;
+using System.Reflection;
 
 namespace Netdb
 {
@@ -199,7 +200,7 @@ namespace Netdb
 
             if (redar["image"] == DBNull.Value)
             {
-                image = File.ReadAllBytes("NoImage.jpg");
+                image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
             }
             else
             {

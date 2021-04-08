@@ -633,12 +633,23 @@ namespace Netdb
             {
                 try
                 {
+                    if (!File.Exists(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups" + Path.DirectorySeparatorChar + filename))
+                    {
+                        Tools.Embedbuilder("File does not exist", Color.DarkRed, Context.Channel);
+                        return;
+                    }
+
                     MySqlCommand cmd = new MySqlCommand();
                     MySqlBackup mb = new MySqlBackup(cmd);
 
                     cmd.Connection = Program._con;
 
                     await Context.Message.AddReactionAsync(new Emoji("⌛"));
+
+                    EmbedBuilder eb = new EmbedBuilder();
+                    eb.WithTitle("Restoring Database");
+                    eb.WithDescription("Restoring " + filename);
+                    await Program._client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
 
                     mb.ImportFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups", filename));
 
@@ -652,7 +663,7 @@ namespace Netdb
                 }
                 catch (Exception ex)
                 {
-
+                    await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Could't restore database", ex));
                     await Context.Message.ReplyAsync(ex.ToString());
                 }
             }

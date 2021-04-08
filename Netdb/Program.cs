@@ -13,8 +13,9 @@ namespace Netdb
 {
     class Program
     {
+        bool error;
         string connectionstring;
-        string token;
+        public static string token;
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
 
@@ -38,9 +39,12 @@ namespace Netdb
                 .AddSingleton(_commands)
                 .BuildServiceProvider();
 
+            File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "");
             _client.Log += Client_Log;
 
             _client.JoinedGuild += _client_JoinedGuild;
+
+            _client.Ready += _client_Ready;
 
             await RegisterCommandsAsync();
 
@@ -50,11 +54,10 @@ namespace Netdb
             {
                 input = File.ReadAllLines(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "token.txt", Encoding.UTF8);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "token.txt geht ned");
+                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't get token and MYSQL connection string", ex));
             }
-            
 
             token = input[1];
             connectionstring = input[0];
@@ -70,19 +73,36 @@ namespace Netdb
 
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Connection Open"));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                await Client_Log(new LogMessage(LogSeverity.Info,"System", "Database Connection Closed"));
+                await Client_Log(new LogMessage(LogSeverity.Info,"System", "Database Connection Closed", ex));
+                error = true;
             }
 
+            try
+            {
                 BackupDB();
+            }
+            catch (Exception ex)
+            {
+                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup", ex));
+                error = true;
+            }
 
+            try
+            {
                 GetMostsearched();
 
                 GetBestReviewed();
 
                 CommandDB.Setup();
                 PrefixManager.Setup();
+            }
+            catch (Exception ex)
+            {
+                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Setups aren't working", ex));
+                error = true;
+            }
 
             await _client.StartAsync();
 
@@ -91,6 +111,24 @@ namespace Netdb
             await SendMessages(time);
 
             await Task.Delay(-1);
+        }
+
+        private async Task _client_Ready()
+        {
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.WithTitle("Bot started");
+
+            if (error)
+            {
+                eb.WithDescription("Bot started with an error");
+            }
+            else
+            {
+                eb.WithDescription("Bot started with no errors");
+            }
+ 
+            eb.AddField("Database connection", _con.State);
+            await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)
@@ -263,7 +301,7 @@ namespace Netdb
         {
             try
             {
-                string path = Path.Combine("DB_Backups", DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_") + "_backup.sql");
+                string path = Path.Combine("DB_Backups", DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_").Replace("/","_") + "_backup.sql");
 
                 MySqlCommand cmd = new MySqlCommand();
                 MySqlBackup mb = new MySqlBackup(cmd);
@@ -346,6 +384,7 @@ namespace Netdb
         public static Task Client_Log(LogMessage arg)
         {
             Console.WriteLine(arg);
+            File.AppendAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt",DateTime.Now + ":  " + arg.Message + "  " + arg.Exception + "\n");
             return Task.CompletedTask;
         }
 
@@ -357,7 +396,7 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
-            var message = arg as SocketUserMessage;
+            SocketUserMessage message = arg as SocketUserMessage;
             if (message == null)
             {
                 return;
@@ -396,7 +435,7 @@ namespace Netdb
 
                 if (!result.IsSuccess)
                 {
-                    Console.WriteLine(result.ErrorReason);
+                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while executing command  " + result.ErrorReason));
 
                     var eb = new EmbedBuilder();
                     eb.WithColor(Color.DarkRed);
@@ -417,9 +456,9 @@ namespace Netdb
                     {
                         eb.WithDescription("Something is missing");
                     }
-                    else if (result.ErrorReason == " The input text has too many parameters.")
+                    else if (result.ErrorReason == "The input text has too many parameters.")
                     {
-                        eb.WithDescription("That's too much");
+                        eb.WithDescription("There are too many parameters");
                     }
                     else
                     {
