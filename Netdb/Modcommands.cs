@@ -333,8 +333,12 @@ namespace Netdb
                 date += ".";
             }
 
-            DateTime realeasedate = Convert.ToDateTime(date + DateTime.Now.Year.ToString());
-
+            if (!DateTime.TryParse(date + DateTime.Now.Year.ToString(), out DateTime realeasedate);)
+            {
+                Tools.Embedbuilder("That's not a valid date",Color.DarkRed,Context.Channel);
+                return;
+            }
+           
             if (Tools.IsAvailable(moviename))
             {
                 Tools.Embedbuilder("This movie is already available", Color.DarkRed, Context.Channel);
