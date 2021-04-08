@@ -333,7 +333,7 @@ namespace Netdb
                 date += ".";
             }
 
-            if (!DateTime.TryParse(date + DateTime.Now.Year.ToString(), out DateTime realeasedate);)
+            if (!DateTime.TryParse(date + DateTime.Now.Year.ToString(), out DateTime realeasedate))
             {
                 Tools.Embedbuilder("That's not a valid date",Color.DarkRed,Context.Channel);
                 return;
