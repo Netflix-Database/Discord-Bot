@@ -585,8 +585,9 @@ namespace Netdb
         public async Task Report([Remainder] string report)
         {
             IUser user = Program._client.GetUser(487265499785199616);
+            await user.SendMessageAsync(Context.User.Username + " " + report);
 
-            user.SendMessageAsync(Context.User.Username + " " + report);
+            Tools.Embedbuilder("Report sent successful",Color.Green,Context.Channel);
         }
     }
 }
