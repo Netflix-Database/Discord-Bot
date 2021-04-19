@@ -19,6 +19,8 @@ namespace Netdb
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
 
+        public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
+
         //Botstats
         public static DateTime startedAt = DateTime.Now;
         public static int commandsexecuted = 0;
@@ -39,7 +41,7 @@ namespace Netdb
                 .AddSingleton(_commands)
                 .BuildServiceProvider();
 
-            File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt", "");
+            File.WriteAllText(filepath + "log.txt", "");
             _client.Log += Client_Log;
 
             _client.JoinedGuild += _client_JoinedGuild;
@@ -52,7 +54,7 @@ namespace Netdb
 
             try
             {
-                input = File.ReadAllLines(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "token.txt", Encoding.UTF8);
+                input = File.ReadAllLines(filepath + "token.txt", Encoding.UTF8);
             }
             catch (Exception ex)
             {

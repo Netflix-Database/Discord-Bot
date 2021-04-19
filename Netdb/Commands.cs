@@ -444,7 +444,7 @@ namespace Netdb
         {
             ulong id;
 
-            if (Context.Channel.GetType() != typeof(SocketDMChannel))
+            if (Context.Channel.GetType() == typeof(SocketDMChannel))
             {
                 id = Context.User.Id;
             }
@@ -459,12 +459,6 @@ namespace Netdb
                 }
 
                 id = Context.Channel.Id;
-            }
-
-            if (!Tools.Reader($"select * from subscriberlist where channelid = '{Context.Channel.Id}';"))
-            {
-                Tools.Embedbuilder("You are not subscribed", Color.DarkRed, Context.Channel);
-                return;
             }
             
             Tools.RunCommand($"delete from subscriberlist where channelid = '{id}';");
@@ -585,7 +579,13 @@ namespace Netdb
         public async Task Report([Remainder] string report)
         {
             IUser user = Program._client.GetUser(487265499785199616);
-            await user.SendMessageAsync(Context.User.Username + " " + report);
+
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.WithTitle("Report");
+            eb.WithAuthor(Context.User);
+            eb.WithColor(Color.DarkRed);
+            eb.WithDescription(report);
+            await user.SendMessageAsync("", false, eb.Build());
 
             Tools.Embedbuilder("Report sent successful",Color.Green,Context.Channel);
         }
