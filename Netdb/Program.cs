@@ -128,6 +128,7 @@ namespace Netdb
             foreach (var item in guilds)
             {
                 memberCount += item.MemberCount;
+                Client_Log(new LogMessage(LogSeverity.Info, "System", $"{item.Name}     {item.MemberCount}"));
             }
         }
 
