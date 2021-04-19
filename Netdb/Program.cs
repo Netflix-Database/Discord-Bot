@@ -434,28 +434,32 @@ namespace Netdb
             if (message.Author.IsBot) return;
 
             int argPos = 0;
+            string prefix = "";
 
-            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+            if (!_con.Ping())
+            {
+                try
+                {
+                    _con.Open();
+                    prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+                }
+                catch (Exception)
+                {
+                    var eb = new EmbedBuilder();
+                    eb.WithColor(Color.DarkRed);
+                    eb.WithDescription("The databse is currently offline. Try again later.");
+
+                    await message.Channel.SendMessageAsync("", false, eb.Build());
+                    return;
+                }
+            }
+            else
+            {
+                prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+            }
 
             if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
             {
-                if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
-                {
-                    try
-                    {
-                        _con.Open();
-                    }
-                    catch (Exception)
-                    {
-                        var eb = new EmbedBuilder();
-                        eb.WithColor(Color.DarkRed);
-                        eb.WithDescription("The databse is currently offline. Try again later.");
-
-                        await message.Channel.SendMessageAsync("", false, eb.Build());
-                        return;
-                    }
-                }
-
                 CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 
                 var result = await _commands.ExecuteAsync(context, argPos, _services);
