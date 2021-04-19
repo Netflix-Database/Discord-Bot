@@ -14,7 +14,7 @@ namespace Netdb
 {
     class Program
     {
-        bool error;
+        static bool error;
         string connectionstring;
         public static string token;
         public static MySqlConnection _con;
@@ -83,15 +83,7 @@ namespace Netdb
                 error = true;
             }
 
-            try
-            {
-                BackupDB();
-            }
-            catch (Exception ex)
-            {
-                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup", ex));
-                error = true;
-            }
+            BackupDB();
 
             try
             {
@@ -132,7 +124,6 @@ namespace Netdb
             memberCount = 0;
 
             var guilds = _client.Guilds;
-            Console.WriteLine("guildcnt:" + guilds.Count);
             _client.DownloadUsersAsync(guilds);
             foreach (var item in guilds)
             {
@@ -156,6 +147,7 @@ namespace Netdb
  
             eb.AddField("Database connection", _con.State);
             await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
+            await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)
@@ -335,7 +327,7 @@ namespace Netdb
 
                 cmd.Connection = _con;
 
-                mb.ExportToFile(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + path);
+                mb.ExportToFile(filepath + path);
 
                 mb.Dispose();
                 cmd.Dispose();
@@ -344,7 +336,8 @@ namespace Netdb
             }
             catch (Exception ex)
             {
-                throw ex;
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup failed")).GetAwaiter().GetResult();
+                error = true;
             }
             
         }
