@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using System.Text;
+using System.Threading;
 
 namespace Netdb
 {
@@ -18,6 +19,7 @@ namespace Netdb
         public static string token;
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
+        public static int memberCount = 69;
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -112,7 +114,29 @@ namespace Netdb
 
             await SendMessages(time);
 
+            var timer = new Timer((e) =>
+            {
+                Perform5MinuteUpdate();
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+
             await Task.Delay(-1);
+        }
+
+        private void Perform5MinuteUpdate()
+        {
+            UpdateMemberCount();
+        }
+
+        private void UpdateMemberCount()
+        {
+            memberCount = 0;
+
+            var guilds = _client.Guilds;
+
+            foreach (var item in guilds)
+            {
+                memberCount += item.MemberCount;
+            }
         }
 
         private async Task _client_Ready()

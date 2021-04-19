@@ -561,12 +561,7 @@ namespace Netdb
             }
             reader.Close();
 
-            int members = 0;
-            var guilds = Program._client.Guilds;
-            for (int i = 0; i < guilds.Count; i++)
-            {
-                members += (int)guilds;
-            }
+            int members = Program.memberCount;
 
             var eb = new EmbedBuilder();
 
