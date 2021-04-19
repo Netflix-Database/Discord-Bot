@@ -114,6 +114,8 @@ namespace Netdb
 
             await SendMessages(time);
 
+            Perform5MinuteUpdate();
+
             var timer = new Timer((e) =>
             {
                 Perform5MinuteUpdate();
