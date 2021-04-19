@@ -114,12 +114,10 @@ namespace Netdb
 
             await SendMessages(time);
 
-            Perform5MinuteUpdate();
-
             var timer = new Timer((e) =>
             {
                 Perform5MinuteUpdate();
-            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
 
             await Task.Delay(-1);
         }
@@ -134,7 +132,8 @@ namespace Netdb
             memberCount = 0;
 
             var guilds = _client.Guilds;
-
+            Console.WriteLine("guildcnt:" + guilds.Count);
+            _client.DownloadUsersAsync(guilds);
             foreach (var item in guilds)
             {
                 memberCount += item.MemberCount;
