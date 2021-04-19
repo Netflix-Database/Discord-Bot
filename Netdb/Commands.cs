@@ -4,6 +4,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Netdb
 {
@@ -560,6 +561,13 @@ namespace Netdb
             }
             reader.Close();
 
+            int members = 0;
+            var guilds = Program._client.Guilds;
+            for (int i = 0; i < guilds.Count; i++)
+            {
+                members += (int)guilds;
+            }
+
             var eb = new EmbedBuilder();
 
             eb.WithColor(Color.Gold);
@@ -567,9 +575,10 @@ namespace Netdb
             eb.WithDescription("a simple Netflix bot");
             eb.AddField("Server", Context.Client.Guilds.Count);
             eb.AddField("Ping", Context.Client.Latency);
+            eb.AddField("Users", members);
             eb.AddField("Currently in the database","movies: `" + movies + "` \n series: `" + series + "` \n reviews: `" + reviews + "`");
-            eb.AddField("Invite the Bot", "[here](https://discord.com/oauth2/authorize?client_id=802237562625196084&scope=bot&permissions=518208)");
-            eb.WithFooter("made by Yannick Füreder and Traunbauer Elias");
+            eb.AddField("Invite the Bot", "[here](https://discord.com/oauth2/authorize?client_id=802237562625196084&scope=bot&permissions=518208) \n [vote](https://top.gg/bot/802237562625196084/vote)");
+            eb.WithFooter("made by Füreder Yannick and Traunbauer Elias");
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
