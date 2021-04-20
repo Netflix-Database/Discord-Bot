@@ -175,6 +175,8 @@ namespace Netdb
 
                 cmd.Dispose();
                 reader.Dispose();
+
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
             }
         }
 
@@ -200,8 +202,6 @@ namespace Netdb
             {
                 Perform5MinuteUpdate();
             }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
-
-            await Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)
@@ -407,10 +407,6 @@ namespace Netdb
 
             await Task.Delay(waitingtime);
 
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
-            var reader = cmd.ExecuteReader();
-
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Blue);
             eb.WithTitle("Today's releases");
@@ -418,14 +414,25 @@ namespace Netdb
 
             string content = "";
 
-            while(reader.Read())
+            var cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
+            var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
             {
                 content += reader["moviename"] + "\n";
             }
 
             reader.Close();
 
-            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"),content);
+            if (content == null)
+            {
+                reader.Dispose();
+                cmd.Dispose();
+                return;
+            }
+
+            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"), content);
 
             cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select * from subscriberlist;";
@@ -453,6 +460,8 @@ namespace Netdb
 
             reader.Dispose();
             cmd.Dispose();
+
+            await Client_Log(new LogMessage(LogSeverity.Info, "System", $"Daily message sent"));
         }
 
         public static Task Client_Log(LogMessage arg)
