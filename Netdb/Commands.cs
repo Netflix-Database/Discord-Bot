@@ -4,7 +4,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.IO;
-using System.Collections.Generic;
 
 namespace Netdb
 {

@@ -20,6 +20,7 @@ namespace Netdb
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
 
+        //BotData
         public static int memberCount = 0;
         public static int movies = 0;
         public static int series = 0;
