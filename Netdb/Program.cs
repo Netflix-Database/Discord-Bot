@@ -19,7 +19,12 @@ namespace Netdb
         public static string token;
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
-        public static int memberCount = 69;
+
+        public static int memberCount = 0;
+        public static int movies = 0;
+        public static int series = 0;
+        public static int subscribers = 0;
+        public static int reviews = 0;
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -114,21 +119,50 @@ namespace Netdb
             await Task.Delay(-1);
         }
 
-        private void Perform5MinuteUpdate()
+        public static void Perform5MinuteUpdate()
         {
-            UpdateMemberCount();
-        }
-
-        private void UpdateMemberCount()
-        {
-            memberCount = 0;
-
             var guilds = _client.Guilds;
             _client.DownloadUsersAsync(guilds);
             foreach (var item in guilds)
             {
                 memberCount += item.MemberCount;
                 Client_Log(new LogMessage(LogSeverity.Info, "System", $"{item.Name}     {item.MemberCount}"));
+            }
+
+            if (_con.Ping())
+            {
+                var cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from moviedata where type = '{0}';";
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    movies++;
+                }
+                reader.Close();
+
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from moviedata where type = '{1}';";
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    series++;
+                }
+                reader.Close();
+
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from reviewsdata;";
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    reviews++;
+                }
+                reader.Close();
+
+                cmd.Dispose();
+                reader.Dispose();
             }
         }
 
@@ -337,7 +371,7 @@ namespace Netdb
             }
             catch (Exception ex)
             {
-                Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup failed")).GetAwaiter().GetResult();
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup failed", ex)).GetAwaiter().GetResult();
                 error = true;
             }
             
@@ -417,8 +451,7 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
-            SocketUserMessage message = arg as SocketUserMessage;
-            if (message == null)
+            if (!(arg is SocketUserMessage message))
             {
                 return;
             }
@@ -427,7 +460,7 @@ namespace Netdb
             if (message.Author.IsBot) return;
 
             int argPos = 0;
-            string prefix = "";
+            string prefix;
 
             if (!_con.Ping())
             {
@@ -451,7 +484,7 @@ namespace Netdb
                 prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
             }
 
-            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix(Program.mainPrefix, ref argPos))
             {
                 CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 

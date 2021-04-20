@@ -458,6 +458,8 @@ namespace Netdb
                 Program.GetMostsearched();
                 Program.GetBestReviewed();
 
+                Program.Perform5MinuteUpdate();
+
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else
