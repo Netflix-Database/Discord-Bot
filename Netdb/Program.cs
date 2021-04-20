@@ -111,16 +111,17 @@ namespace Netdb
 
             await SendMessages(time);
 
-            var timer = new Timer((e) =>
-            {
-                Perform5MinuteUpdate();
-            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
-
             await Task.Delay(-1);
         }
 
         public static void Perform5MinuteUpdate()
         {
+            memberCount = 0;
+            movies = 0;
+            series = 0;
+            reviews = 0;
+            subscribers = 0;
+
             var guilds = _client.Guilds;
             _client.DownloadUsersAsync(guilds);
             foreach (var item in guilds)
@@ -161,6 +162,16 @@ namespace Netdb
                 }
                 reader.Close();
 
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from subscriberlist;";
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    subscribers++;
+                }
+                reader.Close();
+
                 cmd.Dispose();
                 reader.Dispose();
             }
@@ -183,6 +194,13 @@ namespace Netdb
             eb.AddField("Database connection", _con.State);
             await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
             await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
+
+            var timer = new Timer((e) =>
+            {
+                Perform5MinuteUpdate();
+            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
+
+            await Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)
