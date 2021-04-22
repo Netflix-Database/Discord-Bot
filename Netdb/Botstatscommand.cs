@@ -41,6 +41,8 @@ namespace Netdb
             eb.AddField("Movies", Program.movies);
             eb.AddField("Series", Program.series);
             eb.AddField("Reviews", Program.reviews);
+            eb.AddField("Server", Program._client.Guilds.Count);
+            eb.AddField("Users", Program.memberCount);
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }

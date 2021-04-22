@@ -108,6 +108,11 @@ namespace Netdb
 
             await _client.StartAsync();
 
+            var timer = new Timer((e) =>
+            {
+                Perform5MinuteUpdate();
+            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
+
             DateTime time = new DateTime(2004,09,29,12,0,0,DateTimeKind.Local);
 
             await SendMessages(time);
@@ -197,11 +202,6 @@ namespace Netdb
             eb.AddField("Database connection", _con.State);
             await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
             await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
-
-            var timer = new Timer((e) =>
-            {
-                Perform5MinuteUpdate();
-            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)
