@@ -26,7 +26,7 @@ namespace Netdb
         public static int series = 0;
         public static int subscribers = 0;
         public static int reviews = 0;
-        public static int dailymessagems = 0;
+        public static DateTime dailymessagetime = new DateTime(2004, 09, 29, 12, 0, 0, DateTimeKind.Local);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -114,9 +114,8 @@ namespace Netdb
                 Perform5MinuteUpdate();
             }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
 
-            DateTime time = new DateTime(2004,09,29,12,0,0,DateTimeKind.Local);
 
-            await SendMessages(time);
+            await SendMessages(dailymessagetime);
 
             await Task.Delay(-1);
         }
@@ -399,14 +398,14 @@ namespace Netdb
          
         private async Task SendMessages(DateTime executiontime)
         {
-            dailymessagems = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
+            int time = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
 
-            if (dailymessagems < 0)
+            if (time < 0)
             {
                 return;
             }
 
-            await Task.Delay(dailymessagems);
+            await Task.Delay(time);
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Blue);

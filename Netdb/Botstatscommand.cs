@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 
@@ -43,7 +44,10 @@ namespace Netdb
             eb.AddField("Reviews", Program.reviews);
             eb.AddField("Server", Program._client.Guilds.Count);
             eb.AddField("Users", Program.memberCount);
-            eb.AddField("Daily Message", Program.dailymessagems / 100 + " sec");
+
+            int dailymessage = (int)Program.dailymessagetime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
+
+            eb.AddField("Daily Message", dailymessage + " min");
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
