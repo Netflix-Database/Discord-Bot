@@ -43,6 +43,7 @@ namespace Netdb
             eb.AddField("Reviews", Program.reviews);
             eb.AddField("Server", Program._client.Guilds.Count);
             eb.AddField("Users", Program.memberCount);
+            eb.AddField("Daily Message", Program.dailymessagems / 100 + " sec");
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }

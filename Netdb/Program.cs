@@ -26,6 +26,7 @@ namespace Netdb
         public static int series = 0;
         public static int subscribers = 0;
         public static int reviews = 0;
+        public static int dailymessagems = 0;
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -398,14 +399,14 @@ namespace Netdb
          
         private async Task SendMessages(DateTime executiontime)
         {
-            int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
+            dailymessagems = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
 
-            if (waitingtime < 0)
+            if (dailymessagems < 0)
             {
                 return;
             }
 
-            await Task.Delay(waitingtime);
+            await Task.Delay(dailymessagems);
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Blue);
