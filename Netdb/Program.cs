@@ -133,7 +133,6 @@ namespace Netdb
             foreach (var item in guilds)
             {
                 memberCount += item.MemberCount;
-                Client_Log(new LogMessage(LogSeverity.Info, "System", $"{item.Name}     {item.MemberCount}"));
             }
 
             if (_con.Ping())
@@ -442,13 +441,30 @@ namespace Netdb
             {
                 if ((ulong)(long)reader["guildid"] != 0)
                 {
-                    ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
-                    await channel.SendMessageAsync("", false, eb.Build());
+                    try
+                    {
+                        ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
+                        await channel.SendMessageAsync("", false, eb.Build());
+                    }
+                    catch (Exception)
+                    {
+                        reader.Close();
+                        await Client_Log(new LogMessage(LogSeverity.Info, "System", $"Could not send message to channel: " + reader["channelid"]));
+                    }
                 }
                 else
                 {
-                    IUser user = _client.GetUser((ulong)(long)reader["channelid"]);
-                    await user.SendMessageAsync("", false, eb.Build());
+                    IUser user;
+                    try
+                    {
+                        user = _client.GetUser((ulong)(long)reader["channelid"]);
+                        await user.SendMessageAsync("", false, eb.Build());
+                    }
+                    catch (Exception)
+                    {
+                        reader.Close();
+                        await Client_Log(new LogMessage(LogSeverity.Info, "System", $"Could not send message to user: " + reader["channelid"]));
+                    }
                 }
             }
 
