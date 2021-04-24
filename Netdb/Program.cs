@@ -9,12 +9,15 @@ using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using System.Text;
 using System.Threading;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Netdb
 {
     class Program
     {
-        bool error;
+        static List<EmbedBuilder> errors = new List<EmbedBuilder>();
+        int error;
         string connectionstring;
         public static string token;
         public static MySqlConnection _con;
@@ -32,6 +35,21 @@ namespace Netdb
         public static DiscordSocketClient _client;
         public static CommandService _commands;
         public static IServiceProvider _services;
+
+        public static void HandleError(Exception ex)
+        {
+            StackTrace trace = new StackTrace(ex, true);
+            var frame = trace.GetFrame(0);
+            EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
+            b.WithTitle("Error");
+            b.WithCurrentTimestamp();
+            b.AddField("Exception type", ex.GetType().FullName);
+            b.AddField("Method", frame.GetMethod().Name);
+            b.AddField("File", frame.GetFileName() != "" ? frame.GetFileName() : "-");
+            b.AddField("Line", frame.GetFileLineNumber().ToString());
+            b.AddField("Column", frame.GetFileColumnNumber().ToString());
+            errors.Add(b);
+        }
 
         public async Task RunBotAsync()
         {
@@ -61,6 +79,7 @@ namespace Netdb
             catch (Exception ex)
             {
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't get token and MYSQL connection string", ex));
+                HandleError(ex);
             }
 
             token = input[1];
@@ -80,7 +99,8 @@ namespace Netdb
             catch (Exception ex)
             {
                 await Client_Log(new LogMessage(LogSeverity.Info,"System", "Database Connection Closed", ex));
-                error = true;
+                error++;
+                HandleError(ex);
             }
 
             try
@@ -90,7 +110,8 @@ namespace Netdb
             catch (Exception ex)
             {
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup", ex));
-                error = true;
+                error++;
+                HandleError(ex);
             }
 
             try
@@ -105,7 +126,8 @@ namespace Netdb
             catch (Exception ex)
             {
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Setups aren't working", ex));
-                error = true;
+                error++;
+                HandleError(ex);
             }
 
             await _client.StartAsync();
@@ -119,7 +141,20 @@ namespace Netdb
                 Perform5MinuteUpdate();
             }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
 
+            var timerError = new Timer((e) =>
+            {
+                OutputErrors();
+            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
+
             await Task.Delay(-1);
+        }
+
+        private void OutputErrors()
+        {
+            var b = errors.ToArray()[0];
+            errors.RemoveAt(0);
+            b.AddField("Errors in queue", errors.Count);
+            ((ISocketMessageChannel)_client.GetChannel(835295047477231616)).SendMessageAsync("", false, b.Build()).GetAwaiter().GetResult();
         }
 
         private void Perform5MinuteUpdate()
@@ -145,13 +180,20 @@ namespace Netdb
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithTitle("Bot started");
 
-            if (error)
+            if (error > 0)
             {
-                eb.WithDescription("Bot started with an error");
+                if (error > 1)
+                {
+                    eb.WithDescription($"Bot started with {error} errors");
+                }
+                else
+                {
+                    eb.WithDescription($"Bot started with one error");
+                }
             }
             else
             {
-                eb.WithDescription("Bot started with no errors");
+                eb.WithDescription("Bot started without errors");
             }
  
             eb.AddField("Database connection", _con.State);
@@ -344,68 +386,75 @@ namespace Netdb
             }
             catch (Exception ex)
             {
-                throw ex;
+                HandleError(ex);
             }
             
         }
          
         private async Task SendMessages(DateTime executiontime)
         {
-            int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-
-            if (waitingtime < 0)
+            try
             {
-                return;
-            }
+                int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
 
-            await Task.Delay(waitingtime);
-
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
-            var reader = cmd.ExecuteReader();
-
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.WithColor(Color.Blue);
-            eb.WithTitle("Today's releases");
-            eb.WithCurrentTimestamp();
-
-            string content = "";
-
-            while(reader.Read())
-            {
-                content += reader["moviename"] + "\n";
-            }
-
-            reader.Close();
-
-            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"),content);
-
-            cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from subscriberlist;";
-            reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                if ((ulong)(long)reader["guildid"] != 0)
+                if (waitingtime < 0)
                 {
-                    ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
-                    await channel.SendMessageAsync("", false, eb.Build());
+                    return;
                 }
-                else
+
+                await Task.Delay(waitingtime);
+
+                var cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
+                var reader = cmd.ExecuteReader();
+
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.WithColor(Color.Blue);
+                eb.WithTitle("Today's releases");
+                eb.WithCurrentTimestamp();
+
+                string content = "";
+
+                while (reader.Read())
                 {
-                    IUser user = _client.GetUser((ulong)(long)reader["channelid"]);
-                    await user.SendMessageAsync("", false, eb.Build());
+                    content += reader["moviename"] + "\n";
                 }
+
+                reader.Close();
+
+                eb.AddField(DateTime.Now.Date.ToString("MMMM dd"), content);
+
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from subscriberlist;";
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if ((ulong)(long)reader["guildid"] != 0)
+                    {
+                        ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
+                        await channel.SendMessageAsync("", false, eb.Build());
+                    }
+                    else
+                    {
+                        IUser user = _client.GetUser((ulong)(long)reader["channelid"]);
+                        await user.SendMessageAsync("", false, eb.Build());
+                    }
+                }
+
+                reader.Close();
+
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"update subscriberlist set lastupdated = '{DateTime.Now:yyyy-MM-dd}'";
+                cmd.ExecuteNonQuery();
+
+                reader.Dispose();
+                cmd.Dispose();
             }
-
-            reader.Close();
-
-            cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"update subscriberlist set lastupdated = '{DateTime.Now:yyyy-MM-dd}'";
-            cmd.ExecuteNonQuery();
-
-            reader.Dispose();
-            cmd.Dispose();
+            catch (Exception ex)
+            {
+                HandleError(ex);
+            }
         }
 
         public static Task Client_Log(LogMessage arg)
@@ -423,79 +472,87 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
-            SocketUserMessage message = arg as SocketUserMessage;
-            if (message == null)
+            try
             {
-                return;
-            }
-
-            var context = new SocketCommandContext(_client, message);
-            if (message.Author.IsBot) return;
-
-            int argPos = 0;
-
-            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
-
-            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
-            {
-                if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
+                SocketUserMessage message = arg as SocketUserMessage;
+                if (message == null)
                 {
-                    try
+                    return;
+                }
+
+                var context = new SocketCommandContext(_client, message);
+                if (message.Author.IsBot) return;
+
+                int argPos = 0;
+
+                string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+
+                if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+                {
+                    if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
                     {
-                        _con.Open();
+                        try
+                        {
+                            _con.Open();
+                        }
+                        catch (Exception ex)
+                        {
+                            var eb = new EmbedBuilder();
+                            eb.WithColor(Color.DarkRed);
+                            eb.WithDescription("The databse is currently offline. Try again later.");
+
+                            await message.Channel.SendMessageAsync("", false, eb.Build());
+                            HandleError(ex);
+                            return;
+                        }
                     }
-                    catch (Exception)
+
+                    CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
+
+                    var result = await _commands.ExecuteAsync(context, argPos, _services);
+                    commandsexecuted++;
+
+                    if (!result.IsSuccess)
                     {
+                        await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while executing command  " + result.ErrorReason));
+
                         var eb = new EmbedBuilder();
                         eb.WithColor(Color.DarkRed);
-                        eb.WithDescription("The databse is currently offline. Try again later.");
+
+                        if (result.ErrorReason == "Unknown command.")
+                        {
+                            eb.WithDescription("This command doesn't exist. Use " + prefix + "`help {commandname}` to see the exact syntax.");
+                        }
+                        else if (result.ErrorReason == "User not found.")
+                        {
+                            eb.WithDescription("Couldn't find this user");
+                        }
+                        else if (result.ErrorReason == "Failed to parse Int32.")
+                        {
+                            eb.WithDescription("wrong number");
+                        }
+                        else if (result.ErrorReason == "The input text has too few parameters.")
+                        {
+                            eb.WithDescription("Something is missing");
+                        }
+                        else if (result.ErrorReason == "The input text has too many parameters.")
+                        {
+                            eb.WithDescription("There are too many parameters");
+                        }
+                        else
+                        {
+                            eb.WithDescription("An error occured");
+                        }
 
                         await message.Channel.SendMessageAsync("", false, eb.Build());
-                        return;
                     }
+
+                    if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
                 }
-
-                CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
-
-                var result = await _commands.ExecuteAsync(context, argPos, _services);
-                commandsexecuted++;
-
-                if (!result.IsSuccess)
-                {
-                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while executing command  " + result.ErrorReason));
-
-                    var eb = new EmbedBuilder();
-                    eb.WithColor(Color.DarkRed);
-
-                    if (result.ErrorReason == "Unknown command.")
-                    {
-                        eb.WithDescription("This command doesn't exist. Use " + prefix + "`help {commandname}` to see the exact syntax.");
-                    }
-                    else if(result.ErrorReason == "User not found.")
-                    {
-                        eb.WithDescription("Couldn't find this user");
-                    }
-                    else if (result.ErrorReason == "Failed to parse Int32.")
-                    {
-                        eb.WithDescription("wrong number");
-                    }
-                    else if (result.ErrorReason == "The input text has too few parameters.")
-                    {
-                        eb.WithDescription("Something is missing");
-                    }
-                    else if (result.ErrorReason == "The input text has too many parameters.")
-                    {
-                        eb.WithDescription("There are too many parameters");
-                    }
-                    else
-                    {
-                        eb.WithDescription("An error occured");
-                    }
-
-                    await message.Channel.SendMessageAsync("", false, eb.Build());
-                }
-
-                if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
+            }
+            catch (Exception ex)
+            {
+                HandleError(ex);
             }
         }
     }

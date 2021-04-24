@@ -8,8 +8,11 @@ using System.Collections.Generic;
 
 namespace Netdb
 {
+    public delegate void ErrorOccoured(Exception ex);
     public class Commands : ModuleBase<SocketCommandContext>
     {
+        public event ErrorOccoured HandleError = Program.HandleError;
+
         [Command("ping")]
         [Alias("p")]
         [Summary("Shows the bots ping")]

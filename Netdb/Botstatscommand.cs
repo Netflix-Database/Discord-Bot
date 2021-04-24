@@ -9,6 +9,8 @@ namespace Netdb
     [Summary("Shows stats about the bot")]
     public class Botstatscommand : ModuleBase<SocketCommandContext>
     {
+        public event ErrorOccoured HandleError = Program.HandleError;
+
         [Command]
         [Summary("Shows stats about the bot")]
         public async Task botstats()
