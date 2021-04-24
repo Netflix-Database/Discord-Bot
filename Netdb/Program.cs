@@ -117,7 +117,7 @@ namespace Netdb
             catch (Exception ex)
             {
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup", ex));
-                error = true;
+                error++;
             }
 
             try
