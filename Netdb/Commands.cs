@@ -4,7 +4,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.IO;
-using System.Collections.Generic;
 
 namespace Netdb
 {
@@ -530,42 +529,6 @@ namespace Netdb
         [Summary("Gives information about the bot")]
         public async Task Info()
         {
-            int movies = 0;
-            int series = 0;
-            int reviews = 0;
-
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where type = '{0}';";
-                var reader = await cmd.ExecuteReaderAsync();
-
-                while (reader.Read())
-                {
-                    movies++;
-                }
-                reader.Close();
-
-            cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moviedata where type = '{1}';";
-            reader = await cmd.ExecuteReaderAsync();
-
-            while (reader.Read())
-            {
-                series++;
-            }
-            reader.Close();
-
-            cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from reviewsdata;";
-            reader = await cmd.ExecuteReaderAsync();
-
-            while (reader.Read())
-            {
-                reviews++;
-            }
-            reader.Close();
-
-            int members = Program.memberCount;
-
             var eb = new EmbedBuilder();
 
             eb.WithColor(Color.Gold);
@@ -573,8 +536,8 @@ namespace Netdb
             eb.WithDescription("a simple Netflix bot");
             eb.AddField("Server", Context.Client.Guilds.Count);
             eb.AddField("Ping", Context.Client.Latency);
-            eb.AddField("Users", members);
-            eb.AddField("Currently in the database","movies: `" + movies + "` \n series: `" + series + "` \n reviews: `" + reviews + "`");
+            eb.AddField("Users", Program.memberCount);
+            eb.AddField("Currently in the database","movies: `" + Program.movies + "` \n series: `" + Program.series + "` \n reviews: `" + Program.reviews + "`");
             eb.AddField("Invite the Bot", "[here](https://discord.com/oauth2/authorize?client_id=802237562625196084&scope=bot&permissions=518208) \n [vote](https://top.gg/bot/802237562625196084/vote)");
             eb.WithFooter("made by Füreder Yannick and Traunbauer Elias");
 

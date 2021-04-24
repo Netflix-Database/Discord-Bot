@@ -22,7 +22,14 @@ namespace Netdb
         public static string token;
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
-        public static int memberCount = 69;
+
+        //BotData
+        public static int memberCount = 0;
+        public static int movies = 0;
+        public static int series = 0;
+        public static int subscribers = 0;
+        public static int reviews = 0;
+        public static DateTime dailymessagetime = new DateTime(2004, 09, 29, 12, 0, 0, DateTimeKind.Local);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -110,8 +117,7 @@ namespace Netdb
             catch (Exception ex)
             {
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup", ex));
-                error++;
-                HandleError(ex);
+                error = true;
             }
 
             try
@@ -132,46 +138,75 @@ namespace Netdb
 
             await _client.StartAsync();
 
-            DateTime time = new DateTime(2004,09,29,12,0,0,DateTimeKind.Local);
-
-            await SendMessages(time);
-
             var timer = new Timer((e) =>
             {
                 Perform5MinuteUpdate();
             }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
 
-            var timerError = new Timer((e) =>
-            {
-                OutputErrors();
-            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
-
             await Task.Delay(-1);
-        }
-
-        private void OutputErrors()
-        {
-            var b = errors.ToArray()[0];
-            errors.RemoveAt(0);
-            b.AddField("Errors in queue", errors.Count);
-            ((ISocketMessageChannel)_client.GetChannel(835295047477231616)).SendMessageAsync("", false, b.Build()).GetAwaiter().GetResult();
         }
 
         private void Perform5MinuteUpdate()
         {
-            UpdateMemberCount();
-        }
-
-        private void UpdateMemberCount()
-        {
             memberCount = 0;
+            movies = 0;
+            series = 0;
+            reviews = 0;
+            subscribers = 0;
 
             var guilds = _client.Guilds;
-            Console.WriteLine("guildcnt:" + guilds.Count);
             _client.DownloadUsersAsync(guilds);
             foreach (var item in guilds)
             {
                 memberCount += item.MemberCount;
+            }
+
+            if (_con.Ping())
+            {
+                var cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from moviedata where type = '{0}';";
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    movies++;
+                }
+                reader.Close();
+
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from moviedata where type = '{1}';";
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    series++;
+                }
+                reader.Close();
+
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from reviewsdata;";
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    reviews++;
+                }
+                reader.Close();
+
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from subscriberlist;";
+                reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    subscribers++;
+                }
+                reader.Close();
+
+                cmd.Dispose();
+                reader.Dispose();
+
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
             }
         }
 
@@ -198,6 +233,7 @@ namespace Netdb
  
             eb.AddField("Database connection", _con.State);
             await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
+            await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)
@@ -377,7 +413,7 @@ namespace Netdb
 
                 cmd.Connection = _con;
 
-                mb.ExportToFile(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + path);
+                mb.ExportToFile(filepath + path);
 
                 mb.Dispose();
                 cmd.Dispose();
@@ -386,27 +422,25 @@ namespace Netdb
             }
             catch (Exception ex)
             {
-                HandleError(ex);
+                throw ex;
             }
             
         }
          
         private async Task SendMessages(DateTime executiontime)
         {
-            try
+            int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
+
+            if (waitingtime < 0)
             {
-                int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
+                return;
+            }
 
-                if (waitingtime < 0)
-                {
-                    return;
-                }
+            await Task.Delay(waitingtime);
 
-                await Task.Delay(waitingtime);
-
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
-                var reader = cmd.ExecuteReader();
+            var cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
+            var reader = cmd.ExecuteReader();
 
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.WithColor(Color.Blue);
@@ -415,32 +449,32 @@ namespace Netdb
 
                 string content = "";
 
-                while (reader.Read())
-                {
-                    content += reader["moviename"] + "\n";
-                }
+            while(reader.Read())
+            {
+                content += reader["moviename"] + "\n";
+            }
 
                 reader.Close();
 
-                eb.AddField(DateTime.Now.Date.ToString("MMMM dd"), content);
+            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"),content);
 
                 cmd = Program._con.CreateCommand();
                 cmd.CommandText = $"select * from subscriberlist;";
                 reader = cmd.ExecuteReader();
 
-                while (reader.Read())
+            while (reader.Read())
+            {
+                if ((ulong)(long)reader["guildid"] != 0)
                 {
-                    if ((ulong)(long)reader["guildid"] != 0)
-                    {
-                        ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
-                        await channel.SendMessageAsync("", false, eb.Build());
-                    }
-                    else
-                    {
-                        IUser user = _client.GetUser((ulong)(long)reader["channelid"]);
-                        await user.SendMessageAsync("", false, eb.Build());
-                    }
+                    ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
+                    await channel.SendMessageAsync("", false, eb.Build());
                 }
+                else
+                {
+                    IUser user = _client.GetUser((ulong)(long)reader["channelid"]);
+                    await user.SendMessageAsync("", false, eb.Build());
+                }
+            }
 
                 reader.Close();
 
@@ -448,13 +482,8 @@ namespace Netdb
                 cmd.CommandText = $"update subscriberlist set lastupdated = '{DateTime.Now:yyyy-MM-dd}'";
                 cmd.ExecuteNonQuery();
 
-                reader.Dispose();
-                cmd.Dispose();
-            }
-            catch (Exception ex)
-            {
-                HandleError(ex);
-            }
+            reader.Dispose();
+            cmd.Dispose();
         }
 
         public static Task Client_Log(LogMessage arg)
@@ -472,42 +501,39 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
-            try
+            SocketUserMessage message = arg as SocketUserMessage;
+            if (message == null)
             {
-                SocketUserMessage message = arg as SocketUserMessage;
-                if (message == null)
-                {
-                    return;
-                }
+                return;
+            }
 
                 var context = new SocketCommandContext(_client, message);
                 if (message.Author.IsBot) return;
 
-                int argPos = 0;
+            int argPos = 0;
 
-                string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
 
-                if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            {
+                if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
                 {
-                    if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
+                    try
                     {
-                        try
-                        {
-                            _con.Open();
-                        }
-                        catch (Exception ex)
-                        {
-                            var eb = new EmbedBuilder();
-                            eb.WithColor(Color.DarkRed);
-                            eb.WithDescription("The databse is currently offline. Try again later.");
-
-                            await message.Channel.SendMessageAsync("", false, eb.Build());
-                            HandleError(ex);
-                            return;
-                        }
+                        _con.Open();
                     }
+                    catch (Exception)
+                    {
+                        var eb = new EmbedBuilder();
+                        eb.WithColor(Color.DarkRed);
+                        eb.WithDescription("The databse is currently offline. Try again later.");
 
-                    CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
+                        await message.Channel.SendMessageAsync("", false, eb.Build());
+                        return;
+                    }
+                }
+
+                CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 
                     var result = await _commands.ExecuteAsync(context, argPos, _services);
                     commandsexecuted++;

@@ -460,6 +460,8 @@ namespace Netdb
                 Program.GetMostsearched();
                 Program.GetBestReviewed();
 
+                Program.Perform5MinuteUpdate();
+
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else
@@ -580,7 +582,7 @@ namespace Netdb
         [Summary("Creates a database backup")]
         public async Task Backup()
         {
-            if (Context.User.Id == 487265499785199616)
+            if (Context.User.Id == 487265499785199616 || Context.User.Id == 300571683507404800)
             {
                 Program.BackupDB();
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
@@ -596,9 +598,9 @@ namespace Netdb
         [Summary("Lists all Backups")]
         public async Task ListBackups()
         {
-            if (Context.User.Id == 487265499785199616)
+            if (Context.User.Id == 487265499785199616 || Context.User.Id == 300571683507404800)
             {
-                string[] files = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups");
+                string[] files = Directory.GetFiles(Program.filepath + "DB_Backups");
                 FileInfo fi;
                 string backups = "";
                 long size = 0;
@@ -635,7 +637,7 @@ namespace Netdb
         [Summary("Restores a database backup")]
         public async Task Loadbackup(string filename)
         {
-            if (Context.User.Id == 487265499785199616)
+            if (Context.User.Id == 487265499785199616 || Context.User.Id == 300571683507404800)
             {
                 try
                 {
@@ -656,8 +658,9 @@ namespace Netdb
                     eb.WithTitle("Restoring Database");
                     eb.WithDescription("Restoring " + filename);
                     await Program._client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
+                    await Program._client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
 
-                    mb.ImportFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups", filename));
+                    mb.ImportFromFile(Path.Combine(Program.filepath + "DB_Backups", filename));
 
                     await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
 
