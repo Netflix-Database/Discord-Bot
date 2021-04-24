@@ -17,7 +17,9 @@ namespace Netdb
     class Program
     {
         static List<EmbedBuilder> errors = new List<EmbedBuilder>();
-        int error;
+        static int error;
+        static Timer errorTimer;
+        static Timer updateTimer;
         string connectionstring;
         public static string token;
         public static MySqlConnection _con;
@@ -45,108 +47,199 @@ namespace Netdb
 
         public static void HandleError(Exception ex)
         {
-            StackTrace trace = new StackTrace(ex, true);
-            var frame = trace.GetFrame(0);
-            EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
-            b.WithTitle("Error");
-            b.WithCurrentTimestamp();
-            b.AddField("Exception type", ex.GetType().FullName);
-            b.AddField("Method", frame.GetMethod().Name);
-            b.AddField("File", frame.GetFileName() != "" ? frame.GetFileName() : "-");
-            b.AddField("Line", frame.GetFileLineNumber().ToString());
-            b.AddField("Column", frame.GetFileColumnNumber().ToString());
-            errors.Add(b);
+            try
+            {
+                StackTrace trace = new StackTrace(ex, true);
+                var frame = trace.GetFrame(trace.FrameCount - 1);
+                EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
+                string insight = "";
+                b.WithTitle("Error");
+                b.WithCurrentTimestamp();
+                b.AddField("Exception type", ex.GetType().FullName);
+                b.AddField("Message", ex.Message);
+                b.AddField("Method", frame.GetMethod().Name);
+                if (frame.GetFileName() == "" || frame.GetFileName() == null || frame.GetFileName().Remove(' ') == "")
+                {
+                    b.AddField("File", "-");
+                }
+                else
+                {
+                    b.AddField("File", frame.GetFileName());
+                    string filePath = frame.GetFileName();
+                    if (File.Exists(filePath))
+                    {
+                        string[] lines = new string[5];
+                        var Read = File.ReadAllLines(filePath);
+                        int longest = -1;
+                        int longestIndex = 0;
+                        for (int i = Math.Max(frame.GetFileLineNumber() - 3, 0); i < Math.Min(frame.GetFileLineNumber() + 2, Read.Length); i++)
+                        {
+                            lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = (i+1) + " " + Read[i];
+                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > 60)
+                            {
+                                lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Substring(0, 57) + "...";
+                            }
+                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > longest)
+                            {
+                                longestIndex = i - Math.Max(frame.GetFileLineNumber() - 3, 0);
+                                longest = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length;
+                            }
+                        }
+
+                        if (longest > 60)
+                        {
+                            longest = 60;
+                        }
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            int cnt = longest - lines[i].Length;
+                            for (int j = 0; j < cnt; j++)
+                            {
+                                lines[i] += " ";
+                            }
+                        }
+                        insight = $"`{frame.GetFileName().Split('/')[frame.GetFileName().Split('/').Length - 1]}:\n{lines[0]}\n{lines[1]}\n{lines[2]}` <--- `\n{lines[3]}\n{lines[4]}`";
+                    }
+                }
+                b.AddField("Line", frame.GetFileLineNumber().ToString());
+                if (insight != "")
+                {
+                    b.AddField("Insight", insight);
+                }
+                else
+                {
+                    b.AddField("Insight", "NA");
+                }
+                errors.Add(b);
+                Console.WriteLine("Error queued. Errors in queue: " + errors.Count);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error while reading stack trace");
+            }
         }
 
         public async Task RunBotAsync()
         {
-            _client = new DiscordSocketClient();
-            _commands = new CommandService();
-
-            _services = new ServiceCollection()
-                .AddSingleton(_client)
-                .AddSingleton(_commands)
-                .BuildServiceProvider();
-
-            File.WriteAllText(filepath + "log.txt", "");
-            _client.Log += Client_Log;
-
-            _client.JoinedGuild += _client_JoinedGuild;
-
-            _client.Ready += _client_Ready;
-
-            await RegisterCommandsAsync();
-
-            string[] input = new string[1];
-
             try
             {
-                input = File.ReadAllLines(filepath + "token.txt", Encoding.UTF8);
+                _client = new DiscordSocketClient();
+                _commands = new CommandService();
+
+                _services = new ServiceCollection()
+                    .AddSingleton(_client)
+                    .AddSingleton(_commands)
+                    .BuildServiceProvider();
+
+                File.WriteAllText(filepath + "log.txt", "");
+                _client.Log += Client_Log;
+
+                _client.JoinedGuild += _client_JoinedGuild;
+
+                _client.Ready += _client_Ready;
+
+                await RegisterCommandsAsync();
+
+                string[] input = new string[1];
+
+                try
+                {
+                    input = File.ReadAllLines(filepath + "token.txt", Encoding.UTF8);
+                }
+                catch (Exception ex)
+                {
+                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't get token and MYSQL connection string", ex));
+                    HandleError(ex);
+                    error++;
+                }
+
+                try
+                {
+                    token = input[1];
+                    connectionstring = input[0];
+                    _con = new MySqlConnection(connectionstring);
+
+                    await _client.SetActivityAsync(new Game("Netflix", ActivityType.Watching));
+
+                    await _client.LoginAsync(TokenType.Bot, token);
+                }
+                catch (Exception ex)
+                {
+                    HandleError(ex);
+                    error++;
+                }
+
+                try
+                {
+                    _con.Open();
+
+                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Connection Open"));
+                }
+                catch (Exception ex)
+                {
+                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Connection Closed"));
+                    error++;
+                    HandleError(ex);
+                }
+
+                try
+                {
+                    BackupDB();
+                }
+                catch (Exception ex)
+                {
+                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup"));
+                    error++;
+                    HandleError(ex);
+                }
+
+                try
+                {
+                    GetMostsearched();
+
+                    GetBestReviewed();
+
+                    CommandDB.Setup();
+                    PrefixManager.Setup();
+                }
+                catch (Exception ex)
+                {
+                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Setups aren't working"));
+                    error++;
+                    HandleError(ex);
+                }
+
+                await _client.StartAsync();
+
+                updateTimer = new Timer((e) =>
+                {
+                    Perform5MinuteUpdate();
+                }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
+
+                errorTimer = new Timer(OutputErrors, null, 10000, 1000);
+                
+                Console.WriteLine("Setup finished");
             }
-            catch (Exception ex)
+            catch (Exception exx)
             {
-                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't get token and MYSQL connection string", ex));
-                HandleError(ex);
-            }
-
-            token = input[1];
-            connectionstring = input[0];
-            _con = new MySqlConnection(connectionstring);
-
-            await _client.SetActivityAsync(new Game("Netflix", ActivityType.Watching));
-
-            await _client.LoginAsync(TokenType.Bot, token);
-
-            try
-            {
-                _con.Open();
-
-                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Connection Open"));
-            }
-            catch (Exception ex)
-            {
-                await Client_Log(new LogMessage(LogSeverity.Info,"System", "Database Connection Closed", ex));
+                HandleError(exx);
                 error++;
-                HandleError(ex);
             }
-
-            try
-            {
-                BackupDB();
-            }
-            catch (Exception ex)
-            {
-                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup", ex));
-                error++;
-            }
-
-            try
-            {
-                GetMostsearched();
-
-                GetBestReviewed();
-
-                CommandDB.Setup();
-                PrefixManager.Setup();
-            }
-            catch (Exception ex)
-            {
-                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Setups aren't working", ex));
-                error++;
-                HandleError(ex);
-            }
-
-            await _client.StartAsync();
-
-            var timer = new Timer((e) =>
-            {
-                Perform5MinuteUpdate();
-            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
-
             await Task.Delay(-1);
         }
 
-        private void Perform5MinuteUpdate()
+        public static void OutputErrors(object p)
+        {
+            if (errors.Count > 0)
+            {
+                var b = errors.ToArray()[0];
+                errors.RemoveAt(0);
+                ((ISocketMessageChannel)_client.GetChannel(835295047477231616)).SendMessageAsync("", false, b.Build()).GetAwaiter().GetResult();
+            }
+        }
+
+        public static void Perform5MinuteUpdate()
         {
             memberCount = 0;
             movies = 0;
@@ -232,8 +325,9 @@ namespace Netdb
             }
  
             eb.AddField("Database connection", _con.State);
-            await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
-            await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
+            //await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
+            //await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
+            await ((ISocketMessageChannel)_client.GetChannel(835295047477231616)).SendMessageAsync("", false, eb.Build());
         }
 
         private async Task _client_JoinedGuild(SocketGuild arg)
@@ -501,6 +595,7 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
+            try {
             SocketUserMessage message = arg as SocketUserMessage;
             if (message == null)
             {
