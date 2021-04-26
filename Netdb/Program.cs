@@ -138,7 +138,7 @@ namespace Netdb
 
             if (_con.Ping())
             {
-                var cmd = Program._con.CreateCommand();
+                var cmd = _con.CreateCommand();
                 cmd.CommandText = $"select * from moviedata where type = '{0}';";
                 var reader = cmd.ExecuteReader();
 
@@ -148,7 +148,7 @@ namespace Netdb
                 }
                 reader.Close();
 
-                cmd = Program._con.CreateCommand();
+                cmd = _con.CreateCommand();
                 cmd.CommandText = $"select * from moviedata where type = '{1}';";
                 reader = cmd.ExecuteReader();
 
@@ -158,7 +158,7 @@ namespace Netdb
                 }
                 reader.Close();
 
-                cmd = Program._con.CreateCommand();
+                cmd = _con.CreateCommand();
                 cmd.CommandText = $"select * from reviewsdata;";
                 reader = cmd.ExecuteReader();
 
@@ -168,7 +168,7 @@ namespace Netdb
                 }
                 reader.Close();
 
-                cmd = Program._con.CreateCommand();
+                cmd = _con.CreateCommand();
                 cmd.CommandText = $"select * from subscriberlist;";
                 reader = cmd.ExecuteReader();
 
