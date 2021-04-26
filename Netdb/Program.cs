@@ -218,8 +218,8 @@ namespace Netdb
                 }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
 
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
-                
-                Console.WriteLine("Setup finished");
+
+                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
             }
             catch (Exception exx)
             {
@@ -252,6 +252,11 @@ namespace Netdb
             foreach (var item in guilds)
             {
                 memberCount += item.MemberCount;
+            }
+
+            if (_con.State != System.Data.ConnectionState.Open)
+            {
+                return;
             }
 
             if (_con.Ping())
@@ -605,13 +610,10 @@ namespace Netdb
                 var context = new SocketCommandContext(_client, message);
                 if (message.Author.IsBot) return;
 
-            int argPos = 0;
-
-            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
-
-            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
-            {
-                if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
+                int argPos = 0;
+                string prefix;
+         
+                if (_con.State.ToString() == "Closed")
                 {
                     try
                     {
@@ -628,7 +630,12 @@ namespace Netdb
                     }
                 }
 
-                CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
+                prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+
+                if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+                {
+
+                    CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 
                     var result = await _commands.ExecuteAsync(context, argPos, _services);
                     commandsexecuted++;
