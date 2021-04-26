@@ -12,6 +12,8 @@ namespace Netdb
 {
     public class Modcommands : ModuleBase<SocketCommandContext>
     {
+        public event ErrorOccoured HandleError = Program.HandleError;
+
         [Command("add")]
         [Summary("Adds a movie or series to the database")]
         public async Task Add([Remainder] string input)

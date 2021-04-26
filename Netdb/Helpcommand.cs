@@ -10,6 +10,8 @@ namespace Netdb
     [Summary("Lists all commands with their description")]
     public class Helpcommand : ModuleBase<SocketCommandContext>
     {
+        public event ErrorOccoured HandleError = Program.HandleError;
+
         [Command]
         public async Task Help()
         {
