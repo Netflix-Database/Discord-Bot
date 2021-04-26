@@ -610,9 +610,12 @@ namespace Netdb
                 var context = new SocketCommandContext(_client, message);
                 if (message.Author.IsBot) return;
 
-                int argPos = 0;
-                string prefix;
-         
+            int argPos = 0;
+
+            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+
+            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            {
                 if (_con.State.ToString() == "Closed")
                 {
                     try
@@ -630,12 +633,7 @@ namespace Netdb
                     }
                 }
 
-                prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
-
-                if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
-                {
-
-                    CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
+                CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 
                     var result = await _commands.ExecuteAsync(context, argPos, _services);
                     commandsexecuted++;
