@@ -31,7 +31,7 @@ namespace Netdb
             IGuildChannel guildchannel = (IGuildChannel)channel;
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select prefix from prefixes where guildId = '{guildchannel.Guild.Id.ToString()}';";
+            cmd.CommandText = $"select prefix from prefixes where guildId = '{guildchannel.Guild.Id}';";
             var r = cmd.ExecuteReader();
 
             if (r.Read())

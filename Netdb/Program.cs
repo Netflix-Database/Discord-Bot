@@ -612,10 +612,6 @@ namespace Netdb
 
             int argPos = 0;
 
-            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
-
-            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
-            {
                 if (_con.State.ToString() == "Closed")
                 {
                     try
@@ -632,6 +628,12 @@ namespace Netdb
                         return;
                     }
                 }
+
+                string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+
+            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            {
+               
 
                 CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 
