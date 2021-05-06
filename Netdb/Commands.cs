@@ -101,8 +101,6 @@ namespace Netdb
 
             if (!Tools.IsAvailable(moviename))
             {
-                //update pls
-
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = "select * from moviedata where id = '" + moviename + "';";
                 var reader = await cmd.ExecuteReaderAsync();
@@ -170,7 +168,6 @@ namespace Netdb
                 Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
                 return;
             }
-
 
             Tools.Search(search,out EmbedBuilder eb, out FileStream stream);
 

@@ -94,57 +94,6 @@ namespace Netdb
             }
         }
 
-        public static bool ValidateSQLValues(string values)
-        {
-            values = values.ToLower();
-
-            int sus = 0;
-
-            if (values.ToLower().Contains(';'))
-            {
-                sus++;
-            }
-
-            if (values.Contains("drop"))
-            {
-                sus++;
-            }
-
-            if (values.Contains("table"))
-            {
-                sus++;
-            }
-
-            if (values.Contains('\''))
-            {
-                sus++;
-            }
-
-            if (values.Contains('='))
-            {
-                sus++;
-            }
-
-            if (values.Contains("update"))
-            {
-                sus++;
-            }
-
-            if (sus >= 3)
-            {
-                return true;
-            }
-            else
-            {
-                if (sus > 0)
-                {
-                    Console.WriteLine($"Kinda sus value detected on sus lvl {sus}: " + values);
-                }
-
-                return false;
-            }
-        }
-
         /// <summary>
         /// Test if the movie/series is already in your watchlist
         /// </summary>
