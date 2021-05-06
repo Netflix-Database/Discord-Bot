@@ -36,9 +36,7 @@ namespace Netdb
                 return;
             }
 
-            Tools.Search(search,out EmbedBuilder eb,out FileStream stream,out string name);
-
-            eb.WithTitle($"**{name.ToUpper()}**");
+            Tools.Search(search,out EmbedBuilder eb,out FileStream stream);
 
             await Context.Channel.SendFileAsync(stream, "example.png", embed: eb.Build());
 
@@ -154,9 +152,9 @@ namespace Netdb
         [Command("recommend")]
         [Alias("rec")]
         [Summary("Recommend a movie to a certain user")]
-        public async Task Recommend(IUser user, [Remainder]string movie)
+        public async Task Recommend(IUser user, [Remainder]string search)
         {
-            if (Tools.ValidateSQLValues(movie, Context.Channel))
+            if (Tools.ValidateSQLValues(search, Context.Channel))
             {
                 return;
             }
@@ -167,33 +165,17 @@ namespace Netdb
                 return;
             }
 
-            if (!Tools.IsAvailableId(movie))
+            if (!Tools.IsAvailableId(search))
             {
-                if (Tools.IsAvailableId(movie))
-                {
-                    var cmd = Program._con.CreateCommand();
-                    cmd.CommandText = "select * from moviedata where movieName = '" + movie + "';";
-                    var reader = cmd.ExecuteReader();
-
-                    reader.Read();
-
-                    movie = (string)reader["movieName"];
-
-                    reader.Close();
-                    reader.Dispose();
-                    cmd.Dispose();
-                }
-                else
-                {
-                    Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
-                    return;
-                }
+                Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
+                return;
             }
 
-            Tools.Search(movie,out EmbedBuilder eb, out FileStream stream,out string name);
+
+            Tools.Search(search,out EmbedBuilder eb, out FileStream stream);
 
             eb.WithAuthor(Context.User);
-            eb.WithTitle("Recommended:\n**" + name.ToUpper() +"**");
+            eb.WithTitle("Recommended:\n" + eb.Title);
 
             try
             {

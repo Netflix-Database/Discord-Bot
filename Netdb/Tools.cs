@@ -184,82 +184,48 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where movieName = '" + search + "';";
+            cmd.CommandText = "select * from netflixdata where name = '" + search + "';";
             var redar = cmd.ExecuteReader();
 
             if (!redar.Read())
             {
                 redar.Close();
                 cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + search + "';";
+                cmd.CommandText = "select * from netflixdata where netflixid = '" + search + "';";
                 redar = cmd.ExecuteReader();
                 redar.Read();
             }
 
             byte[] image;
 
-            if (redar["image"] == DBNull.Value)
+            if (redar["desktopImg"] == DBNull.Value)
             {
                 image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
             }
             else
             {
-                image = (byte[])redar["image"];
+                image = (byte[])redar["desktopImg"];
             }
-
-
-            string link;
-            if (redar["netflixid"] == DBNull.Value)
-            {
-                link = ("https://www.netflix.com/search?q=" + redar["movieName"]).Replace(" ", "");
-            }
-            else
-            {
-                link = "https://www.netflix.com/title/" + redar["netflixid"];
-            }
-
+  
             movie = new MovieData
             {
                 Age = (int)redar["age"],
                 Description = (string)redar["description"],
-                Id = (int)redar["id"],
-                Link = link,
-                Name = (string)redar["movieName"],
-                Type = Convert.ToBoolean(redar["type"]),
-                Releasedate = (int)redar["releaseDate"],
-                Length = (int)redar["movieLength"],
-                Genres = (string)redar["genres"],
-                AverageReview = ((int)redar["reviews"] != 0) ? (int)redar["reviewpoints"] / (int)redar["reviews"] : 0,
-                Review = (int)redar["reviews"],
+                Id = (int)redar["netflixid"],
+                Link = "https://www.netflix.com/title/" + redar["netflixid"],
+                Name = (string)redar["name"],
+                Type = (string)redar["type"],
+                Releasedate = (int)redar["releasedate"],
+                Length = (string)redar["length"],
+                Genres = (string)redar["topGenre"],
                 Image = image,
             };
 
-            int searchcounter = (int)redar["searchcounter"] + 1;
+            //int searchcounter = (int)redar["searchcounter"] + 1;
 
             redar.Close();
 
-            RunCommand($"update moviedata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
-        }
-        /// <summary>
-        /// Turns the length into hours and minutes
-        /// </summary>
-        /// <param name="minutes"></param>
-        /// <param name="hour"></param>
-        /// <param name="min"></param>
-        public static void GetTime(int minutes, out int hour, out int min)
-        {
-            hour = 0;
-
-            for (int i = 0; i < minutes / 60 + 1; i++)
-            {
-                if (minutes >= 60)
-                {
-                    minutes -= 60;
-                    hour++;
-                }
-            }
-
-            min = minutes;
+            //RunCommand($"update moviedata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
         }
 
         public static bool IsAvailable(string search)
@@ -297,7 +263,7 @@ namespace Netdb
 
                 if (reader.Read())
                 {
-                    if ((string)reader["movieName"] == "null")
+                    if ((string)reader["name"] == "null")
                     {
                         reader.Close();
                         return false;
@@ -376,11 +342,9 @@ namespace Netdb
             return false;
         }
 
-        public static void Search(string search, out EmbedBuilder eb, out FileStream stream, out string name)
+        public static void Search(string search, out EmbedBuilder eb, out FileStream stream)
         {
             GetMovieData(search, out MovieData movie);
-            name = movie.Name;
-            GetTime(movie.Length, out int hour, out int min);
 
             stream = new FileStream("nedsofest.auni", FileMode.Create);
             eb = new EmbedBuilder();
@@ -397,31 +361,16 @@ namespace Netdb
 
             eb.WithColor(Color.Blue);
 
-            string embeddate;
-            if (movie.Releasedate == 0)
-            {
-                embeddate = "N/A";
-            }
-            else
-            {
-                embeddate = movie.Releasedate.ToString();
-            }
+            eb.WithTitle($"**{movie.Name.ToUpper()}**");
 
             string embedage;
             if (movie.Age == 0)
             {
-                embedage = "N/A";
+                embedage = "All";
             }
             else
             {
-                if (movie.Age == 69)
-                {
-                    embedage = "All";
-                }
-                else
-                {
-                    embedage = movie.Age.ToString() + "+";
-                }
+                embedage = movie.Age.ToString() + "+";
             }
 
             if (movie.Genres == "null")
@@ -429,35 +378,13 @@ namespace Netdb
                 movie.Genres = "N/A";
             }
 
-            if (movie.Type == false)
+            if (movie.Type == "Movie")
             {
-                if (movie.Length == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `N/A` \n `" + movie.Genres + "`");
-                }
-                else if (hour == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + min + "min` \n `" + movie.Genres + "`");
-                }
-                else if (min == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + hour + "h` \n `" + movie.Genres + "`");
-                }
-                else
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + hour + "h " + min + "min` \n `" + movie.Genres + "`");
-                }
+                eb.WithDescription("`" + movie.Releasedate.ToString() + "` `" + embedage + "`   `" + movie.Length + "`   \n `" + movie.Genres + "`");
             }
             else
             {
-                if (movie.Length == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `N/A` \n `" + movie.Genres + "`");
-                }
-                else
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + movie.Length + " Seasons` \n `" + movie.Genres + "`");
-                }
+                eb.WithDescription("`" + movie.Releasedate.ToString() + "` `" + embedage + "`  `" + movie.Length + "` \n `" + movie.Genres + "`");
             }
 
             if (movie.Description == "null")
@@ -471,13 +398,13 @@ namespace Netdb
 
             if (movie.Review == 0)
             {
-                if (movie.Type)
+                if (movie.Type == "Movie")
                 {
-                    text += "This series has no reviews yet.";
+                    text += "This movie has no reviews yet.";
                 }
                 else
                 {
-                    text += "This movie has no reviews yet.";
+                    text += "This series has no reviews yet.";
                 }
             }
             else
@@ -485,7 +412,7 @@ namespace Netdb
                 text += movie.AverageReview + "/10 by " + movie.Review + " user/s";
             }
 
-            if (!movie.Type)
+            if (movie.Type == "Movie")
             {
                 text += "\n watch the movie [here](" + movie.Link + ")";
             }

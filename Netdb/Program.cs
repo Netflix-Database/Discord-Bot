@@ -306,8 +306,6 @@ namespace Netdb
             }
  
             eb.AddField("Database connection", _con.State);
-            //await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
-            //await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
             await ((ISocketMessageChannel)_client.GetChannel(835295047477231616)).SendMessageAsync("", false, eb.Build());
         }
 
