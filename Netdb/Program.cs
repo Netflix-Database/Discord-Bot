@@ -35,7 +35,6 @@ namespace Netdb
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
-        //Botstats
         public static DateTime startedAt = DateTime.Now;
         public static int commandsexecuted = 0;
 
@@ -261,48 +260,25 @@ namespace Netdb
 
             if (_con.Ping())
             {
-                var cmd = _con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where type = '{0}';";
-                var reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='Movie'", _con))
                 {
-                    movies++;
+                    movies = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
 
-                cmd = _con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where type = '{1}';";
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='TVSeries';", _con))
                 {
-                    series++;
+                    series = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
 
-                cmd = _con.CreateCommand();
-                cmd.CommandText = $"select * from reviewsdata;";
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM reviewsdata;", _con))
                 {
-                    reviews++;
+                    reviews = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
 
-                cmd = _con.CreateCommand();
-                cmd.CommandText = $"select * from subscriberlist;";
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM subscriberlist;", _con))
                 {
-                    subscribers++;
+                    subscribers = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
-
-                cmd.Dispose();
-                reader.Dispose();
 
                 Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
             }

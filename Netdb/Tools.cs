@@ -275,7 +275,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where MovieName = '" + search + "';";
+            cmd.CommandText = "select * from netflixdata where name = '" + search + "';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
@@ -292,7 +292,7 @@ namespace Netdb
             if (!Tools.IsAvailable(search))
             {
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + search + "';";
+                cmd.CommandText = "select * from netflixdata where netflixid = '" + search + "';";
                 var reader = cmd.ExecuteReader();
 
                 if (reader.Read())

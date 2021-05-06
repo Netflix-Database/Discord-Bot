@@ -22,7 +22,7 @@ namespace Netdb
 
         [Command("search")]
         [Alias("s")]
-        [Summary("Shows you your searched movie")]
+        [Summary("Search for your favourite movies/series")]
         public async Task Search([Remainder]string search)
         {
             if (Tools.ValidateSQLValues(search, Context.Channel))
