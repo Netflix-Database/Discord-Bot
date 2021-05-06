@@ -221,11 +221,11 @@ namespace Netdb
                 Image = image,
             };
 
-            //int searchcounter = (int)redar["searchcounter"] + 1;
+            int searchcounter = (int)redar["searchcounter"] + 1;
 
             redar.Close();
 
-            //RunCommand($"update moviedata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
+            RunCommand($"update moviedata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
         }
 
         public static bool IsAvailable(string search)
