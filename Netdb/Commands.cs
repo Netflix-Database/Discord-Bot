@@ -126,7 +126,7 @@ namespace Netdb
                 return;
             }
 
-            Tools.RunCommand($"insert into reviews (userid, movieid, points) values ('{Context.User.Id}', '{id}', '{points}');");
+            Tools.RunCommand($"insert into reviews (userid, netflixid, points) values ('{Context.User.Id}', '{id}', '{points}');");
 
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select * from totalreviews where id = '{id}';";
@@ -144,6 +144,7 @@ namespace Netdb
             }
             else
             {
+                reader.Close();
                 Tools.RunCommand($"insert into totalreviews (netflixid, amount, points) values ({id}, {1}, {points});");
             }
 
@@ -233,7 +234,7 @@ namespace Netdb
                 for (int i = 0; i < count; i++)
                 {
                     cmd = Program._con.CreateCommand();
-                    cmd.CommandText = $"select * from moviedata where id = '{movieids[i]} ';";
+                    cmd.CommandText = $"select * from netflixdata where netflixid = '{movieids[i]} ';";
                     reader = cmd.ExecuteReader();
 
                     if (reader.Read())

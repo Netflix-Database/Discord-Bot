@@ -23,12 +23,12 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where movieName = '" + moviename + "';";
+            cmd.CommandText = "select netflixid from netflixdata where name = '" + moviename + "';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
             {
-                id = (int)reader["id"];
+                id = (int)reader["netflixid"];
                 reader.Close();
                 return id;
             }
@@ -174,7 +174,19 @@ namespace Netdb
 
             redar.Close();
 
-            RunCommand($"update moviedata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
+            RunCommand($"update netflixdata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
+
+            cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from totalreviews where netflixid = '{movie.Id}';";
+            redar = cmd.ExecuteReader();
+
+            if (redar.Read())
+            {
+                movie.AverageReview = Convert.ToInt32(redar["points"]) / Convert.ToInt32(redar["amount"]);
+                movie.Review = Convert.ToInt32(redar["amount"]);
+            }
+
+            redar.Close();
         }
 
         public static bool IsAvailable(string search)

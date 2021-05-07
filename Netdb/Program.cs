@@ -269,7 +269,7 @@ namespace Netdb
                     series = Convert.ToInt32(cmd.ExecuteScalar());
                 }
 
-                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM reviewsdata;", _con))
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM reviews;", _con))
                 {
                     reviews = Convert.ToInt32(cmd.ExecuteScalar());
                 }
@@ -299,7 +299,7 @@ namespace Netdb
 
             cmd = _con.CreateCommand();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`reviews` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,`points` TINYINT UNSIGNED NULL,PRIMARY KEY(`id`));";
-            cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();  
 
             cmd = _con.CreateCommand();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`totalreviews` (`id` INT NOT NULL AUTO_INCREMENT,`netflixid` INT UNSIGNED NULL,`points` INT UNSIGNED NULL DEFAULT 0,`amount` INT UNSIGNED NULL DEFAULT 0,PRIMARY KEY(`id`));";
