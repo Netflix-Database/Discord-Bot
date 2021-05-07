@@ -101,18 +101,18 @@ namespace Netdb
 
             if (!Tools.IsAvailable(moviename))
             {
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + moviename + "';";
-                var reader = await cmd.ExecuteReaderAsync();
+                var cmd1 = Program._con.CreateCommand();
+                cmd1.CommandText = "select * from netflixdata where netflixid = '" + moviename + "';";
+                var reader1 = await cmd1.ExecuteReaderAsync();
 
-                if (!reader.Read())
+                if (!reader1.Read())
                 {
                     Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
-                    reader.Close();
+                    reader1.Close();
                     return;
                 }
 
-                reader.Close();
+                reader1.Close();
                 id = Convert.ToInt32(moviename);
             }
             else
@@ -120,31 +120,34 @@ namespace Netdb
                 id = Tools.Getid(moviename);
             }
 
-            if (Tools.Reader($"select * from reviewsdata where movieid = '{id}' and userid = '{Context.User.Id}';"))
+            if (Tools.Reader($"select * from reviews where netflixid = '{id}' and userid = '{Context.User.Id}';"))
             {
                 Tools.Embedbuilder("You have already rated this movie", Color.DarkRed, Context.Channel);
                 return;
             }
-            else
+
+            Tools.RunCommand($"insert into reviews (userid, movieid, points) values ('{Context.User.Id}', '{id}', '{points}');");
+
+            var cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from totalreviews where id = '{id}';";
+            var reader = await cmd.ExecuteReaderAsync();
+
+            if (reader.Read())
             {
-                Tools.RunCommand($"insert into reviewsdata (userid, movieid) values ('{Context.User.Id}', '{id}');");
-
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where id = '{id}';";
-                var reader = await cmd.ExecuteReaderAsync();
-
-                reader.Read();
-
-                int reviews = (int)reader["reviews"] + 1;
-                int reviewpoints = (int)reader["reviewpoints"] + points;
+                int reviews = (int)reader["amount"] + 1;
+                int reviewpoints = (int)reader["points"] + points;
 
                 reader.Close();
 
-                Tools.RunCommand($"update moviedata set reviews = '{reviews}' where id = '{id}';");
-                Tools.RunCommand($"update moviedata set reviewpoints = '{reviewpoints}' where id = '{id}';");
-
-                Tools.Embedbuilder("Thanks for your review", Color.Green, Context.Channel);
+                Tools.RunCommand($"update totalreviews set amount = '{reviews}' where id = '{id}';");
+                Tools.RunCommand($"update totalreviews set points = '{reviewpoints}' where id = '{id}';");
             }
+            else
+            {
+                Tools.RunCommand($"insert into totalreviews (netflixid, amount, points) values ({id}, {1}, {points});");
+            }
+
+            Tools.Embedbuilder("Thanks for your review", Color.Green, Context.Channel);
         }
 
         [Command("recommend")]

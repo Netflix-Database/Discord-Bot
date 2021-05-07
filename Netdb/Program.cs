@@ -288,11 +288,23 @@ namespace Netdb
             var cmd = _con.CreateCommand();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS sys.commands (id INT NOT NULL AUTO_INCREMENT Primary Key,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL);";
             cmd.ExecuteNonQuery();
-            cmd.Dispose();
 
             cmd = _con.CreateCommand();
             cmd.CommandText = "CREATE TABLE IF NOT EXISTS sys.prefixes (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(10) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id),UNIQUE INDEX id_UNIQUE (id ASC) VISIBLE,UNIQUE INDEX guildId_UNIQUE (guildId ASC) VISIBLE);";
             cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`netflixdata` (`id` INT NOT NULL AUTO_INCREMENT,`netflixid` INT NULL,`type` VARCHAR(45) NULL,`name` VARCHAR(200) NULL,`description` VARCHAR(500) NULL,`age` INT NULL,`releasedate` INT NULL,`topGenre` VARCHAR(45) NULL,`length` VARCHAR(45) NULL,`titleImg` BLOB NULL,`desktopImg` BLOB NULL,`mobileImg` BLOB NULL,`awards` VARCHAR(500) NULL,`downloadable` TINYINT NULL,`subtitles` VARCHAR(500) NULL,`audio` VARCHAR(2000) NULL,`emotions` VARCHAR(200) NULL,`creator` VARCHAR(300) NULL,`starring` VARCHAR(700) NULL,`cast` VARCHAR(2000) NULL,`allGenres` VARCHAR(500) NULL,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`reviews` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,`points` TINYINT UNSIGNED NULL,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`totalreviews` (`id` INT NOT NULL AUTO_INCREMENT,`netflixid` INT UNSIGNED NULL,`points` INT UNSIGNED NULL DEFAULT 0,`amount` INT UNSIGNED NULL DEFAULT 0,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();
+
             cmd.Dispose();
         }
 
