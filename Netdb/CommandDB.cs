@@ -8,18 +8,6 @@ namespace Netdb
     class CommandDB
     {
         /// <summary>
-        /// Setup for Database Command table
-        /// </summary>
-        public static void Setup()
-        {
-            var cmd = Program._con.CreateCommand();
-            string command = "CREATE TABLE IF NOT EXISTS sys.commands (id INT NOT NULL AUTO_INCREMENT Primary Key,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL); ";
-            cmd.CommandText = command;
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
-        }
-
-        /// <summary>
         /// Get All data for a specific command
         /// </summary>
         /// <param name="command">Command or Alias to search for</param>
