@@ -291,7 +291,7 @@ namespace Netdb
             cmd.Dispose();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS sys.prefixes (`id` INT NOT NULL AUTO_INCREMENT,`guildId` VARCHAR(10) NULL,`prefix` VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,UNIQUE INDEX `guildId_UNIQUE` (`guildId` ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS sys.prefixes (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(10) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id),UNIQUE INDEX id_UNIQUE (id ASC) VISIBLE,UNIQUE INDEX guildId_UNIQUE (guildId ASC) VISIBLE);";
             cmd.ExecuteNonQuery();
             cmd.Dispose();
         }
