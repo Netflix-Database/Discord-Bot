@@ -125,7 +125,7 @@ namespace Netdb
         /// </summary>
         /// <param name="search"></param>
         /// <param name="movie"></param>
-        public static void GetMovieData(string search, out MovieData movie)
+        public static void GetMovieData(string search, out MovieData movie, ulong userid)
         {
             if (Program._con.State.ToString() == "Closed")
             {
@@ -184,6 +184,17 @@ namespace Netdb
             {
                 movie.AverageReview = Convert.ToInt32(redar["points"]) / Convert.ToInt32(redar["amount"]);
                 movie.Review = Convert.ToInt32(redar["amount"]);
+            }
+
+            redar.Close();
+
+            cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from reviews where netflixid = '{movie.Id}' and userid = '{userid}';";
+            redar = cmd.ExecuteReader();
+
+            if (redar.Read())
+            {
+                movie.Hasreviewed = true;
             }
 
             redar.Close();
@@ -303,9 +314,9 @@ namespace Netdb
             return false;
         }
 
-        public static void Search(string search, out EmbedBuilder eb, out FileStream stream)
+        public static void Search(string search, out EmbedBuilder eb, out FileStream stream, ulong userid)
         {
-            GetMovieData(search, out MovieData movie);
+            GetMovieData(search, out MovieData movie, userid);
 
             stream = new FileStream("nedsofest.auni", FileMode.Create);
             eb = new EmbedBuilder();

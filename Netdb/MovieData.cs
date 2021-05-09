@@ -17,6 +17,14 @@ namespace Netdb
         private double _totalreview;
         private byte[] _image;
         private string _netflixid;
+        private bool _hasreviewed;
+
+        public bool Hasreviewed
+        {
+            get { return _hasreviewed; }
+            set { _hasreviewed = value; }
+        }
+
 
         public string Netflixid
         {

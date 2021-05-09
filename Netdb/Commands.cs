@@ -36,7 +36,7 @@ namespace Netdb
                 return;
             }
 
-            Tools.Search(search,out EmbedBuilder eb,out FileStream stream);
+            Tools.Search(search,out EmbedBuilder eb,out FileStream stream, Context.User.Id);
 
             await Context.Channel.SendFileAsync(stream, "example.png", embed: eb.Build());
 
@@ -173,7 +173,7 @@ namespace Netdb
                 return;
             }
 
-            Tools.Search(search,out EmbedBuilder eb, out FileStream stream);
+            Tools.Search(search,out EmbedBuilder eb, out FileStream stream, Context.User.Id);
 
             eb.WithAuthor(Context.User);
             eb.WithTitle("Recommended:\n" + eb.Title);
