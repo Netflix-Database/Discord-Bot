@@ -155,8 +155,32 @@ namespace Netdb
         [Command("recommend")]
         [Alias("rec")]
         [Summary("Recommend a movie to a certain user")]
-        public async Task Recommend(IUser user, [Remainder]string search)
+        public async Task Recommend(string input, [Remainder]string search)
         {
+            IUser user = null;
+
+            if (ulong.TryParse(input, out ulong userid))
+            {
+                user = Program._client.GetUser(userid);
+            }
+            else if (input[input.Length - 5] == '#')
+            {
+                user = Program._client.GetUser(input.Split('#')[0], input.Split('#')[1]);
+            }
+            else if(input.StartsWith("<@!") && input.EndsWith('>'))
+            {
+                if (ulong.TryParse(input.Substring(3, 18), out userid))
+                {
+                    user = Program._client.GetUser(userid);
+                }
+            }
+
+            if (user == null)
+            {
+                Tools.Embedbuilder("Can't find this user", Color.DarkRed, Context.Channel);
+                return;
+            }
+
             if (Tools.ValidateSQLValues(search, Context.Channel))
             {
                 return;
@@ -164,7 +188,7 @@ namespace Netdb
 
             if (user.IsBot)
             {
-                Tools.Embedbuilder("You can't send recommondation to other bots", Color.DarkRed, Context.Channel);
+                Tools.Embedbuilder("You can't send recommendation to other bots", Color.DarkRed, Context.Channel);
                 return;
             }
 
@@ -191,6 +215,7 @@ namespace Netdb
             }
 
             stream.Close();
+            stream.Dispose();
         }
 
         [Command("watchlist")]
