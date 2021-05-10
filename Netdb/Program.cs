@@ -195,9 +195,9 @@ namespace Netdb
 
                 try
                 {
-                    GetMostsearched();
+                    //GetMostsearched();
 
-                    GetBestReviewed();
+                    //GetBestReviewed();
 
                     SetupDB();
                 }
@@ -306,19 +306,19 @@ namespace Netdb
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE `sys`.`watchlistdata` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`watchlistdata` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE `sys`.`moderation` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`ismod` TINYINT UNSIGNED NULL,`contentadded` INT UNSIGNED NULL,`since` DATE NULL,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`moderation` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`ismod` TINYINT UNSIGNED NULL,`contentadded` INT UNSIGNED NULL,`since` DATE NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE `sys`.`comingsoon` (`id` INT NOT NULL AUTO_INCREMENT,`name` VARCHAR(100) NULL,`releasedate` DATE NULL,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`comingsoon` (`id` INT NOT NULL AUTO_INCREMENT,`name` VARCHAR(100) NULL,`releasedate` DATE NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd.Dispose();

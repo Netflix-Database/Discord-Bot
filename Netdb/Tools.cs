@@ -183,7 +183,6 @@ namespace Netdb
             if (redar.Read())
             {
                 movie.AverageReview = Convert.ToInt32(redar["points"]) / Convert.ToInt32(redar["amount"]);
-                movie.Review = Convert.ToInt32(redar["amount"]);
             }
 
             redar.Close();
@@ -195,9 +194,13 @@ namespace Netdb
             if (redar.Read())
             {
                 movie.Hasreviewed = true;
+                movie.Review = Convert.ToInt32(redar["points"]);
             }
 
             redar.Close();
+
+            redar.Dispose();
+            cmd.Dispose();
         }
 
         public static bool IsAvailable(string search)
@@ -331,7 +334,17 @@ namespace Netdb
 
             eb.WithImageUrl("attachment://example.png");
 
-            eb.WithColor(Color.Blue);
+            if (!movie.Hasreviewed)
+            {
+                eb.WithFooter(footer => footer.Text = "#" + movie.Id);
+                eb.WithColor(Color.Blue);
+            }
+            else
+            {
+                eb.WithFooter(footer => footer.Text = "#" + movie.Id + " You rated this movie a " + movie.Review + "/10");
+                eb.WithColor(Color.Green);
+            }
+     
 
             eb.WithTitle($"**{movie.Name.ToUpper()}**");
 
@@ -368,7 +381,7 @@ namespace Netdb
 
             string text = "";
 
-            if (movie.Review == 0)
+            if (movie.AverageReview == 0)
             {
                 if (movie.Type == "Movie")
                 {
@@ -381,7 +394,7 @@ namespace Netdb
             }
             else
             {
-                text += movie.AverageReview + "/10 by " + movie.Review + " user/s";
+                text += movie.AverageReview + "/10";
             }
 
             if (movie.Type == "Movie")
@@ -394,8 +407,6 @@ namespace Netdb
             }
 
             eb.AddField("Review:", text);
-
-            eb.WithFooter(footer => footer.Text = "#" + movie.Id.ToString("D5"));
         }
     }
 }
