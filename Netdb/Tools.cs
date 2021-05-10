@@ -108,7 +108,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from userdata where userid = '{userid}' and movieid = '{movieid}';";
+            cmd.CommandText = $"select * from watchlistdata where userid = '{userid}' and netflixid = '{movieid}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())

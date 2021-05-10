@@ -32,7 +32,7 @@ namespace Netdb
                     break;
                 }
 
-                if (command.Name != "botstats" && command.Name != "commands")
+                if (command.Name != "Botstats" && command.Name != "commands")
                 {
                     // Get the command Summary attribute information
                     string embedFieldText = command.Summary ?? "No description available\n";

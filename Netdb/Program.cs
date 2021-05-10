@@ -663,7 +663,7 @@ namespace Netdb
 
                         if (result.ErrorReason == "Unknown command.")
                         {
-                            eb.WithDescription("This command doesn't exist. Use " + prefix + "`help {commandname}` to see the exact syntax.");
+                            eb.WithDescription("This command doesn't exist. Use `" + prefix + "help {commandname}` to see the exact syntax.");
                         }
                         else if (result.ErrorReason == "User not found.")
                         {

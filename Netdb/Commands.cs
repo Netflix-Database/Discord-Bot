@@ -4,6 +4,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Netdb
 {
@@ -197,25 +198,24 @@ namespace Netdb
         [Summary("Add or remove movies to your watchlist")]
         public async Task Watchlist(string input, [Remainder] string moviename = null)
         {
-            if (Tools.ValidateSQLValues(moviename, Context.Channel) || Tools.ValidateSQLValues(input, Context.Channel))
+            if (Tools.ValidateSQLValues(input + moviename, Context.Channel))
             {
                 return;
             }
 
             if (input == "clear" || input == "c")
             {
-                Tools.RunCommand($"delete from userdata where userid = '{Context.User.Id}';");
+                Tools.RunCommand($"delete from watchlistdata where userid = '{Context.User.Id}';");
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
                 return;
             }
             else if (input == "list" || input == "l")
             {
-                int[] movieids = new int[27];
-                int count = 0;
+                List<int> movieids = new List<int>();
 
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from userdata where userid = '{Context.User.Id}';";
+                cmd.CommandText = $"select * from watchlistdata where userid = '{Context.User.Id}';";
                 var reader = cmd.ExecuteReader();
 
                 EmbedBuilder eb = new EmbedBuilder();
@@ -225,39 +225,84 @@ namespace Netdb
 
                 while (reader.Read())
                 {
-                    movieids[count] = (int)reader["movieid"];
-                    count++;
+                    movieids.Add(Convert.ToInt32(reader["netflixid"]));
                 }
 
                 reader.Close();
 
-                for (int i = 0; i < count; i++)
+                int pages = 1;
+
+                if (movieids.Count > 9)
                 {
+                    pages = (int)Math.Ceiling((decimal)((double)movieids.Count / 9));
+                }
+
+                int page;
+                if (moviename == null)
+                {
+                    page = 1;
+                }
+                else
+                {
+                    if (int.TryParse(moviename, out int result))
+                    {
+                        if (result > pages)
+                        {
+                            Tools.Embedbuilder("This page doesn't exist", Color.DarkRed, Context.Channel);
+                            return;
+                        }
+
+                        page = result;
+                    }
+                    else
+                    {
+                        Tools.Embedbuilder("An error occured", Color.DarkRed, Context.Channel);
+                        return;
+                    }
+                }
+
+                int tmp = 0;
+
+                for (int i = 0; i < page - 1; i++)
+                {
+                    tmp += 9;
+                }
+
+                for (int i = tmp; i < tmp + 9; i++)
+                {
+                    if (i == movieids.Count)
+                    {
+                        break;
+                    }
+
                     cmd = Program._con.CreateCommand();
                     cmd.CommandText = $"select * from netflixdata where netflixid = '{movieids[i]} ';";
                     reader = cmd.ExecuteReader();
 
                     if (reader.Read())
                     {
-                        string link = "https://www.netflix.com/search?q=" + reader["moviename"];
-                        link = link.Replace(" ", "");
+                        string link = "https://www.netflix.com/title/" + reader["netflixid"];
 
-                        if (Convert.ToBoolean(reader["type"]))
+                        if ((string)reader["type"] == "TVSeries")
                         {
-                            eb.AddField((string)reader["moviename"], " watch the series [here](" + link + ")");
+                            eb.AddField((string)reader["name"], " watch the series [here](" + link + ")");
                         }
                         else
                         {
-                            eb.AddField((string)reader["moviename"], " watch the movie [here](" + link + ")");
+                            eb.AddField((string)reader["name"], " watch the movie [here](" + link + ")");
                         }
                     }
 
                     reader.Close();
                 }
 
-                if (count == 0)
+                if (movieids.Count == 0)
                 {
-                    eb.WithDescription("There are currently no movies or series in your warchlist");
+                    eb.WithDescription("There are currently no movies or series in your watchlist");
+                }
+                else
+                {
+                    eb.WithFooter("Page " + page + "/" + pages);
                 }
 
                 await Context.Channel.SendMessageAsync("", false, eb.Build());
@@ -274,7 +319,7 @@ namespace Netdb
                         return;
                     }
 
-                    Tools.RunCommand($"insert into userdata (movieid, userid) values ('{Tools.Getid(moviename)}', '{Context.User.Id}');");
+                    Tools.RunCommand($"insert into watchlistdata (netflixid, userid) values ('{Tools.Getid(moviename)}', '{Context.User.Id}');");
 
                     Tools.Embedbuilder("Added movie to your watchlist", Color.Green, Context.Channel);
                     return;
@@ -283,7 +328,7 @@ namespace Netdb
                 {
                     if (Tools.Exists(Tools.Getid(moviename), Context.User.Id))
                     {
-                        Tools.RunCommand($"delete from userdata where userid = '{Context.User.Id}' and movieid = '{Tools.Getid(moviename)}';");
+                        Tools.RunCommand($"delete from watchlistdata where userid = '{Context.User.Id}' and netflixid = '{Tools.Getid(moviename)}';");
                         await Context.Message.AddReactionAsync(new Emoji("✅"));
                         return;
                     }
