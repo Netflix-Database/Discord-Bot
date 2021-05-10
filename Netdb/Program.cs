@@ -208,12 +208,13 @@ namespace Netdb
                     HandleError(ex);
                 }
 
-                await _client.StartAsync();
-
                 updateTimer = new Timer((e) =>
                 {
                     Perform5MinuteUpdate();
-                }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
+                }, null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(60));
+
+
+                await _client.StartAsync();
 
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
 
@@ -647,7 +648,7 @@ namespace Netdb
                 {
                     var eb = new EmbedBuilder();
                     eb.WithColor(Color.Red);
-                    eb.WithDescription("Prefix = " + prefix);
+                    eb.WithDescription("You can search for Netflix movies and series by typing `" + prefix + "search`. The command accepts only the English names. See all commands here: `" + prefix + "help`.");
 
                     await message.Channel.SendMessageAsync("", false, eb.Build());
                 }
