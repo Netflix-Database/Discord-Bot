@@ -203,6 +203,11 @@ namespace Netdb
             cmd.Dispose();
         }
 
+        /// <summary>
+        /// Checks if a movie/series is in the database by name
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns>true or false</returns>
         public static bool IsAvailable(string search)
         {
             if (search == "null")
@@ -216,24 +221,33 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from netflixdata where name = '" + search + "';";
+            cmd.CommandText = "select null from netflixdata where name = '" + search + "';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
             {
                 reader.Close();
+                reader.Dispose();
+                cmd.Dispose();
                 return true;
             }
             reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
             return false;
         }
 
+        /// <summary>
+        /// Checks if a movie/series is in the database by id and name
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns>true or false</returns>
         public static bool IsAvailableId(string search)
         {
             if (!Tools.IsAvailable(search))
             {
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from netflixdata where netflixid = '" + search + "';";
+                cmd.CommandText = "select name from netflixdata where netflixid = '" + search + "';";
                 var reader = cmd.ExecuteReader();
 
                 if (reader.Read())
@@ -254,6 +268,10 @@ namespace Netdb
             return true;
         }
 
+        /// <summary>
+        /// Runs a MySQL command
+        /// </summary>
+        /// <param name="command"></param>
         public static void RunCommand(string command)
         {
             var cmd = Program._con.CreateCommand();
@@ -278,6 +296,12 @@ namespace Netdb
             return false;
         }
 
+        /// <summary>
+        /// Sends a simple embed into a channel
+        /// </summary>
+        /// <param name="description"></param>
+        /// <param name="color"></param>
+        /// <param name="channel"></param>
         public static void Embedbuilder(string description, Color color, ISocketMessageChannel channel)
         {
             var eb = new EmbedBuilder();
@@ -302,6 +326,11 @@ namespace Netdb
             Tools.RunCommand($"update moderation set contentadded = '{contentadded}' where userid = '{user.Id}'; ");
         }
 
+        /// <summary>
+        /// Checks if a user is a moderator
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public static bool IsModerator(IUser user)
         {
             var cmd = Program._con.CreateCommand();
@@ -317,6 +346,13 @@ namespace Netdb
             return false;
         }
 
+        /// <summary>
+        /// Searches a movie/series and returns it in an embed
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="eb"></param>
+        /// <param name="stream"></param>
+        /// <param name="userid"></param>
         public static void Search(string search, out EmbedBuilder eb, out FileStream stream, ulong userid)
         {
             GetMovieData(search, out MovieData movie, userid);
