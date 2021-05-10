@@ -624,8 +624,6 @@ namespace Netdb
                 var context = new SocketCommandContext(_client, message);
                 if (message.Author.IsBot) return;
 
-            int argPos = 0;
-
                 if (_con.State.ToString() == "Closed")
                 {
                     try
@@ -645,7 +643,19 @@ namespace Netdb
 
                 string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
 
-            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+                if (message.ToString() == _client.CurrentUser.Mention)
+                {
+                    var eb = new EmbedBuilder();
+                    eb.WithColor(Color.Red);
+                    eb.WithDescription("Prefix = " + prefix);
+
+                    await message.Channel.SendMessageAsync("", false, eb.Build());
+                }
+
+
+                int argPos = 0;
+
+                if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
             {
                
 
