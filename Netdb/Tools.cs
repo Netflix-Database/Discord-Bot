@@ -23,7 +23,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select netflixid from netflixdata where name = '" + moviename + "';";
+            cmd.CommandText = $"select netflixid from netflixdata where name = '{moviename}' or netflixid = '{moviename}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())

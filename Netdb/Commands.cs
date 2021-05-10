@@ -256,7 +256,7 @@ namespace Netdb
                     }
                     else
                     {
-                        Tools.Embedbuilder("An error occured", Color.DarkRed, Context.Channel);
+                        Tools.Embedbuilder("That's not a valid number", Color.DarkRed, Context.Channel);
                         return;
                     }
                 }
@@ -309,7 +309,7 @@ namespace Netdb
                 return;
             }
 
-            if (Tools.IsAvailable(moviename))
+            if (Tools.IsAvailableId(moviename))
             {
                 if (input == "add" || input == "a")
                 {
