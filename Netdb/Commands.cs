@@ -174,7 +174,7 @@ namespace Netdb
                 return;
             }
 
-            Tools.Search(search,out EmbedBuilder eb, out FileStream stream, Context.User.Id);
+            Tools.Search(search,out EmbedBuilder eb, out FileStream stream, user.Id);
 
             eb.WithAuthor(Context.User);
             eb.WithTitle("Recommended:\n" + eb.Title);
