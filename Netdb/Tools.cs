@@ -102,21 +102,20 @@ namespace Netdb
         /// <returns></returns>
         public static bool Exists(int movieid, ulong userid)
         {
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from watchlistdata where userid = '{userid}' and netflixid = '{movieid}';";
+            cmd.CommandText = $"select null from watchlistdata where userid = '{userid}' and netflixid = '{movieid}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
             {
                 reader.Close();
+                reader.Dispose();
+                cmd.Dispose();
                 return true;
             }
             reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
             return false;
         }
 
@@ -127,11 +126,6 @@ namespace Netdb
         /// <param name="movie"></param>
         public static void GetMovieData(string search, out MovieData movie, ulong userid)
         {
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = "select * from netflixdata where name = '" + search + "';";
             var redar = cmd.ExecuteReader();
@@ -215,11 +209,6 @@ namespace Netdb
                 return false;
             }
 
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = "select null from netflixdata where name = '" + search + "';";
             var reader = cmd.ExecuteReader();
@@ -255,6 +244,8 @@ namespace Netdb
                     if ((string)reader["name"] == "null")
                     {
                         reader.Close();
+                        reader.Dispose();
+                        cmd.Dispose();
                         return false;
                     }
                     reader.Close();
@@ -262,6 +253,8 @@ namespace Netdb
                 else
                 {
                     reader.Close();
+                    reader.Dispose();
+                    cmd.Dispose();
                     return false;
                 }
             }
@@ -290,9 +283,13 @@ namespace Netdb
             if (reader.Read())
             {
                 reader.Close();
+                reader.Dispose();
+                cmd.Dispose();
                 return true;
             }
             reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
             return false;
         }
 

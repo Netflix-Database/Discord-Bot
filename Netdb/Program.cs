@@ -616,11 +616,10 @@ namespace Netdb
         private async Task HandleCommandAsync(SocketMessage arg)
         {
             try {
-            SocketUserMessage message = arg as SocketUserMessage;
-            if (message == null)
-            {
-                return;
-            }
+                if (!(arg is SocketUserMessage message))
+                {
+                    return;
+                }
 
                 var context = new SocketCommandContext(_client, message);
                 if (message.Author.IsBot) return;
