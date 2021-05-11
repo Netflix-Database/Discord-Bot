@@ -310,7 +310,7 @@ namespace Netdb
         public static void UpdateContentadded(IUser user)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moderation where userid = '{user.Id}';";
+            cmd.CommandText = $"select contentadded from moderation where userid = '{user.Id}';";
             var reader = cmd.ExecuteReader();
 
             reader.Read();
@@ -321,6 +321,9 @@ namespace Netdb
             reader.Close();
 
             Tools.RunCommand($"update moderation set contentadded = '{contentadded}' where userid = '{user.Id}'; ");
+
+            cmd.Dispose();
+            reader.Dispose();
         }
 
         /// <summary>
@@ -331,7 +334,7 @@ namespace Netdb
         public static bool IsModerator(IUser user)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moderation where userid = '{user.Id}' and ismod = '{1}';";
+            cmd.CommandText = $"select null from moderation where userid = '{user.Id}' and ismod = '{1}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())

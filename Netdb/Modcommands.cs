@@ -41,21 +41,21 @@ namespace Netdb
             {
                 int id = Tools.Getid(moviename);
 
-                Tools.RunCommand($"update moviedata set movieName = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where movieName = '{moviename}';");
+                Tools.RunCommand($"update moviedata set name = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where movieName = '{moviename}';");
 
-                Tools.RunCommand($"delete from userdata where movieid = '{id}';");
+                Tools.RunCommand($"delete from watchlistdata where netflixid = '{id}';");
 
-                Tools.RunCommand($"delete from reviewsdata where movieid = '{id}';");
+                Tools.RunCommand($"delete from reviews where netflixid = '{id}';");
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else if (Tools.IsAvailableId(moviename))
             {
-                Tools.RunCommand($"update moviedata set movieName = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where id = '{moviename}';");
+                Tools.RunCommand($"update netflixdata set name = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where id = '{moviename}';");
 
-                Tools.RunCommand($"delete from userdata where movieid = '{moviename}';");
+                Tools.RunCommand($"delete from watchlistdata where netflixid = '{moviename}';");
 
-                Tools.RunCommand($"delete from reviewsdata where movieid = '{moviename}';");
+                Tools.RunCommand($"delete from reviews where netflixid = '{moviename}';");
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
@@ -105,7 +105,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from comingsoon where moviename = '{moviename}';";
+            cmd.CommandText = $"select null from comingsoon where moviename = '{moviename}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
@@ -229,7 +229,7 @@ namespace Netdb
                 reader.Close();
 
                 cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from reviewsdata where userid = '{id}';";
+                cmd.CommandText = $"select null from reviews where userid = '{id}';";
                 reader = await cmd.ExecuteReaderAsync();
 
                 int reviews = 0;
