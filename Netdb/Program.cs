@@ -354,7 +354,7 @@ namespace Netdb
         {
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Blue);
-            eb.WithTitle("Hi");
+            eb.WithTitle("Hi,");
             eb.WithDescription("use `#help` to get an overview of all commands");
 
             await arg.DefaultChannel.SendMessageAsync("", false, eb.Build());
