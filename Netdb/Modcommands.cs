@@ -14,9 +14,9 @@ namespace Netdb
 
         [Command("add")]
         [Summary("Adds a movie or series to the database")]
-        public async Task Add(int id)
+        public async Task Add([Remainder]string id)
         {
-           
+            Tools.RunCommand(id);
         }
 
         [Command("remove")]
@@ -44,6 +44,8 @@ namespace Netdb
                 Tools.RunCommand($"delete from watchlistdata where netflixid = '{id}';");
 
                 Tools.RunCommand($"delete from reviews where netflixid = '{id}';");
+
+                Tools.RunCommand($"delete from totalreviews where netflixid = '{id}';");
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
