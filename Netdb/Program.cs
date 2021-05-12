@@ -275,7 +275,7 @@ namespace Netdb
                     reviews = Convert.ToInt32(cmd.ExecuteScalar());
                 }
 
-                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM subscriberlist;", _con))
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM subscriberdata;", _con))
                 {
                     subscribers = Convert.ToInt32(cmd.ExecuteScalar());
                 }
@@ -291,7 +291,7 @@ namespace Netdb
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`prefixes` (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(10) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id),UNIQUE INDEX id_UNIQUE (id ASC) VISIBLE,UNIQUE INDEX guildId_UNIQUE (guildId ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`prefixes` (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(45) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id),UNIQUE INDEX id_UNIQUE (id ASC) VISIBLE,UNIQUE INDEX guildId_UNIQUE (guildId ASC) VISIBLE);";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();

@@ -31,6 +31,11 @@ namespace Netdb
                 return;
             }
 
+            if (search.Contains("'"))
+            {
+                search = search.Replace("'", "\'");
+            }
+
             if (!Tools.IsAvailableId(search))
             {
                 Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
@@ -310,11 +315,11 @@ namespace Netdb
 
                         if ((string)reader["type"] == "TVSeries")
                         {
-                            eb.AddField((string)reader["name"], " watch the series [here](" + link + ")");
+                            eb.AddField((string)reader["name_en"], " watch the series [here](" + link + ")");
                         }
                         else
                         {
-                            eb.AddField((string)reader["name"], " watch the movie [here](" + link + ")");
+                            eb.AddField((string)reader["name_en"], " watch the movie [here](" + link + ")");
                         }
                     }
 

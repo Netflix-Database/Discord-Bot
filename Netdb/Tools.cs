@@ -23,7 +23,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select netflixid from netflixdata where name = '{moviename}' or netflixid = '{moviename}';";
+            cmd.CommandText = $"select netflixid from netflixdata where name_en = '{moviename}' or netflixid = '{moviename}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
@@ -127,7 +127,7 @@ namespace Netdb
         public static void GetMovieData(string search, out MovieData movie, ulong userid)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from netflixdata where name = '" + search + "';";
+            cmd.CommandText = "select * from netflixdata where name_en = '" + search + "';";
             var redar = cmd.ExecuteReader();
 
             if (!redar.Read())
@@ -153,10 +153,10 @@ namespace Netdb
             movie = new MovieData
             {
                 Age = (int)redar["age"],
-                Description = (string)redar["description"],
+                Description = (string)redar["description_en"],
                 Id = (int)redar["netflixid"],
                 Link = "https://www.netflix.com/title/" + redar["netflixid"],
-                Name = (string)redar["name"],
+                Name = (string)redar["name_en"],
                 Type = (string)redar["type"],
                 Releasedate = (int)redar["releasedate"],
                 Length = (string)redar["length"],
@@ -210,7 +210,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select null from netflixdata where name = '" + search + "';";
+            cmd.CommandText = "select null from netflixdata where name_en = '" + search + "';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
@@ -236,12 +236,12 @@ namespace Netdb
             if (!Tools.IsAvailable(search))
             {
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select name from netflixdata where netflixid = '" + search + "';";
+                cmd.CommandText = "select name_en from netflixdata where netflixid = '" + search + "';";
                 var reader = cmd.ExecuteReader();
 
                 if (reader.Read())
                 {
-                    if ((string)reader["name"] == "null")
+                    if ((string)reader["name_en"] == "null")
                     {
                         reader.Close();
                         reader.Dispose();

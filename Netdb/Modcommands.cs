@@ -16,7 +16,7 @@ namespace Netdb
         [Summary("Adds a movie or series to the database")]
         public async Task Add([Remainder]string id)
         {
-            Tools.RunCommand(id);
+            
         }
 
         [Command("remove")]
@@ -134,10 +134,6 @@ namespace Netdb
         {
             if (Tools.IsModerator(Context.User))
             {
-                Program.BackupDB();
-                Program.GetMostsearched();
-                Program.GetBestReviewed();
-
                 Program.Perform5MinuteUpdate();
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
@@ -160,7 +156,7 @@ namespace Netdb
                     return;
                 }
 
-                Tools.RunCommand($"insert into moderation (userid, since,contentadded) values ('{user.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','0');");
+                Tools.RunCommand($"insert into moderation (userid, ismod, since,contentadded) values ('{user.Id}','1', '{DateTime.Now.Date:yyyy-MM-dd}','0');");
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else
