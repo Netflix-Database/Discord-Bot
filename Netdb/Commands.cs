@@ -455,13 +455,13 @@ namespace Netdb
         {
             if (Context.Channel.GetType() == typeof(SocketDMChannel))
             {
-                if (Tools.Reader($"select * from subscriberlist where guildid = '{0}' and channelid = '{Context.User.Id}';"))
+                if (Tools.Reader($"select null from subscriberdata where guildid = '{0}' and channelid = '{Context.User.Id}';"))
                 {
                     Tools.Embedbuilder("You have already subscribed",Color.DarkRed, Context.Channel);
                     return;
                 }
 
-                Tools.RunCommand($"insert into subscriberlist (channelid, since,guildid) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{0}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, since, guildid) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{0}');");
             }
             else
             {
@@ -474,7 +474,7 @@ namespace Netdb
                 }
 
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from subscriberlist where guildid = '{Context.Guild.Id}';";
+                cmd.CommandText = $"select guildid,channelid from subscriberdata where guildid = '{Context.Guild.Id}';";
                 var reader = await cmd.ExecuteReaderAsync();
 
                 if (reader.Read())
@@ -488,7 +488,7 @@ namespace Netdb
                 }
                 reader.Close();
 
-                Tools.RunCommand($"insert into subscriberlist (channelid, since,guildid) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{Context.Guild.Id}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, since,guildid) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{Context.Guild.Id}');");
             }
             Tools.Embedbuilder("You will now recieve an update about whats coming to Netflix every day", Color.Green, Context.Channel);
         }
@@ -517,7 +517,7 @@ namespace Netdb
                 id = Context.Channel.Id;
             }
             
-            Tools.RunCommand($"delete from subscriberlist where channelid = '{id}';");
+            Tools.RunCommand($"delete from subscriberdata where channelid = '{id}';");
             Tools.Embedbuilder("Ok :(",Color.Green, Context.Channel);
         }
 
