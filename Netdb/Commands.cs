@@ -466,7 +466,7 @@ namespace Netdb
                     return;
                 }
 
-                Tools.RunCommand($"insert into subscriberdata (channelid, since, guildid) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{0}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{0}');");
             }
             else
             {
@@ -479,7 +479,7 @@ namespace Netdb
                 }
 
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select guildid,channelid from subscriberdata where guildid = '{Context.Guild.Id}';";
+                cmd.CommandText = $"select guildid, channelid from subscriberdata where guildid = '{Context.Guild.Id}';";
                 var reader = await cmd.ExecuteReaderAsync();
 
                 if (reader.Read())
@@ -493,7 +493,7 @@ namespace Netdb
                 }
                 reader.Close();
 
-                Tools.RunCommand($"insert into subscriberdata (channelid, since,guildid) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{Context.Guild.Id}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{Context.Guild.Id}');");
             }
             Tools.Embedbuilder("You will now recieve an update about whats coming to Netflix every day", Color.Green, Context.Channel);
         }
