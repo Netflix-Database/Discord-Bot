@@ -25,6 +25,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = "select * from moviedata where movieName = '" + moviename + "';";
             var reader = cmd.ExecuteReader();
+            Program.openDataReaders.Add(reader);
 
             if (reader.Read())
             {
@@ -43,6 +44,7 @@ namespace Netdb
         /// <returns>bool</returns>
         public static bool ValidateSQLValues(string values, ISocketMessageChannel c)
         {
+            Program.PrepareForDatabaseUse();
             int sus = 0;
 
             values = values.ToLower();
@@ -161,7 +163,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select * from userdata where userid = '{userid}' and movieid = '{movieid}';";
             var reader = cmd.ExecuteReader();
-
+            Program.openDataReaders.Add(reader);
             if (reader.Read())
             {
                 reader.Close();
@@ -186,7 +188,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = "select * from moviedata where movieName = '" + search + "';";
             var redar = cmd.ExecuteReader();
-
+            Program.openDataReaders.Add(redar);
             if (!redar.Read())
             {
                 redar.Close();
@@ -277,7 +279,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = "select * from moviedata where MovieName = '" + search + "';";
             var reader = cmd.ExecuteReader();
-
+            Program.openDataReaders.Add(reader);
             if (reader.Read())
             {
                 reader.Close();
@@ -294,7 +296,7 @@ namespace Netdb
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = "select * from moviedata where id = '" + search + "';";
                 var reader = cmd.ExecuteReader();
-
+                Program.openDataReaders.Add(reader);
                 if (reader.Read())
                 {
                     if ((string)reader["movieName"] == "null")
@@ -327,7 +329,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = input;
             var reader = cmd.ExecuteReader();
-
+            Program.openDataReaders.Add(reader);
             if (reader.Read())
             {
                 reader.Close();
@@ -350,7 +352,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select * from moderation where userid = '{user.Id}';";
             var reader = cmd.ExecuteReader();
-
+            Program.openDataReaders.Add(reader);
             reader.Read();
 
             int contentadded = (int)reader["contentadded"];
@@ -366,7 +368,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select * from moderation where userid = '{user.Id}' and ismod = '{1}';";
             var reader = cmd.ExecuteReader();
-
+            Program.openDataReaders.Add(reader);
             if (reader.Read())
             {
                 reader.Close();

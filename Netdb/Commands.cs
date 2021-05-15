@@ -548,7 +548,7 @@ namespace Netdb
         [Summary("Report bugs pls")]
         public async Task Report([Remainder] string report)
         {
-            IUser user = Program._client.GetUser(487265499785199616);
+            ISocketMessageChannel user = (ISocketMessageChannel)Program._client.GetChannel(835800158528733184);
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithTitle("Report");

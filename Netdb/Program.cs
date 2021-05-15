@@ -24,6 +24,7 @@ namespace Netdb
         public static string token;
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
+        public static List<MySqlDataReader> openDataReaders = new List<MySqlDataReader>();
 
         //BotData
         public static int memberCount = 0;
@@ -44,6 +45,18 @@ namespace Netdb
         public static DiscordSocketClient _client;
         public static CommandService _commands;
         public static IServiceProvider _services;
+
+        public static void PrepareForDatabaseUse()
+        {
+            foreach (var item in openDataReaders)
+            {
+                if (item != null && !item.IsClosed)
+                {
+                    item.Close();
+                    item.Dispose();
+                }
+            }
+        }
 
         public static void HandleError(Exception ex)
         {
