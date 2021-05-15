@@ -36,7 +36,6 @@ namespace Netdb
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
-        //Botstats
         public static DateTime startedAt = DateTime.Now;
         public static int commandsexecuted = 0;
 
@@ -209,12 +208,11 @@ namespace Netdb
 
                 try
                 {
-                    GetMostsearched();
+                    //GetMostsearched();
 
-                    GetBestReviewed();
+                    //GetBestReviewed();
 
-                    CommandDB.Setup();
-                    PrefixManager.Setup();
+                    SetupDB();
                 }
                 catch (Exception ex)
                 {
@@ -223,16 +221,17 @@ namespace Netdb
                     HandleError(ex);
                 }
 
-                await _client.StartAsync();
-
                 updateTimer = new Timer((e) =>
                 {
                     Perform5MinuteUpdate();
-                }, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(5));
+                }, null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(60));
+
+
+                await _client.StartAsync();
 
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
-                
-                Console.WriteLine("Setup finished");
+
+                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
             }
             catch (Exception exx)
             {
@@ -267,53 +266,76 @@ namespace Netdb
                 memberCount += item.MemberCount;
             }
 
+            if (_con.State != System.Data.ConnectionState.Open)
+            {
+                return;
+            }
+
             if (_con.Ping())
             {
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where type = '{0}';";
-                var reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='Movie'", _con))
                 {
-                    movies++;
+                    movies = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
 
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where type = '{1}';";
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='TVSeries';", _con))
                 {
-                    series++;
+                    series = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
 
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from reviewsdata;";
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM reviews;", _con))
                 {
-                    reviews++;
+                    reviews = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
 
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from subscriberlist;";
-                reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM subscriberdata;", _con))
                 {
-                    subscribers++;
+                    subscribers = Convert.ToInt32(cmd.ExecuteScalar());
                 }
-                reader.Close();
-
-                cmd.Dispose();
-                reader.Dispose();
 
                 Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
             }
+        }
+
+        public static void SetupDB()
+        {
+            var cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`commands` (id INT NOT NULL AUTO_INCREMENT Primary Key,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL);";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`prefixes` (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(45) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id),UNIQUE INDEX id_UNIQUE (id ASC) VISIBLE,UNIQUE INDEX guildId_UNIQUE (guildId ASC) VISIBLE);";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`netflixdata` (`id` INT NOT NULL AUTO_INCREMENT,`netflixid` INT NULL,`type` VARCHAR(45) NULL,`name` VARCHAR(200) NULL,`description` VARCHAR(500) NULL,`age` INT NULL,`releasedate` INT NULL,`topGenre` VARCHAR(45) NULL,`length` VARCHAR(45) NULL,`titleImg` BLOB NULL,`desktopImg` BLOB NULL,`mobileImg` BLOB NULL,`awards` VARCHAR(500) NULL,`downloadable` TINYINT NULL,`subtitles` VARCHAR(500) NULL,`audio` VARCHAR(2000) NULL,`emotions` VARCHAR(200) NULL,`creator` VARCHAR(300) NULL,`starring` VARCHAR(700) NULL,`cast` VARCHAR(2000) NULL,`allGenres` VARCHAR(500) NULL,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`reviews` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,`points` TINYINT UNSIGNED NULL,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();  
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`totalreviews` (`id` INT NOT NULL AUTO_INCREMENT,`netflixid` INT UNSIGNED NULL,`points` INT UNSIGNED NULL DEFAULT 0,`amount` INT UNSIGNED NULL DEFAULT 0,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`watchlistdata` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`moderation` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`ismod` TINYINT UNSIGNED NULL,`contentadded` INT UNSIGNED NULL,`since` DATE NULL,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();
+
+            cmd = _con.CreateCommand();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`comingsoon` (`id` INT NOT NULL AUTO_INCREMENT,`name` VARCHAR(100) NULL,`releasedate` DATE NULL,PRIMARY KEY(`id`));";
+            cmd.ExecuteNonQuery();
+
+            cmd.Dispose();
         }
 
         private async Task _client_Ready()
@@ -338,8 +360,6 @@ namespace Netdb
             }
  
             eb.AddField("Database connection", _con.State);
-            //await _client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
-            //await _client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
             await ((ISocketMessageChannel)_client.GetChannel(835295047477231616)).SendMessageAsync("", false, eb.Build());
         }
 
@@ -347,7 +367,7 @@ namespace Netdb
         {
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Blue);
-            eb.WithTitle("Hi");
+            eb.WithTitle("Hi,");
             eb.WithDescription("use `#help` to get an overview of all commands");
 
             await arg.DefaultChannel.SendMessageAsync("", false, eb.Build());
@@ -609,22 +629,15 @@ namespace Netdb
         private async Task HandleCommandAsync(SocketMessage arg)
         {
             try {
-            SocketUserMessage message = arg as SocketUserMessage;
-            if (message == null)
-            {
-                return;
-            }
+                if (!(arg is SocketUserMessage message))
+                {
+                    return;
+                }
 
                 var context = new SocketCommandContext(_client, message);
                 if (message.Author.IsBot) return;
 
-            int argPos = 0;
-
-            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
-
-            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
-            {
-                if (_con.State.ToString() == "Closed" && !message.Content.Contains("botstats"))
+                if (_con.State.ToString() == "Closed")
                 {
                     try
                     {
@@ -641,6 +654,24 @@ namespace Netdb
                     }
                 }
 
+                string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+
+                if (message.ToString() == _client.CurrentUser.Mention)
+                {
+                    var eb = new EmbedBuilder();
+                    eb.WithColor(Color.Red);
+                    eb.WithDescription("You can search for Netflix movies and series by typing `" + prefix + "search`. The command accepts only the English names. See all commands here: `" + prefix + "help`.");
+
+                    await message.Channel.SendMessageAsync("", false, eb.Build());
+                }
+
+
+                int argPos = 0;
+
+                if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            {
+               
+
                 CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
 
                     var result = await _commands.ExecuteAsync(context, argPos, _services);
@@ -655,7 +686,7 @@ namespace Netdb
 
                         if (result.ErrorReason == "Unknown command.")
                         {
-                            eb.WithDescription("This command doesn't exist. Use " + prefix + "`help {commandname}` to see the exact syntax.");
+                            eb.WithDescription("This command doesn't exist. Use `" + prefix + "help {commandname}` to see the exact syntax.");
                         }
                         else if (result.ErrorReason == "User not found.")
                         {

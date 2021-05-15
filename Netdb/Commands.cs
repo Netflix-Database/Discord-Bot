@@ -4,6 +4,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Netdb
 {
@@ -22,12 +23,17 @@ namespace Netdb
 
         [Command("search")]
         [Alias("s")]
-        [Summary("Shows you your searched movie")]
+        [Summary("Search for your favourite movies/series")]
         public async Task Search([Remainder]string search)
         {
             if (Tools.ValidateSQLValues(search, Context.Channel))
             {
                 return;
+            }
+
+            if (search.Contains("'"))
+            {
+                search = search.Replace("'", "\'");
             }
 
             if (!Tools.IsAvailableId(search))
@@ -36,9 +42,7 @@ namespace Netdb
                 return;
             }
 
-            Tools.Search(search,out EmbedBuilder eb,out FileStream stream,out string name);
-
-            eb.WithTitle($"**{name.ToUpper()}**");
+            Tools.Search(search,out EmbedBuilder eb,out FileStream stream, Context.User.Id);
 
             await Context.Channel.SendFileAsync(stream, "example.png", embed: eb.Build());
 
@@ -103,20 +107,18 @@ namespace Netdb
 
             if (!Tools.IsAvailable(moviename))
             {
-                //update pls
+                var cmd1 = Program._con.CreateCommand();
+                cmd1.CommandText = "select * from netflixdata where netflixid = '" + moviename + "';";
+                var reader1 = await cmd1.ExecuteReaderAsync();
 
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + moviename + "';";
-                var reader = await cmd.ExecuteReaderAsync();
-
-                if (!reader.Read())
+                if (!reader1.Read())
                 {
                     Tools.Embedbuilder("This movie is not available", Color.DarkRed, Context.Channel);
-                    reader.Close();
+                    reader1.Close();
                     return;
                 }
 
-                reader.Close();
+                reader1.Close();
                 id = Convert.ToInt32(moviename);
             }
             else
@@ -124,76 +126,87 @@ namespace Netdb
                 id = Tools.Getid(moviename);
             }
 
-            if (Tools.Reader($"select * from reviewsdata where movieid = '{id}' and userid = '{Context.User.Id}';"))
+            if (Tools.Reader($"select * from reviews where netflixid = '{id}' and userid = '{Context.User.Id}';"))
             {
                 Tools.Embedbuilder("You have already rated this movie", Color.DarkRed, Context.Channel);
                 return;
             }
-            else
+
+            Tools.RunCommand($"insert into reviews (userid, netflixid, points) values ('{Context.User.Id}', '{id}', '{points}');");
+
+            var cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from totalreviews where id = '{id}';";
+            var reader = await cmd.ExecuteReaderAsync();
+
+            if (reader.Read())
             {
-                Tools.RunCommand($"insert into reviewsdata (userid, movieid) values ('{Context.User.Id}', '{id}');");
-
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where id = '{id}';";
-                var reader = await cmd.ExecuteReaderAsync();
-
-                reader.Read();
-
-                int reviews = (int)reader["reviews"] + 1;
-                int reviewpoints = (int)reader["reviewpoints"] + points;
+                int reviews = (int)reader["amount"] + 1;
+                int reviewpoints = (int)reader["points"] + points;
 
                 reader.Close();
 
-                Tools.RunCommand($"update moviedata set reviews = '{reviews}' where id = '{id}';");
-                Tools.RunCommand($"update moviedata set reviewpoints = '{reviewpoints}' where id = '{id}';");
-
-                Tools.Embedbuilder("Thanks for your review", Color.Green, Context.Channel);
+                Tools.RunCommand($"update totalreviews set amount = '{reviews}' where id = '{id}';");
+                Tools.RunCommand($"update totalreviews set points = '{reviewpoints}' where id = '{id}';");
             }
+            else
+            {
+                reader.Close();
+                Tools.RunCommand($"insert into totalreviews (netflixid, amount, points) values ({id}, {1}, {points});");
+            }
+
+            Tools.Embedbuilder("Thanks for your review", Color.Green, Context.Channel);
         }
 
         [Command("recommend")]
         [Alias("rec")]
         [Summary("Recommend a movie to a certain user")]
-        public async Task Recommend(IUser user, [Remainder]string movie)
+        public async Task Recommend(string input, [Remainder]string search)
         {
-            if (Tools.ValidateSQLValues(movie, Context.Channel))
+            IUser user = null;
+
+            if (ulong.TryParse(input, out ulong userid))
+            {
+                user = Program._client.GetUser(userid);
+            }
+            else if (input[input.Length - 5] == '#')
+            {
+                user = Program._client.GetUser(input.Split('#')[0], input.Split('#')[1]);
+            }
+            else if(input.StartsWith("<@!") && input.EndsWith('>'))
+            {
+                if (ulong.TryParse(input.Substring(3, 18), out userid))
+                {
+                    user = Program._client.GetUser(userid);
+                }
+            }
+
+            if (user == null)
+            {
+                Tools.Embedbuilder("Can't find this user", Color.DarkRed, Context.Channel);
+                return;
+            }
+
+            if (Tools.ValidateSQLValues(search, Context.Channel))
             {
                 return;
             }
 
             if (user.IsBot)
             {
-                Tools.Embedbuilder("You can't send recommondation to other bots", Color.DarkRed, Context.Channel);
+                Tools.Embedbuilder("You can't send recommendation to other bots", Color.DarkRed, Context.Channel);
                 return;
             }
 
-            if (!Tools.IsAvailableId(movie))
+            if (!Tools.IsAvailableId(search))
             {
-                if (Tools.IsAvailableId(movie))
-                {
-                    var cmd = Program._con.CreateCommand();
-                    cmd.CommandText = "select * from moviedata where movieName = '" + movie + "';";
-                    var reader = cmd.ExecuteReader();
-
-                    reader.Read();
-
-                    movie = (string)reader["movieName"];
-
-                    reader.Close();
-                    reader.Dispose();
-                    cmd.Dispose();
-                }
-                else
-                {
-                    Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
-                    return;
-                }
+                Tools.Embedbuilder("This movie/series is not available", Color.DarkRed, Context.Channel);
+                return;
             }
 
-            Tools.Search(movie,out EmbedBuilder eb, out FileStream stream,out string name);
+            Tools.Search(search,out EmbedBuilder eb, out FileStream stream, user.Id);
 
             eb.WithAuthor(Context.User);
-            eb.WithTitle("Recommended:\n**" + name.ToUpper() +"**");
+            eb.WithTitle("Recommended:\n" + eb.Title);
 
             try
             {
@@ -207,6 +220,7 @@ namespace Netdb
             }
 
             stream.Close();
+            stream.Dispose();
         }
 
         [Command("watchlist")]
@@ -214,25 +228,24 @@ namespace Netdb
         [Summary("Add or remove movies to your watchlist")]
         public async Task Watchlist(string input, [Remainder] string moviename = null)
         {
-            if (Tools.ValidateSQLValues(moviename, Context.Channel) || Tools.ValidateSQLValues(input, Context.Channel))
+            if (Tools.ValidateSQLValues(input + moviename, Context.Channel))
             {
                 return;
             }
 
             if (input == "clear" || input == "c")
             {
-                Tools.RunCommand($"delete from userdata where userid = '{Context.User.Id}';");
+                Tools.RunCommand($"delete from watchlistdata where userid = '{Context.User.Id}';");
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
                 return;
             }
             else if (input == "list" || input == "l")
             {
-                int[] movieids = new int[27];
-                int count = 0;
+                List<int> movieids = new List<int>();
 
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from userdata where userid = '{Context.User.Id}';";
+                cmd.CommandText = $"select * from watchlistdata where userid = '{Context.User.Id}';";
                 var reader = cmd.ExecuteReader();
 
                 EmbedBuilder eb = new EmbedBuilder();
@@ -242,46 +255,91 @@ namespace Netdb
 
                 while (reader.Read())
                 {
-                    movieids[count] = (int)reader["movieid"];
-                    count++;
+                    movieids.Add(Convert.ToInt32(reader["netflixid"]));
                 }
 
                 reader.Close();
 
-                for (int i = 0; i < count; i++)
+                int pages = 1;
+
+                if (movieids.Count > 9)
                 {
+                    pages = (int)Math.Ceiling((decimal)((double)movieids.Count / 9));
+                }
+
+                int page;
+                if (moviename == null)
+                {
+                    page = 1;
+                }
+                else
+                {
+                    if (int.TryParse(moviename, out int result))
+                    {
+                        if (result > pages)
+                        {
+                            Tools.Embedbuilder("This page doesn't exist", Color.DarkRed, Context.Channel);
+                            return;
+                        }
+
+                        page = result;
+                    }
+                    else
+                    {
+                        Tools.Embedbuilder("That's not a valid number", Color.DarkRed, Context.Channel);
+                        return;
+                    }
+                }
+
+                int tmp = 0;
+
+                for (int i = 0; i < page - 1; i++)
+                {
+                    tmp += 9;
+                }
+
+                for (int i = tmp; i < tmp + 9; i++)
+                {
+                    if (i == movieids.Count)
+                    {
+                        break;
+                    }
+
                     cmd = Program._con.CreateCommand();
-                    cmd.CommandText = $"select * from moviedata where id = '{movieids[i]} ';";
+                    cmd.CommandText = $"select * from netflixdata where netflixid = '{movieids[i]} ';";
                     reader = cmd.ExecuteReader();
 
                     if (reader.Read())
                     {
-                        string link = "https://www.netflix.com/search?q=" + reader["moviename"];
-                        link = link.Replace(" ", "");
+                        string link = "https://www.netflix.com/title/" + reader["netflixid"];
 
-                        if (Convert.ToBoolean(reader["type"]))
+                        if ((string)reader["type"] == "TVSeries")
                         {
-                            eb.AddField((string)reader["moviename"], " watch the series [here](" + link + ")");
+                            eb.AddField((string)reader["name_en"], " watch the series [here](" + link + ")");
                         }
                         else
                         {
-                            eb.AddField((string)reader["moviename"], " watch the movie [here](" + link + ")");
+                            eb.AddField((string)reader["name_en"], " watch the movie [here](" + link + ")");
                         }
                     }
 
                     reader.Close();
                 }
 
-                if (count == 0)
+                if (movieids.Count == 0)
                 {
-                    eb.WithDescription("There are currently no movies or series in your warchlist");
+                    eb.WithDescription("There are currently no movies or series in your watchlist");
+                }
+                else
+                {
+                    eb.WithFooter("Page " + page + "/" + pages);
                 }
 
                 await Context.Channel.SendMessageAsync("", false, eb.Build());
                 return;
             }
 
-            if (Tools.IsAvailable(moviename))
+            if (Tools.IsAvailableId(moviename))
             {
                 if (input == "add" || input == "a")
                 {
@@ -291,7 +349,7 @@ namespace Netdb
                         return;
                     }
 
-                    Tools.RunCommand($"insert into userdata (movieid, userid) values ('{Tools.Getid(moviename)}', '{Context.User.Id}');");
+                    Tools.RunCommand($"insert into watchlistdata (netflixid, userid) values ('{Tools.Getid(moviename)}', '{Context.User.Id}');");
 
                     Tools.Embedbuilder("Added movie to your watchlist", Color.Green, Context.Channel);
                     return;
@@ -300,7 +358,7 @@ namespace Netdb
                 {
                     if (Tools.Exists(Tools.Getid(moviename), Context.User.Id))
                     {
-                        Tools.RunCommand($"delete from userdata where userid = '{Context.User.Id}' and movieid = '{Tools.Getid(moviename)}';");
+                        Tools.RunCommand($"delete from watchlistdata where userid = '{Context.User.Id}' and netflixid = '{Tools.Getid(moviename)}';");
                         await Context.Message.AddReactionAsync(new Emoji("✅"));
                         return;
                     }
@@ -402,13 +460,13 @@ namespace Netdb
         {
             if (Context.Channel.GetType() == typeof(SocketDMChannel))
             {
-                if (Tools.Reader($"select * from subscriberlist where guildid = '{0}' and channelid = '{Context.User.Id}';"))
+                if (Tools.Reader($"select null from subscriberdata where guildid = '{0}' and channelid = '{Context.User.Id}';"))
                 {
                     Tools.Embedbuilder("You have already subscribed",Color.DarkRed, Context.Channel);
                     return;
                 }
 
-                Tools.RunCommand($"insert into subscriberlist (channelid, since,guildid) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{0}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{0}');");
             }
             else
             {
@@ -421,7 +479,7 @@ namespace Netdb
                 }
 
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from subscriberlist where guildid = '{Context.Guild.Id}';";
+                cmd.CommandText = $"select guildid, channelid from subscriberdata where guildid = '{Context.Guild.Id}';";
                 var reader = await cmd.ExecuteReaderAsync();
 
                 if (reader.Read())
@@ -435,7 +493,7 @@ namespace Netdb
                 }
                 reader.Close();
 
-                Tools.RunCommand($"insert into subscriberlist (channelid, since,guildid) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{Context.Guild.Id}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','{Context.Guild.Id}');");
             }
             Tools.Embedbuilder("You will now recieve an update about whats coming to Netflix every day", Color.Green, Context.Channel);
         }
@@ -464,7 +522,7 @@ namespace Netdb
                 id = Context.Channel.Id;
             }
             
-            Tools.RunCommand($"delete from subscriberlist where channelid = '{id}';");
+            Tools.RunCommand($"delete from subscriberdata where channelid = '{id}';");
             Tools.Embedbuilder("Ok :(",Color.Green, Context.Channel);
         }
 

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using System.IO;
-using System.Net;
 using MySql.Data.MySqlClient;
 using System.Reflection;
 
@@ -16,252 +14,9 @@ namespace Netdb
 
         [Command("add")]
         [Summary("Adds a movie or series to the database")]
-        public async Task Add([Remainder] string input)
+        public async Task Add([Remainder]string id)
         {
-            if (Tools.ValidateSQLValues(input, Context.Channel))
-            {
-                return;
-            }
-
-            if (!Tools.IsModerator(Context.User))
-            {
-                Tools.Embedbuilder("You have to be a moderator to use this command", Color.DarkRed,Context.Channel);
-                return;
-            }
-
-            string[] content = input.Split(",");
-
-            if (content[0].ToLower() == "movie" || content[0].ToLower() == "series")
-            {
-                content[1] = content[1].Trim();
-
-                if (Tools.IsAvailable(content[1]))
-                {
-                    Tools.Embedbuilder("This movie/series is already in the library", Color.DarkRed,Context.Channel);
-                    return;
-                }
-                else
-                {
-                    content[1] = content[1].Trim();
-
-                    var cmd = Program._con.CreateCommand();
-                    cmd.CommandText = "select * from moviedata where movieName = 'null';";
-                    var reader = await cmd.ExecuteReaderAsync();
-
-                    if (reader.Read())
-                    {
-                        int id = (int)reader["id"];
-                        reader.Close();
-                        Tools.RunCommand($"update moviedata set movieName = '{content[1]}' where id = '{id}'; ");
-
-                        if (content[0].ToLower() == "movie")
-                        {
-                            Tools.RunCommand($"update moviedata set type = '0' where movieName = '{content[1]}'; ");
-                            await Context.Message.AddReactionAsync(new Emoji("✅"));
-                            Tools.UpdateContentadded(Context.User);
-                            return;
-                        }
-                        else if (content[0].ToLower() == "series")
-                        {
-                            Tools.RunCommand($"update moviedata set type = '1' where movieName = '{content[1]}'; ");
-                            await Context.Message.AddReactionAsync(new Emoji("✅"));
-                            Tools.UpdateContentadded(Context.User);
-                            return;
-                        }
-                    }
-
-                    reader.Close();
-
-                    if (content[0].ToLower() == "movie")
-                    {
-                        Tools.RunCommand($"insert into moviedata (movieName, type) values ('{content[1]}', '{0}');");
-                        await Context.Message.AddReactionAsync(new Emoji("✅"));
-                        Tools.UpdateContentadded(Context.User);
-                        return;
-                    }
-                    else if (content[0].ToLower() == "series")
-                    {
-                        Tools.RunCommand($"insert into moviedata (movieName, type) values ('{content[1]}', '{1}');");
-                        await Context.Message.AddReactionAsync(new Emoji("✅"));
-                        Tools.UpdateContentadded(Context.User);
-                        return;
-                    }
-                }
-            }
-
-            content[0] = content[0].Trim();
-
-            if (!Tools.IsAvailable(content[0]))
-            {
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + content[0] + "';";
-                var reader = await cmd.ExecuteReaderAsync();
-
-                if (reader.Read())
-                {
-                    content[0] = (string)reader["movieName"];
-                    reader.Close();
-                }
-                else
-                {
-                    reader.Close();
-                    Tools.Embedbuilder("This movie is not available.", Color.DarkRed, Context.Channel);
-                    reader.Dispose();
-                    cmd.Dispose();
-                    return;
-                }
-            }
-            content[1] = content[1].Replace(" ", "");
-
-            if (content[1] == "age")
-            {
-                if (!int.TryParse(content[2], out int age))
-                {
-                    Tools.Embedbuilder("The age must be a number", Color.DarkRed, Context.Channel);
-                    return;
-                }
-
-                if (age < 0 || age > 21)
-                {
-                    Tools.Embedbuilder("Age must be between 0 and 21", Color.DarkRed, Context.Channel);
-                    return;
-                }
-
-                if (age == 0)
-                {
-                    age = 69;
-                }
-
-                Tools.RunCommand($"update moviedata set age = '{age}' where movieName = '{content[0]}'; ");
-                await Context.Message.AddReactionAsync(new Emoji("✅"));
-                Tools.UpdateContentadded(Context.User);
-            }
-            else if (content[1] == "description")
-            {
-                if (content[2] == "")
-                {
-                    Tools.Embedbuilder("Please provide a description", Color.DarkRed, Context.Channel);
-                    return;
-                }
-
-                if (content[2].StartsWith(" "))
-                {
-                    content[2] = content[2].Remove(0, 1);
-                }
-
-                string description = content[2];
-
-                if (content.Length > 2)
-                {
-                    for (int i = 3; i < content.Length; i++)
-                    {
-                        description += ", " + content[i];
-                    }
-                }
-
-                if (description.Length > 300)
-                {
-                    Tools.Embedbuilder("Descritpion must be less than 300 charactars", Color.DarkRed, Context.Channel);
-                    return;
-                }
-
-                Tools.RunCommand($"update moviedata set description = '{description}' where movieName = '{content[0]}'; ");
-                await Context.Message.AddReactionAsync(new Emoji("✅"));
-                Tools.UpdateContentadded(Context.User);
-            }
-            else if (content[1] == "genres")
-            {
-                Tools.RunCommand($"update moviedata set genres = '{content[2]}' where movieName = '{content[0]}'; ");
-                await Context.Message.AddReactionAsync(new Emoji("✅"));
-                Tools.UpdateContentadded(Context.User);
-            }
-            else if (content[1] == "releasedate" || content[1] == "rd")
-            {
-                if (int.TryParse(content[2], out int releasedate) && releasedate < DateTime.Now.Year + 1 && releasedate > 1888)
-                {
-                    Tools.RunCommand($"update moviedata set releaseDate = '{Convert.ToInt32(content[2])}' where movieName = '{content[0]}'; ");
-                    await Context.Message.AddReactionAsync(new Emoji("✅"));
-                    Tools.UpdateContentadded(Context.User);
-                    return;
-                }
-
-                Tools.Embedbuilder("The releasedate must be a number between 1888 and " + DateTime.Now.Year, Color.DarkRed, Context.Channel);
-            }
-            else if (content[1] == "length")
-            {
-                if (int.TryParse(content[2], out int length) && length > 0)
-                {
-                    Tools.RunCommand($"update moviedata set movieLength = '{Convert.ToInt32(content[2])   }' where movieName = '{content[0]}'; ");
-                    await Context.Message.AddReactionAsync(new Emoji("✅"));
-                    Tools.UpdateContentadded(Context.User);
-                    return;
-                }
-
-                Tools.Embedbuilder("The length must be a number greater than 0", Color.DarkRed, Context.Channel);
-            }
-            else if (content[1] == "image")
-            {
-                var attachments = Context.Message.Attachments;
-
-                if (attachments.Count == 0)
-                {
-                    Tools.Embedbuilder("You have to attach a file", Color.Blue, Context.Channel);
-                    return;
-                }
-
-                if (attachments.ElementAt(0).Filename.EndsWith(".png"))
-                {
-                    string fileurl = attachments.ElementAt(0).Url;
-
-                    WebClient mywebclient = new WebClient();
-
-                    byte[] ImageData = mywebclient.DownloadData(fileurl);
-
-                    var cmd = Program._con.CreateCommand();
-                    cmd.CommandText = $"update moviedata set image = @image where id = '{Tools.Getid(content[0])}';";
-
-                    var blob = new MySqlParameter("@image", MySqlDbType.MediumBlob, ImageData.Length)
-                    {
-                        Value = ImageData
-                    };
-
-                    cmd.Parameters.Add(blob);
-
-                    cmd.ExecuteNonQuery();
-
-                    await Context.Message.AddReactionAsync(new Emoji("✅"));
-
-                    Tools.UpdateContentadded(Context.User);
-
-                    cmd.Dispose();
-                }
-                else
-                {
-                    Tools.Embedbuilder("The file has to be a png!", Color.Blue, Context.Channel);
-                }
-            }
-            else if (content[1] == "id")
-            {
-                if (content[2].Length != 8)
-                {
-                    Tools.Embedbuilder("This is not a valid id", Color.DarkRed, Context.Channel);
-                    return;
-                }
-
-                if (!int.TryParse(content[2], out int id))
-                {
-                    Tools.Embedbuilder("The id must be a number", Color.DarkRed, Context.Channel);
-                    return;
-                }
-
-                Tools.RunCommand($"update moviedata set netflixid = '{id}' where movieName = '{content[0]}'; ");
-                await Context.Message.AddReactionAsync(new Emoji("✅"));
-                Tools.UpdateContentadded(Context.User);
-            }
-            else
-            {
-                Tools.Embedbuilder("Your are missing an operator", Color.DarkRed, Context.Channel);
-            }
+            
         }
 
         [Command("remove")]
@@ -284,21 +39,23 @@ namespace Netdb
             {
                 int id = Tools.Getid(moviename);
 
-                Tools.RunCommand($"update moviedata set movieName = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where movieName = '{moviename}';");
+                Tools.RunCommand($"update moviedata set name = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where movieName = '{moviename}';");
 
-                Tools.RunCommand($"delete from userdata where movieid = '{id}';");
+                Tools.RunCommand($"delete from watchlistdata where netflixid = '{id}';");
 
-                Tools.RunCommand($"delete from reviewsdata where movieid = '{id}';");
+                Tools.RunCommand($"delete from reviews where netflixid = '{id}';");
+
+                Tools.RunCommand($"delete from totalreviews where netflixid = '{id}';");
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else if (Tools.IsAvailableId(moviename))
             {
-                Tools.RunCommand($"update moviedata set movieName = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where id = '{moviename}';");
+                Tools.RunCommand($"update netflixdata set name = 'null',description = 'null',age = '0',genres = 'null',movieLength = '0',searchcounter = '0',releaseDate = '0',reviews = '0',reviewpoints = '0',image = 'null' where id = '{moviename}';");
 
-                Tools.RunCommand($"delete from userdata where movieid = '{moviename}';");
+                Tools.RunCommand($"delete from watchlistdata where netflixid = '{moviename}';");
 
-                Tools.RunCommand($"delete from reviewsdata where movieid = '{moviename}';");
+                Tools.RunCommand($"delete from reviews where netflixid = '{moviename}';");
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
@@ -348,7 +105,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from comingsoon where moviename = '{moviename}';";
+            cmd.CommandText = $"select null from comingsoon where moviename = '{moviename}';";
             var reader = cmd.ExecuteReader();
 
             if (reader.Read())
@@ -370,85 +127,6 @@ namespace Netdb
             cmd.Dispose();
         }
 
-        [Command("missing")]
-        [Alias("m")]
-        [Summary("Shows what's missing in the Database")]
-        public async Task ShowMissing(int i = 0)
-        {
-            if (Tools.IsModerator(Context.User))
-            {
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from moviedata where description = 'null' or age = '0' or movieLength = '0' or releasedate = '0' or image is null;";
-                var reader = cmd.ExecuteReader();
-
-                if (!reader.Read())
-                {
-                    Tools.Embedbuilder("There is currently nothing missing", Color.Green, Context.Channel);
-                    reader.Close();
-                    return;
-                }
-
-                for (int y = i; y > 0; y--)
-                {
-                    reader.Read();
-                }
-
-                while ((string)reader["movieName"] == "null")
-                {
-                    reader.Read();
-                }
-
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.WithTitle((string)reader["movieName"]);
-                eb.WithDescription("#add " + (string)reader["movieName"] + ",");
-
-                string missing = "";
-
-                if ((string)reader["description"] == "null")
-                {
-                    missing += "description, ";
-                }
-
-                if ((int)reader["age"] == 0)
-                {
-                    missing += "age, ";
-                }
-
-                if ((string)reader["genres"] == "null")
-                {
-                    missing += "genres, ";
-                }
-
-                if ((int)reader["movieLength"] == 0)
-                {
-                    missing += "length, ";
-                }
-
-                if ((int)reader["releaseDate"] == 0)
-                {
-                    missing += "releasedate, ";
-                }
-
-                if (reader["image"] == DBNull.Value)
-                {
-                    missing += "image";
-                }
-
-                reader.Close();
-
-                eb.AddField("Missing", missing);
-
-                await Context.Channel.SendMessageAsync("", false, eb.Build());
-
-                reader.Dispose();
-                cmd.Dispose();
-            }
-            else
-            {
-                Tools.Embedbuilder("You have to be a moderator to do this", Color.DarkRed, Context.Channel);
-            }
-        }
-
         [Command("update")]
         [Alias("u")]
         [Summary("Updates something in the Db")]
@@ -456,10 +134,6 @@ namespace Netdb
         {
             if (Tools.IsModerator(Context.User))
             {
-                Program.BackupDB();
-                Program.GetMostsearched();
-                Program.GetBestReviewed();
-
                 Program.Perform5MinuteUpdate();
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
@@ -482,7 +156,7 @@ namespace Netdb
                     return;
                 }
 
-                Tools.RunCommand($"insert into moderation (userid, since,contentadded) values ('{user.Id}', '{DateTime.Now.Date:yyyy-MM-dd}','0');");
+                Tools.RunCommand($"insert into moderation (userid, ismod, since,contentadded) values ('{user.Id}','1', '{DateTime.Now.Date:yyyy-MM-dd}','0');");
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
             else
@@ -551,7 +225,7 @@ namespace Netdb
                 reader.Close();
 
                 cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from reviewsdata where userid = '{id}';";
+                cmd.CommandText = $"select null from reviews where userid = '{id}';";
                 reader = await cmd.ExecuteReaderAsync();
 
                 int reviews = 0;

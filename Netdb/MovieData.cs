@@ -4,19 +4,27 @@ namespace Netdb
     public class MovieData
     {
         private string _name;
-        private bool _type;
+        private string _type;
         private string _description;
         private string _link;
         private int _id;
         private int _age;
         private int _releasedate;
-        private int _length;
+        private string _length;
         private string _genres;
         private int _review;
         private int _averagereview;
         private double _totalreview;
         private byte[] _image;
         private string _netflixid;
+        private bool _hasreviewed;
+
+        public bool Hasreviewed
+        {
+            get { return _hasreviewed; }
+            set { _hasreviewed = value; }
+        }
+
 
         public string Netflixid
         {
@@ -60,7 +68,7 @@ namespace Netdb
         }
 
 
-        public int Length
+        public string Length
         {
             get { return _length; }
             set { _length = value; }
@@ -102,7 +110,7 @@ namespace Netdb
         }
 
 
-        public bool Type
+        public string Type
         {
             get { return _type; }
             set { _type = value; }

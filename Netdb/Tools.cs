@@ -23,13 +23,13 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where movieName = '" + moviename + "';";
+            cmd.CommandText = $"select netflixid from netflixdata where name_en = '{moviename}' or netflixid = '{moviename}';";
             var reader = cmd.ExecuteReader();
             Program.openDataReaders.Add(reader);
 
             if (reader.Read())
             {
-                id = (int)reader["id"];
+                id = (int)reader["netflixid"];
                 reader.Close();
                 return id;
             }
@@ -96,57 +96,6 @@ namespace Netdb
             }
         }
 
-        public static bool ValidateSQLValues(string values)
-        {
-            values = values.ToLower();
-
-            int sus = 0;
-
-            if (values.ToLower().Contains(';'))
-            {
-                sus++;
-            }
-
-            if (values.Contains("drop"))
-            {
-                sus++;
-            }
-
-            if (values.Contains("table"))
-            {
-                sus++;
-            }
-
-            if (values.Contains('\''))
-            {
-                sus++;
-            }
-
-            if (values.Contains('='))
-            {
-                sus++;
-            }
-
-            if (values.Contains("update"))
-            {
-                sus++;
-            }
-
-            if (sus >= 3)
-            {
-                return true;
-            }
-            else
-            {
-                if (sus > 0)
-                {
-                    Console.WriteLine($"Kinda sus value detected on sus lvl {sus}: " + values);
-                }
-
-                return false;
-            }
-        }
-
         /// <summary>
         /// Test if the movie/series is already in your watchlist
         /// </summary>
@@ -155,21 +104,20 @@ namespace Netdb
         /// <returns></returns>
         public static bool Exists(int movieid, ulong userid)
         {
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from userdata where userid = '{userid}' and movieid = '{movieid}';";
+            cmd.CommandText = $"select null from watchlistdata where userid = '{userid}' and netflixid = '{movieid}';";
             var reader = cmd.ExecuteReader();
             Program.openDataReaders.Add(reader);
             if (reader.Read())
             {
                 reader.Close();
+                reader.Dispose();
+                cmd.Dispose();
                 return true;
             }
             reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
             return false;
         }
 
@@ -178,61 +126,43 @@ namespace Netdb
         /// </summary>
         /// <param name="search"></param>
         /// <param name="movie"></param>
-        public static void GetMovieData(string search, out MovieData movie)
+        public static void GetMovieData(string search, out MovieData movie, ulong userid)
         {
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where movieName = '" + search + "';";
+            cmd.CommandText = "select * from netflixdata where name_en = '" + search + "';";
             var redar = cmd.ExecuteReader();
             Program.openDataReaders.Add(redar);
             if (!redar.Read())
             {
                 redar.Close();
                 cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + search + "';";
+                cmd.CommandText = "select * from netflixdata where netflixid = '" + search + "';";
                 redar = cmd.ExecuteReader();
                 redar.Read();
             }
 
             byte[] image;
 
-            if (redar["image"] == DBNull.Value)
+            if (redar["desktopImg"] == DBNull.Value)
             {
                 image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
             }
             else
             {
-                image = (byte[])redar["image"];
+                image = (byte[])redar["desktopImg"];
             }
-
-
-            string link;
-            if (redar["netflixid"] == DBNull.Value)
-            {
-                link = ("https://www.netflix.com/search?q=" + redar["movieName"]).Replace(" ", "");
-            }
-            else
-            {
-                link = "https://www.netflix.com/title/" + redar["netflixid"];
-            }
-
+  
             movie = new MovieData
             {
                 Age = (int)redar["age"],
-                Description = (string)redar["description"],
-                Id = (int)redar["id"],
-                Link = link,
-                Name = (string)redar["movieName"],
-                Type = Convert.ToBoolean(redar["type"]),
-                Releasedate = (int)redar["releaseDate"],
-                Length = (int)redar["movieLength"],
-                Genres = (string)redar["genres"],
-                AverageReview = ((int)redar["reviews"] != 0) ? (int)redar["reviewpoints"] / (int)redar["reviews"] : 0,
-                Review = (int)redar["reviews"],
+                Description = (string)redar["description_en"],
+                Id = (int)redar["netflixid"],
+                Link = "https://www.netflix.com/title/" + redar["netflixid"],
+                Name = (string)redar["name_en"],
+                Type = (string)redar["type"],
+                Releasedate = (int)redar["releasedate"],
+                Length = (string)redar["length"],
+                Genres = (string)redar["topGenre"],
                 Image = image,
             };
 
@@ -240,30 +170,40 @@ namespace Netdb
 
             redar.Close();
 
-            RunCommand($"update moviedata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
-        }
-        /// <summary>
-        /// Turns the length into hours and minutes
-        /// </summary>
-        /// <param name="minutes"></param>
-        /// <param name="hour"></param>
-        /// <param name="min"></param>
-        public static void GetTime(int minutes, out int hour, out int min)
-        {
-            hour = 0;
+            RunCommand($"update netflixdata set searchcounter = '{searchcounter}' where id = '{movie.Id}'; ");
 
-            for (int i = 0; i < minutes / 60 + 1; i++)
+            cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from totalreviews where netflixid = '{movie.Id}';";
+            redar = cmd.ExecuteReader();
+
+            if (redar.Read())
             {
-                if (minutes >= 60)
-                {
-                    minutes -= 60;
-                    hour++;
-                }
+                movie.AverageReview = Convert.ToInt32(redar["points"]) / Convert.ToInt32(redar["amount"]);
             }
 
-            min = minutes;
+            redar.Close();
+
+            cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from reviews where netflixid = '{movie.Id}' and userid = '{userid}';";
+            redar = cmd.ExecuteReader();
+
+            if (redar.Read())
+            {
+                movie.Hasreviewed = true;
+                movie.Review = Convert.ToInt32(redar["points"]);
+            }
+
+            redar.Close();
+
+            redar.Dispose();
+            cmd.Dispose();
         }
 
+        /// <summary>
+        /// Checks if a movie/series is in the database by name
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns>true or false</returns>
         public static bool IsAvailable(string search)
         {
             if (search == "null")
@@ -271,37 +211,43 @@ namespace Netdb
                 return false;
             }
 
-            if (Program._con.State.ToString() == "Closed")
-            {
-                Program._con.Open();
-            }
-
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from moviedata where MovieName = '" + search + "';";
+            cmd.CommandText = "select null from netflixdata where name_en = '" + search + "';";
             var reader = cmd.ExecuteReader();
             Program.openDataReaders.Add(reader);
             if (reader.Read())
             {
                 reader.Close();
+                reader.Dispose();
+                cmd.Dispose();
                 return true;
             }
             reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
             return false;
         }
 
+        /// <summary>
+        /// Checks if a movie/series is in the database by id and name
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns>true or false</returns>
         public static bool IsAvailableId(string search)
         {
             if (!Tools.IsAvailable(search))
             {
                 var cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from moviedata where id = '" + search + "';";
+                cmd.CommandText = "select name_en from netflixdata where netflixid = '" + search + "';";
                 var reader = cmd.ExecuteReader();
                 Program.openDataReaders.Add(reader);
                 if (reader.Read())
                 {
-                    if ((string)reader["movieName"] == "null")
+                    if ((string)reader["name_en"] == "null")
                     {
                         reader.Close();
+                        reader.Dispose();
+                        cmd.Dispose();
                         return false;
                     }
                     reader.Close();
@@ -309,12 +255,18 @@ namespace Netdb
                 else
                 {
                     reader.Close();
+                    reader.Dispose();
+                    cmd.Dispose();
                     return false;
                 }
             }
             return true;
         }
 
+        /// <summary>
+        /// Runs a MySQL command
+        /// </summary>
+        /// <param name="command"></param>
         public static void RunCommand(string command)
         {
             var cmd = Program._con.CreateCommand();
@@ -333,12 +285,22 @@ namespace Netdb
             if (reader.Read())
             {
                 reader.Close();
+                reader.Dispose();
+                cmd.Dispose();
                 return true;
             }
             reader.Close();
+            reader.Dispose();
+            cmd.Dispose();
             return false;
         }
 
+        /// <summary>
+        /// Sends a simple embed into a channel
+        /// </summary>
+        /// <param name="description"></param>
+        /// <param name="color"></param>
+        /// <param name="channel"></param>
         public static void Embedbuilder(string description, Color color, ISocketMessageChannel channel)
         {
             var eb = new EmbedBuilder();
@@ -350,7 +312,7 @@ namespace Netdb
         public static void UpdateContentadded(IUser user)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moderation where userid = '{user.Id}';";
+            cmd.CommandText = $"select contentadded from moderation where userid = '{user.Id}';";
             var reader = cmd.ExecuteReader();
             Program.openDataReaders.Add(reader);
             reader.Read();
@@ -361,12 +323,20 @@ namespace Netdb
             reader.Close();
 
             Tools.RunCommand($"update moderation set contentadded = '{contentadded}' where userid = '{user.Id}'; ");
+
+            cmd.Dispose();
+            reader.Dispose();
         }
 
+        /// <summary>
+        /// Checks if a user is a moderator
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public static bool IsModerator(IUser user)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from moderation where userid = '{user.Id}' and ismod = '{1}';";
+            cmd.CommandText = $"select null from moderation where userid = '{user.Id}' and ismod = '{1}';";
             var reader = cmd.ExecuteReader();
             Program.openDataReaders.Add(reader);
             if (reader.Read())
@@ -378,11 +348,16 @@ namespace Netdb
             return false;
         }
 
-        public static void Search(string search, out EmbedBuilder eb, out FileStream stream, out string name)
+        /// <summary>
+        /// Searches a movie/series and returns it in an embed
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="eb"></param>
+        /// <param name="stream"></param>
+        /// <param name="userid"></param>
+        public static void Search(string search, out EmbedBuilder eb, out FileStream stream, ulong userid)
         {
-            GetMovieData(search, out MovieData movie);
-            name = movie.Name;
-            GetTime(movie.Length, out int hour, out int min);
+            GetMovieData(search, out MovieData movie, userid);
 
             stream = new FileStream("nedsofest.auni", FileMode.Create);
             eb = new EmbedBuilder();
@@ -397,33 +372,28 @@ namespace Netdb
 
             eb.WithImageUrl("attachment://example.png");
 
-            eb.WithColor(Color.Blue);
-
-            string embeddate;
-            if (movie.Releasedate == 0)
+            if (!movie.Hasreviewed)
             {
-                embeddate = "N/A";
+                eb.WithFooter(footer => footer.Text = "#" + movie.Id);
+                eb.WithColor(Color.Blue);
             }
             else
             {
-                embeddate = movie.Releasedate.ToString();
+                eb.WithFooter(footer => footer.Text = "#" + movie.Id + " You rated this movie a " + movie.Review + "/10");
+                eb.WithColor(Color.Green);
             }
+     
+
+            eb.WithTitle($"**{movie.Name.ToUpper()}**");
 
             string embedage;
             if (movie.Age == 0)
             {
-                embedage = "N/A";
+                embedage = "All";
             }
             else
             {
-                if (movie.Age == 69)
-                {
-                    embedage = "All";
-                }
-                else
-                {
-                    embedage = movie.Age.ToString() + "+";
-                }
+                embedage = movie.Age.ToString() + "+";
             }
 
             if (movie.Genres == "null")
@@ -431,35 +401,13 @@ namespace Netdb
                 movie.Genres = "N/A";
             }
 
-            if (movie.Type == false)
+            if (movie.Type == "Movie")
             {
-                if (movie.Length == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `N/A` \n `" + movie.Genres + "`");
-                }
-                else if (hour == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + min + "min` \n `" + movie.Genres + "`");
-                }
-                else if (min == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + hour + "h` \n `" + movie.Genres + "`");
-                }
-                else
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + hour + "h " + min + "min` \n `" + movie.Genres + "`");
-                }
+                eb.WithDescription("`" + movie.Releasedate.ToString() + "` `" + embedage + "`   `" + movie.Length + "`   \n `" + movie.Genres + "`");
             }
             else
             {
-                if (movie.Length == 0)
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `N/A` \n `" + movie.Genres + "`");
-                }
-                else
-                {
-                    eb.WithDescription("`" + embeddate + "` `" + embedage + "`  `" + movie.Length + " Seasons` \n `" + movie.Genres + "`");
-                }
+                eb.WithDescription("`" + movie.Releasedate.ToString() + "` `" + embedage + "`  `" + movie.Length + "` \n `" + movie.Genres + "`");
             }
 
             if (movie.Description == "null")
@@ -471,23 +419,23 @@ namespace Netdb
 
             string text = "";
 
-            if (movie.Review == 0)
+            if (movie.AverageReview == 0)
             {
-                if (movie.Type)
+                if (movie.Type == "Movie")
                 {
-                    text += "This series has no reviews yet.";
+                    text += "This movie has no reviews yet.";
                 }
                 else
                 {
-                    text += "This movie has no reviews yet.";
+                    text += "This series has no reviews yet.";
                 }
             }
             else
             {
-                text += movie.AverageReview + "/10 by " + movie.Review + " user/s";
+                text += movie.AverageReview + "/10";
             }
 
-            if (!movie.Type)
+            if (movie.Type == "Movie")
             {
                 text += "\n watch the movie [here](" + movie.Link + ")";
             }
@@ -497,8 +445,6 @@ namespace Netdb
             }
 
             eb.AddField("Review:", text);
-
-            eb.WithFooter(footer => footer.Text = "#" + movie.Id.ToString("D5"));
         }
     }
 }

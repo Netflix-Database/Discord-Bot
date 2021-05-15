@@ -8,18 +8,6 @@ namespace Netdb
     class CommandDB
     {
         /// <summary>
-        /// Setup for Database Command table
-        /// </summary>
-        public static void Setup()
-        {
-            var cmd = Program._con.CreateCommand();
-            string command = "CREATE TABLE IF NOT EXISTS sys.commands (id INT NOT NULL AUTO_INCREMENT Primary Key,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL); ";
-            cmd.CommandText = command;
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
-        }
-
-        /// <summary>
         /// Get All data for a specific command
         /// </summary>
         /// <param name="command">Command or Alias to search for</param>
@@ -46,7 +34,7 @@ namespace Netdb
                 alias = r[2].ToString();
                 short_description = r[3].ToString();
                 syntax = r[4].ToString();
-                mod_required = r[5].ToString() == "1" ? true : false;
+                mod_required = r[5].ToString() == "1";
                 uses = int.Parse(r[6].ToString());
 
                 r.Close();
@@ -58,13 +46,14 @@ namespace Netdb
                 cmd = Program._con.CreateCommand();
                 cmd.CommandText = $"select * from commands where alias = '{command}';";
                 r = cmd.ExecuteReader();
+
                 if (r.Read())
                 {
                     commandA = r[1].ToString();
                     alias = r[2].ToString();
                     short_description = r[3].ToString();
                     syntax = r[4].ToString();
-                    mod_required = r[5].ToString() == "1" ? true : false;
+                    mod_required = r[5].ToString() == "1";
                     uses = int.Parse(r[6].ToString());
 
                     r.Close();
@@ -72,6 +61,8 @@ namespace Netdb
                 else
                 {
                     r.Close();
+                    r.Dispose();
+                    cmd.Dispose();
                     return false;
                 }
             }
@@ -107,7 +98,7 @@ namespace Netdb
                 aliasN.Add(r[2].ToString());
                 short_DN.Add(r[3].ToString());
                 DN.Add(r[4].ToString());
-                modReqN.Add(r[5].ToString() == "1" ? true : false);
+                modReqN.Add(r[5].ToString() == "1");
                 usesN.Add(int.Parse(r[6].ToString()));
             }
 
@@ -128,10 +119,7 @@ namespace Netdb
         /// <param name="command">Command to update count from</param>
         public static void CommandUsed(string command)
         {
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"update sys.commands set uses = uses + 1 where command = '{command}';";
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            Tools.RunCommand($"update sys.commands set uses = uses + 1 where command = '{command}';");
         }
     }
 }
