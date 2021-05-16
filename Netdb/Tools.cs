@@ -23,7 +23,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select netflixid from netflixdata where name_en = '{moviename}' or netflixid = '{moviename}';";
+            cmd.CommandText = $"select netflixid from netflixdata where name_en = '{moviename}' or netflixid = '{moviename}' or name_de = '{moviename}';";
             var reader = cmd.ExecuteReader();
             Program.openDataReaders.Add(reader);
 
@@ -129,7 +129,7 @@ namespace Netdb
         public static void GetMovieData(string search, out MovieData movie, ulong userid)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select * from netflixdata where name_en = '" + search + "';";
+            cmd.CommandText = $"select * from netflixdata where name_en = '{search}' or name_de = '{search}';";
             var redar = cmd.ExecuteReader();
             Program.openDataReaders.Add(redar);
             if (!redar.Read())
@@ -212,7 +212,7 @@ namespace Netdb
             }
 
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = "select null from netflixdata where name_en = '" + search + "';";
+            cmd.CommandText = $"select null from netflixdata where name_en = '{search}' or name_de = '{search}';";
             var reader = cmd.ExecuteReader();
             Program.openDataReaders.Add(reader);
             if (reader.Read())

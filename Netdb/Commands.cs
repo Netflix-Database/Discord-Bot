@@ -33,7 +33,7 @@ namespace Netdb
 
             if (search.Contains("'"))
             {
-                search = search.Replace("'", "\'");
+                search = search.Replace("'", "\\'");
             }
 
             if (!Tools.IsAvailableId(search))
@@ -108,7 +108,7 @@ namespace Netdb
             if (!Tools.IsAvailable(moviename))
             {
                 var cmd1 = Program._con.CreateCommand();
-                cmd1.CommandText = "select * from netflixdata where netflixid = '" + moviename + "';";
+                cmd1.CommandText = $"select * from netflixdata where netflixid = '{moviename}';";
                 var reader1 = await cmd1.ExecuteReaderAsync();
 
                 if (!reader1.Read())
