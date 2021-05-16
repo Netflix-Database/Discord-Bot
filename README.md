@@ -1,4 +1,4 @@
-# Netdb
+# **Netdb**
 
    ## About
 Netdb is a Discord Bot where you can always lookup various stats about a lot of Netflix Movies and Series in seconds!
