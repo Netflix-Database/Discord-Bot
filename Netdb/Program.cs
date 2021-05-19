@@ -603,7 +603,7 @@ namespace Netdb
         public static Task Client_Log(LogMessage arg)
         {
             Console.WriteLine(arg);
-            File.AppendAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt",DateTime.Now + ":  " + arg.Message + "  " + arg.Exception + "\n");
+            File.AppendAllText(filepath + "log.txt",DateTime.Now + ":  " + arg.Message + "  " + arg.Exception + "\n");
             return Task.CompletedTask;
         }
 
