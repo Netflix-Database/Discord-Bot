@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace Netdb
 {
@@ -31,7 +33,7 @@ namespace Netdb
         public static int series = 0;
         public static int subscribers = 0;
         public static int reviews = 0;
-        public static DateTime dailymessagetime = new DateTime(2004, 09, 29, 12, 0, 0, DateTimeKind.Local);
+        public static DateTime dailymessagetime = DateTime.Now.AddSeconds(10);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -43,81 +45,6 @@ namespace Netdb
         public static DiscordSocketClient _client;
         public static CommandService _commands;
         public static IServiceProvider _services;
-
-        public static void HandleError(Exception ex)
-        {
-            try
-            {
-                StackTrace trace = new StackTrace(ex, true);
-                var frame = trace.GetFrame(trace.FrameCount - 1);
-                EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
-                string insight = "";
-                b.WithTitle("Error");
-                b.WithCurrentTimestamp();
-                b.AddField("Exception type", ex.GetType().FullName);
-                b.AddField("Message", ex.Message);
-                b.AddField("Method", frame.GetMethod().Name);
-                if (frame.GetFileName() == "" || frame.GetFileName() == null || frame.GetFileName().Remove(' ') == "")
-                {
-                    b.AddField("File", "-");
-                }
-                else
-                {
-                    b.AddField("File", frame.GetFileName());
-                    string filePath = frame.GetFileName();
-                    if (File.Exists(filePath))
-                    {
-                        string[] lines = new string[5];
-                        var Read = File.ReadAllLines(filePath);
-                        int longest = -1;
-                        int longestIndex = 0;
-                        for (int i = Math.Max(frame.GetFileLineNumber() - 3, 0); i < Math.Min(frame.GetFileLineNumber() + 2, Read.Length); i++)
-                        {
-                            lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = (i+1) + " " + Read[i];
-                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > 60)
-                            {
-                                lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Substring(0, 57) + "...";
-                            }
-                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > longest)
-                            {
-                                longestIndex = i - Math.Max(frame.GetFileLineNumber() - 3, 0);
-                                longest = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length;
-                            }
-                        }
-
-                        if (longest > 60)
-                        {
-                            longest = 60;
-                        }
-
-                        for (int i = 0; i < lines.Length; i++)
-                        {
-                            int cnt = longest - lines[i].Length;
-                            for (int j = 0; j < cnt; j++)
-                            {
-                                lines[i] += " ";
-                            }
-                        }
-                        insight = $"`{frame.GetFileName().Split('/')[frame.GetFileName().Split('/').Length - 1]}:\n{lines[0]}\n{lines[1]}\n{lines[2]}` <--- `\n{lines[3]}\n{lines[4]}`";
-                    }
-                }
-                b.AddField("Line", frame.GetFileLineNumber().ToString());
-                if (insight != "")
-                {
-                    b.AddField("Insight", insight);
-                }
-                else
-                {
-                    b.AddField("Insight", "NA");
-                }
-                errors.Add(b);
-                Console.WriteLine("Error queued. Errors in queue: " + errors.Count);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Error while reading stack trace");
-            }
-        }
 
         public async Task RunBotAsync()
         {
@@ -184,21 +111,6 @@ namespace Netdb
 
                 try
                 {
-                    //BackupDB();
-                }
-                catch (Exception ex)
-                {
-                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup"));
-                    error++;
-                    HandleError(ex);
-                }
-
-                try
-                {
-                    //GetMostsearched();
-
-                    //GetBestReviewed();
-
                     SetupDB();
                 }
                 catch (Exception ex)
@@ -216,6 +128,8 @@ namespace Netdb
 
                 await _client.StartAsync();
 
+                await SendMessages(dailymessagetime);
+
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
 
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
@@ -226,6 +140,81 @@ namespace Netdb
                 error++;
             }
             await Task.Delay(-1);
+        }
+
+        public static void HandleError(Exception ex)
+        {
+            try
+            {
+                StackTrace trace = new StackTrace(ex, true);
+                var frame = trace.GetFrame(trace.FrameCount - 1);
+                EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
+                string insight = "";
+                b.WithTitle("Error");
+                b.WithCurrentTimestamp();
+                b.AddField("Exception type", ex.GetType().FullName);
+                b.AddField("Message", ex.Message);
+                b.AddField("Method", frame.GetMethod().Name);
+                if (frame.GetFileName() == "" || frame.GetFileName() == null || frame.GetFileName().Remove(' ') == "")
+                {
+                    b.AddField("File", "-");
+                }
+                else
+                {
+                    b.AddField("File", frame.GetFileName());
+                    string filePath = frame.GetFileName();
+                    if (File.Exists(filePath))
+                    {
+                        string[] lines = new string[5];
+                        var Read = File.ReadAllLines(filePath);
+                        int longest = -1;
+                        int longestIndex = 0;
+                        for (int i = Math.Max(frame.GetFileLineNumber() - 3, 0); i < Math.Min(frame.GetFileLineNumber() + 2, Read.Length); i++)
+                        {
+                            lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = (i + 1) + " " + Read[i];
+                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > 60)
+                            {
+                                lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Substring(0, 57) + "...";
+                            }
+                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > longest)
+                            {
+                                longestIndex = i - Math.Max(frame.GetFileLineNumber() - 3, 0);
+                                longest = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length;
+                            }
+                        }
+
+                        if (longest > 60)
+                        {
+                            longest = 60;
+                        }
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            int cnt = longest - lines[i].Length;
+                            for (int j = 0; j < cnt; j++)
+                            {
+                                lines[i] += " ";
+                            }
+                        }
+                        insight = $"`{frame.GetFileName().Split('/')[frame.GetFileName().Split('/').Length - 1]}:\n{lines[0]}\n{lines[1]}\n{lines[2]}` <--- `\n{lines[3]}\n{lines[4]}`";
+                    }
+                }
+                b.AddField("Line", frame.GetFileLineNumber().ToString());
+                if (insight != "")
+                {
+                    b.AddField("Insight", insight);
+                }
+                else
+                {
+                    b.AddField("Insight", "NA");
+                }
+                errors.Add(b);
+                Console.WriteLine("Error queued. Errors in queue: " + errors.Count);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error while reading stack trace");
+            }
         }
 
         public static void OutputErrors(object p)
@@ -552,49 +541,71 @@ namespace Netdb
 
             await Task.Delay(waitingtime);
 
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
-            var reader = cmd.ExecuteReader();
+            string content = "";
 
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.WithColor(Color.Blue);
-                eb.WithTitle("Today's releases");
-                eb.WithCurrentTimestamp();
+            WebClient client = new WebClient();
+            dynamic obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/de_AT/new?body={%22providers%22:[%22nfx%22],%22enable_provider_filter%22:false,%22titles_per_provider%22:10,%22monetization_types%22:[%22ads%22,%22buy%22,%22flatrate%22,%22rent%22,%22free%22],%22page%22:1,%22page_size%22:1,%22fields%22:[%22full_path%22,%22id%22,%22jw_entity_id%22,%22object_type%22,%22offers%22,%22poster%22,%22scoring%22,%22season_number%22,%22show_id%22,%22show_title%22,%22title%22,%22tmdb_popularity%22,%22backdrops%22]}&filter_price_changes=false&language=en"));
 
-                string content = "";
-
-            while(reader.Read())
+            if (true/*obj.days[0].date == DateTime.Now.Date.ToShortDateString()*/)
             {
-                content += reader["moviename"] + "\n";
+                for (int i = 0; i < obj.days[0].providers[0].items.Count; i++)
+                {
+                    if (obj.days[0].providers[0].items[i].object_type == "show_season")
+                    {
+                        content += obj.days[0].providers[0].items[i].show_title + "\n";
+                    }
+                    else if(obj.days[0].providers[0].items[i].object_type == "movie")
+                    {
+                        content += obj.days[0].providers[0].items[i].title + "\n";
+                    }
+                    
+                    Console.WriteLine(content);
+                }
             }
 
-                reader.Close();
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.WithColor(Color.Blue);
+            eb.WithTitle("Today's releases");
+            eb.WithCurrentTimestamp();
+            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"), content);
 
-            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"),content);
-
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from subscriberlist;";
-                reader = cmd.ExecuteReader();
+            var cmd = _con.CreateCommand();
+            cmd.CommandText = $"select * from subscriberdata;";
+            var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
-                if ((ulong)(long)reader["guildid"] != 0)
+                if ((ulong)Convert.ToInt64(reader["guildid"]) != 0)
                 {
-                    ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
-                    await channel.SendMessageAsync("", false, eb.Build());
+                    try
+                    {
+                        ITextChannel channel = _client.GetGuild((ulong)Convert.ToInt64(reader["guildid"])).GetTextChannel((ulong)Convert.ToInt64(reader["channelid"]));
+                        await channel.SendMessageAsync("", false, eb.Build());
+                    }
+                    catch (Exception)
+                    {
+ 
+                    }
                 }
                 else
                 {
-                    IUser user = _client.GetUser((ulong)(long)reader["channelid"]);
-                    await user.SendMessageAsync("", false, eb.Build());
+                    try
+                    {
+                        IUser user = _client.GetUser((ulong)Convert.ToInt64(reader["channelid"]));
+                        await user.SendMessageAsync("", false, eb.Build());
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
             }
 
-                reader.Close();
+            reader.Close();
 
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update subscriberlist set lastupdated = '{DateTime.Now:yyyy-MM-dd}'";
-                cmd.ExecuteNonQuery();
+            cmd = _con.CreateCommand();
+            cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}'";
+            cmd.ExecuteNonQuery();
 
             reader.Dispose();
             cmd.Dispose();

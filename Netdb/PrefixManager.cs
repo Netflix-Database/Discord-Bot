@@ -21,7 +21,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select prefix from prefixes where guildId = '{guildchannel.Guild.Id}';";
             var r = cmd.ExecuteReader();
-            Program.openDataReaders.Add(r);
+
             if (r.Read())
             {
                 string res = r[0].ToString();
