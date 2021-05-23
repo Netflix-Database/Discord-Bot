@@ -546,20 +546,21 @@ namespace Netdb
             WebClient client = new WebClient();
             dynamic obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/de_AT/new?body={%22providers%22:[%22nfx%22],%22enable_provider_filter%22:false,%22titles_per_provider%22:10,%22monetization_types%22:[%22ads%22,%22buy%22,%22flatrate%22,%22rent%22,%22free%22],%22page%22:1,%22page_size%22:1,%22fields%22:[%22full_path%22,%22id%22,%22jw_entity_id%22,%22object_type%22,%22offers%22,%22poster%22,%22scoring%22,%22season_number%22,%22show_id%22,%22show_title%22,%22title%22,%22tmdb_popularity%22,%22backdrops%22]}&filter_price_changes=false&language=en"));
 
-            if (true/*obj.days[0].date == DateTime.Now.Date.ToShortDateString()*/)
+            for (int i = 0; i < obj.days.Count; i++)
             {
-                for (int i = 0; i < obj.days[0].providers[0].items.Count; i++)
+                if (obj.days[i].date == DateTime.Now.Date.AddDays(-1).ToString("yyyy-MM-dd"))
                 {
-                    if (obj.days[0].providers[0].items[i].object_type == "show_season")
+                    for (int y = 0; y < obj.days[i].providers[0].items.Count; y++)
                     {
-                        content += obj.days[0].providers[0].items[i].show_title + "\n";
+                        if (obj.days[i].providers[0].items[y].object_type == "show_season")
+                        {
+                            content += obj.days[i].providers[0].items[y].show_title + "\n";
+                        }
+                        else if (obj.days[i].providers[0].items[y].object_type == "movie")
+                        {
+                            content += obj.days[i].providers[0].items[y].title + "\n";
+                        }
                     }
-                    else if(obj.days[0].providers[0].items[i].object_type == "movie")
-                    {
-                        content += obj.days[0].providers[0].items[i].title + "\n";
-                    }
-                    
-                    Console.WriteLine(content);
                 }
             }
 

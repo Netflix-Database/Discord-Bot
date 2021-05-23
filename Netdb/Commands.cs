@@ -456,7 +456,7 @@ namespace Netdb
         [Command("subscribe")]
         [Alias("sc")]
         [Summary("When you are subscribed the bot will send you the newest movies daily")]
-        public async Task Subscribe()
+        public async Task Subscribe(string country)
         {
             if (Context.Channel.GetType() == typeof(SocketDMChannel))
             {
