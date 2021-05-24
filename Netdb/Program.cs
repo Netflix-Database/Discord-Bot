@@ -33,7 +33,7 @@ namespace Netdb
         public static int series = 0;
         public static int subscribers = 0;
         public static int reviews = 0;
-        public static DateTime dailymessagetime = DateTime.Now.AddSeconds(10);
+        public static DateTime dailymessagetime = DateTime.Now.AddSeconds(20);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -48,8 +48,6 @@ namespace Netdb
 
         public async Task RunBotAsync()
         {
-            try
-            {
                 _client = new DiscordSocketClient();
                 _commands = new CommandService();
 
@@ -122,23 +120,18 @@ namespace Netdb
 
                 updateTimer = new Timer((e) =>
                 {
-                    Perform5MinuteUpdate();
+                    Perform60MinuteUpdate();
                 }, null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(60));
 
 
                 await _client.StartAsync();
 
-                await SendMessages(dailymessagetime);
+                await SendMessages(dailymessagetime, "de_AT");
 
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
 
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
-            }
-            catch (Exception exx)
-            {
-                HandleError(exx);
-                error++;
-            }
+
             await Task.Delay(-1);
         }
 
@@ -227,7 +220,7 @@ namespace Netdb
             }
         }
 
-        public static void Perform5MinuteUpdate()
+        public static void Perform60MinuteUpdate()
         {
             memberCount = 0;
             movies = 0;
@@ -300,7 +293,7 @@ namespace Netdb
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,`country` VARCHAR(5) NULL, PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
@@ -348,189 +341,8 @@ namespace Netdb
 
             await arg.DefaultChannel.SendMessageAsync("", false, eb.Build());
         }
-
-        public static void GetMostsearched()
-        {
-            var cmd = _con.CreateCommand();
-            cmd.CommandText = "SELECT * FROM moviedata ORDER BY searchcounter DESC";
-            var reader = cmd.ExecuteReader();
-
-            MovieData[] movies = new MovieData[50];
-            MovieData[] series = new MovieData[50];
-
-           for (int i = 0; i < 50; i++)
-            {
-                movies[i] = new MovieData();
-                series[i] = new MovieData();
-            }
-
-            int moviecount = 0;
-            int seriescount = 0;
-
-            while (reader.Read() && (seriescount < 50 && moviecount < 50))
-            {
-                if ((int)reader["searchcounter"] != 0)
-                {
-                    if ((sbyte)reader["type"] == 0 && moviecount < 50)
-                    {
-
-                        movies[moviecount].Name = (string)reader["movieName"];
-                        moviecount++;
-                    }
-                    else if ((sbyte)reader["type"] == 1 && seriescount < 50)
-                    {
-                        series[seriescount].Name = (string)reader["movieName"];
-                        seriescount++;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Type Unknown");
-                    }
-                }
-            }
-
-            reader.Close();
-
-            for (int i = 0; i < movies.Length; i++)
-            {
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update mostsearched set name = '{movies[i].Name}' where id = '{i + 1}';";
-                cmd.ExecuteNonQuery();
-
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update mostsearched set name = '{series[i].Name}' where id = '{i + 51}';";
-                cmd.ExecuteNonQuery();
-            }
-
-            reader.Dispose();
-            cmd.Dispose();
-        }
-
-        public static void GetBestReviewed()
-        {
-            var cmd = _con.CreateCommand();
-            cmd.CommandText = "SELECT * FROM moviedata ORDER BY reviews DESC";
-            var reader = cmd.ExecuteReader();
-
-            MovieData[] movies = new MovieData[50];
-            MovieData[] series = new MovieData[50];
-
-            for (int i = 0; i < 50; i++)
-            {
-                movies[i] = new MovieData();
-                series[i] = new MovieData();
-            }
-
-            int moviecount = 0;
-            int seriescount = 0;
-
-            while (reader.Read() && (seriescount < 50 && moviecount < 50))
-            {
-
-                if ((int)reader["reviews"] != 0)
-                {
-                    if ((sbyte)reader["type"] == 0 && moviecount < 50)
-                    {
-                        movies[moviecount].Name = (string)reader["movieName"];
-                        movies[moviecount].Review = (int)reader["reviews"];
-                        movies[moviecount].AverageReview = (int)reader["reviewpoints"] / (int)reader["reviews"];
-                        moviecount++;
-                    }
-                    else if ((sbyte)reader["type"] == 1 && seriescount < 50)
-                    {
-                        series[seriescount].Name = (string)reader["movieName"];
-                        series[seriescount].Review = (int)reader["reviews"];
-                        series[seriescount].AverageReview = (int)reader["reviewpoints"] / (int)reader["reviews"];
-                        seriescount++;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Type Unknown");
-                    }
-                }
-            }
-
-            reader.Close();
-
-            int mostmoviereviews = movies[0].Review;
-            int mostseriesreviews = series[0].Review;
-
-            for (int i = 0; i < moviecount; i++)
-            {
-                movies[i].Totalreview = (movies[i].AverageReview / 10.0) * 100 * 0.7;
-                movies[i].Totalreview += ((double)movies[i].Review / (double)mostmoviereviews * 100) * 0.3;
-
-                series[i].Totalreview = (series[i].AverageReview / 10.0) * 100 * 0.7;
-                series[i].Totalreview += ((double)series[i].Review / (double)mostseriesreviews * 100) * 0.3;
-            }
-
-            for (int write = 0; write < movies.Length; write++)
-            {
-                for (int sort = 0; sort < movies.Length - 1; sort++)
-                {
-                    if (movies[sort].Totalreview < movies[sort + 1].Totalreview)
-                    {
-                        MovieData temp = movies[sort + 1];
-                        movies[sort + 1] = movies[sort];
-                        movies[sort] = temp;
-                    }
-                }
-            }
-
-            for (int write = 0; write < series.Length; write++)
-            {
-                for (int sort = 0; sort < series.Length - 1; sort++)
-                {
-                    if (series[sort].Totalreview < series[sort + 1].Totalreview)
-                    {
-                        MovieData temp = series[sort + 1];
-                        series[sort + 1] = series[sort];
-                        series[sort] = temp;
-                    }
-                }
-            }
-
-            for (int i = 0; i < movies.Length; i++)
-            {
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update bestreviewed set name = '{movies[i].Name}' where id = '{i + 1}';";
-                cmd.ExecuteNonQuery();
-
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update bestreviewed set name = '{series[i].Name}' where id = '{i + 51}';";
-                cmd.ExecuteNonQuery();
-            }
-
-            reader.Dispose();
-            cmd.Dispose();
-        }
-
-        public static void BackupDB()
-        {
-            try
-            {
-                string path = Path.Combine("DB_Backups", DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_").Replace("/","_") + "_backup.sql");
-
-                MySqlCommand cmd = new MySqlCommand();
-                MySqlBackup mb = new MySqlBackup(cmd);
-
-                cmd.Connection = _con;
-
-                mb.ExportToFile(filepath + path);
-
-                mb.Dispose();
-                cmd.Dispose();
-
-                Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup Created")).GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            
-        }
          
-        private async Task SendMessages(DateTime executiontime)
+        private async Task SendMessages(DateTime executiontime, string country)
         {
             int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
 
@@ -541,10 +353,12 @@ namespace Netdb
 
             await Task.Delay(waitingtime);
 
+            await Client_Log(new LogMessage(LogSeverity.Info, "System", "Sending daily message for " + country));
+
             string content = "";
 
             WebClient client = new WebClient();
-            dynamic obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/de_AT/new?body={%22providers%22:[%22nfx%22],%22enable_provider_filter%22:false,%22titles_per_provider%22:10,%22monetization_types%22:[%22ads%22,%22buy%22,%22flatrate%22,%22rent%22,%22free%22],%22page%22:1,%22page_size%22:1,%22fields%22:[%22full_path%22,%22id%22,%22jw_entity_id%22,%22object_type%22,%22offers%22,%22poster%22,%22scoring%22,%22season_number%22,%22show_id%22,%22show_title%22,%22title%22,%22tmdb_popularity%22,%22backdrops%22]}&filter_price_changes=false&language=en"));
+            dynamic obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/" + country + "/new?body={%22providers%22:[%22nfx%22],%22enable_provider_filter%22:false,%22titles_per_provider%22:10,%22monetization_types%22:[%22ads%22,%22buy%22,%22flatrate%22,%22rent%22,%22free%22],%22page%22:1,%22page_size%22:1,%22fields%22:[%22full_path%22,%22id%22,%22jw_entity_id%22,%22object_type%22,%22offers%22,%22poster%22,%22scoring%22,%22season_number%22,%22show_id%22,%22show_title%22,%22title%22,%22tmdb_popularity%22,%22backdrops%22]}&filter_price_changes=false&language=en"));
 
             for (int i = 0; i < obj.days.Count; i++)
             {
@@ -564,14 +378,22 @@ namespace Netdb
                 }
             }
 
+            if (content == "")
+            {
+                content = "You're up to date";
+            }
+
+            Console.WriteLine(content);
+
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Blue);
             eb.WithTitle("Today's releases");
             eb.WithCurrentTimestamp();
             eb.AddField(DateTime.Now.Date.ToString("MMMM dd"), content);
+            eb.WithFooter(country);
 
             var cmd = _con.CreateCommand();
-            cmd.CommandText = $"select * from subscriberdata;";
+            cmd.CommandText = $"select * from subscriberdata where country = '{country}';";
             var reader = cmd.ExecuteReader();
 
             while (reader.Read())
@@ -582,6 +404,10 @@ namespace Netdb
                     {
                         ITextChannel channel = _client.GetGuild((ulong)Convert.ToInt64(reader["guildid"])).GetTextChannel((ulong)Convert.ToInt64(reader["channelid"]));
                         await channel.SendMessageAsync("", false, eb.Build());
+
+                        cmd = _con.CreateCommand();
+                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where channelid = {reader["channelid"]};";
+                        cmd.ExecuteNonQuery();
                     }
                     catch (Exception)
                     {
@@ -594,6 +420,10 @@ namespace Netdb
                     {
                         IUser user = _client.GetUser((ulong)Convert.ToInt64(reader["channelid"]));
                         await user.SendMessageAsync("", false, eb.Build());
+
+                        cmd = _con.CreateCommand();
+                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where guildid = {reader["guildid"]};";
+                        cmd.ExecuteNonQuery();
                     }
                     catch (Exception)
                     {
@@ -603,11 +433,6 @@ namespace Netdb
             }
 
             reader.Close();
-
-            cmd = _con.CreateCommand();
-            cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}'";
-            cmd.ExecuteNonQuery();
-
             reader.Dispose();
             cmd.Dispose();
         }
