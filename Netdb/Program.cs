@@ -33,7 +33,7 @@ namespace Netdb
         public static int series = 0;
         public static int subscribers = 0;
         public static int reviews = 0;
-        public static DateTime dailymessagetime = DateTime.Now.AddSeconds(20);
+        public static DateTime dailymessagetime = new DateTime(2004, 9, 29, 12, 0, 0);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -380,10 +380,8 @@ namespace Netdb
 
             if (content == "")
             {
-                content = "You're up to date";
+                content = "no releases today :(";
             }
-
-            Console.WriteLine(content);
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.Blue);
