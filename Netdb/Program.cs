@@ -368,7 +368,7 @@ namespace Netdb
                     {
                         if (obj.days[i].providers[0].items[y].object_type == "show_season")
                         {
-                            content += obj.days[i].providers[0].items[y].show_title + "\n";
+                            content += obj.days[i].providers[0].items[y].show_title + " " + obj.days[i].providers[0].items[y].title + "\n";
                         }
                         else if (obj.days[i].providers[0].items[y].object_type == "movie")
                         {
