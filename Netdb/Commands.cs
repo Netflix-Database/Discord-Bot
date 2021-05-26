@@ -456,8 +456,19 @@ namespace Netdb
         [Command("subscribe")]
         [Alias("sc")]
         [Summary("When you are subscribed the bot will send you the newest movies daily")]
-        public async Task Subscribe(string country)
+        public async Task Subscribe(string country = null)
         {
+            string[] countries = {"AT", "DE", "US"};
+
+            if (country == null)
+            {
+                var eb = new EmbedBuilder();
+                eb.WithColor(Color.Blue);
+                eb.WithAuthor("#subscribe {country}");
+                eb.WithTitle("Countries");
+
+            }
+
             if (Context.Channel.GetType() == typeof(SocketDMChannel))
             {
                 if (Tools.Reader($"select null from subscriberdata where guildid = '{0}' and channelid = '{Context.User.Id}';"))
