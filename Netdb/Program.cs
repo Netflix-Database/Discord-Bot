@@ -356,10 +356,14 @@ namespace Netdb
             await Client_Log(new LogMessage(LogSeverity.Info, "System", "Sending daily message for " + country));
 
             string content = "";
-
             WebClient client = new WebClient();
-            dynamic obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/" + country + "/new?body={%22providers%22:[%22nfx%22],%22enable_provider_filter%22:false,%22titles_per_provider%22:10,%22monetization_types%22:[%22ads%22,%22buy%22,%22flatrate%22,%22rent%22,%22free%22],%22page%22:1,%22page_size%22:1,%22fields%22:[%22full_path%22,%22id%22,%22jw_entity_id%22,%22object_type%22,%22offers%22,%22poster%22,%22scoring%22,%22season_number%22,%22show_id%22,%22show_title%22,%22title%22,%22tmdb_popularity%22,%22backdrops%22]}&filter_price_changes=false&language=en"));
+            dynamic obj = null;
 
+            do
+            {
+                obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/" + country + "/new?body={\"providers\":[\"nfx\"],\"enable_provider_filter\":false,\"titles_per_provider\":10,\"monetization_types\":[\"ads\",\"buy\",\"flatrate\",\"rent\",\"free\"],\"page\":1,\"page_size\":5,\"fields\":[\"full_path\",\"id\",\"jw_entity_id\",\"object_type\",\"offers\",\"poster\",\"scoring\",\"season_number\",\"show_id\",\"show_title\",\"title\",\"tmdb_popularity\",\"backdrops\"]}&filter_price_changes=false&language=de"));
+            } while (obj == null);
+          
             for (int i = 0; i < obj.days.Count; i++)
             {
                 if (obj.days[i].date == DateTime.Now.Date.AddDays(-1).ToString("yyyy-MM-dd"))

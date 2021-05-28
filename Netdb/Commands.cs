@@ -458,7 +458,10 @@ namespace Netdb
         [Summary("When you are subscribed the bot will send you the newest movies daily")]
         public async Task Subscribe(string country = null)
         {
-            string[] countries = {"AT", "DE", "US"};
+            string[] countries2 = {"AT", "DE", "US"};
+
+            Dictionary<string, IEmote> countries = new Dictionary<string, IEmote>();
+            countries.Add("Austria", new Emoji("😂"));
 
             if (country == null)
             {
@@ -467,6 +470,10 @@ namespace Netdb
                 eb.WithAuthor("#subscribe {country}");
                 eb.WithTitle("Countries");
 
+                for (int i = 0; i < countries.Count; i++)
+                {
+                    eb.AddField(countries[]);
+                }
             }
 
             if (Context.Channel.GetType() == typeof(SocketDMChannel))
