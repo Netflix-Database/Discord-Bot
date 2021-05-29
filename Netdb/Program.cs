@@ -141,6 +141,12 @@ namespace Netdb
             {
                 StackTrace trace = new StackTrace(ex, true);
                 var frame = trace.GetFrame(trace.FrameCount - 1);
+
+                if (frame.GetMethod().Name == "MoveNext")
+                {
+                    return;
+                }
+
                 EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
                 string insight = "";
                 b.WithTitle("Error");
@@ -201,7 +207,9 @@ namespace Netdb
                 {
                     b.AddField("Insight", "NA");
                 }
+                
                 errors.Add(b);
+
                 Console.WriteLine("Error queued. Errors in queue: " + errors.Count);
             }
             catch (Exception)
