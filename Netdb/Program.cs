@@ -365,7 +365,7 @@ namespace Netdb
 
             string content = "";
             WebClient client = new WebClient();
-            dynamic obj = null;
+            dynamic obj;
 
             do
             {
