@@ -33,7 +33,11 @@ namespace Netdb
         public static int series = 0;
         public static int subscribers = 0;
         public static int reviews = 0;
-        public static DateTime dailymessagetime = new DateTime(2004, 9, 29, 12, 0, 0);
+
+        public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 0, 0);
+        public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 0, 0);
+        public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 12, 0, 0);
+
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -126,7 +130,7 @@ namespace Netdb
 
                 await _client.StartAsync();
 
-                await SendMessages(dailymessagetime, "de_AT");
+                await SendMessages(dailymessagetime_AT, "de_AT");
 
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
 

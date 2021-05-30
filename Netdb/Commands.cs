@@ -458,10 +458,10 @@ namespace Netdb
         [Summary("When you are subscribed the bot will send you the newest movies daily")]
         public async Task Subscribe(string country = null)
         {
-            var countries = new List<Tuple<string, string, IEmote>>();
-            countries.Add(new Tuple<string, string, IEmote>("Austria", "AT", new Emoji("😂")));
-            countries.Add(new Tuple<string, string, IEmote>("Germany", "DE", new Emoji("😂")));
-            countries.Add(new Tuple<string, string, IEmote>("USA", "US", new Emoji("😂")));
+            var countries = new List<Tuple<string, string, string, IEmote>>();
+            countries.Add(new Tuple<string, string, string, IEmote>("Austria", "AT", "de_AT", new Emoji("😂")));
+            countries.Add(new Tuple<string, string, string, IEmote>("Germany", "DE", "en_US", new Emoji("😂")));
+            countries.Add(new Tuple<string, string, string,  IEmote>("USA", "US", "de_DE", new Emoji("😂")));
 
             if (country == null)
             {
@@ -479,16 +479,16 @@ namespace Netdb
                 return;
             }
 
-            bool nix = false;
+            Tuple<string, string, string, IEmote> tuple = null;
             for (int i = 0; i < countries.Count; i++)
             {
                 if (country == countries[i].Item2)
                 {
-                    nix = true;
+                    tuple = countries[i];
                 }
             }
 
-            if (!nix)
+            if (tuple == null)
             {
                 Tools.Embedbuilder("This country is not available", Color.DarkRed, Context.Channel);
                 return;
@@ -502,7 +502,7 @@ namespace Netdb
                     return;
                 }
 
-                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid, country) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}', '{0}', '{country}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid, country) values ('{Context.User.Id}', '{DateTime.Now.Date:yyyy-MM-dd}', '{0}', '{tuple.Item3}');");
             }
             else
             {
@@ -529,7 +529,7 @@ namespace Netdb
                 }
                 reader.Close();
 
-                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid, country) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}', '{Context.Guild.Id}', '{country}');");
+                Tools.RunCommand($"insert into subscriberdata (channelid, abostarted, guildid, country) values ('{Context.Channel.Id}', '{DateTime.Now.Date:yyyy-MM-dd}', '{Context.Guild.Id}', '{tuple.Item3}');");
             }
 
             Tools.Embedbuilder("You will now recieve an update about whats coming to Netflix every day", Color.Green, Context.Channel);
