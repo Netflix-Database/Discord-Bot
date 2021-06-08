@@ -483,11 +483,15 @@ namespace Netdb
                     }
                     catch (Exception)
                     {
-                        var eb = new EmbedBuilder();
-                        eb.WithColor(Color.DarkRed);
-                        eb.WithDescription("The databse is currently offline. Try again later.");
+                        if (message.Content.StartsWith('#'))
+                        {
+                            var eb = new EmbedBuilder();
+                            eb.WithColor(Color.DarkRed);
+                            eb.WithDescription("The databse is currently offline. Try again later.");
 
-                        await message.Channel.SendMessageAsync("", false, eb.Build());
+                            await message.Channel.SendMessageAsync("", false, eb.Build());
+                        }
+                     
                         return;
                     }
                 }
