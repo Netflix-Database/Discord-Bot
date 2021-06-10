@@ -139,17 +139,8 @@ namespace Netdb
                 redar.Read();
             }
 
-            byte[] image;
-
-            if (redar["desktopImg"] == DBNull.Value)
-            {
-                image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
-            }
-            else
-            {
-                image = (byte[])redar["desktopImg"];
-            }
-  
+            byte[] image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
+ 
             movie = new MovieData
             {
                 Age = (int)redar["age"],
