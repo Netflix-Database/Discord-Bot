@@ -8,4 +8,5 @@ new movie gets released.
 
    ## Support
 [![Discord](https://discord.com/api/guilds/623873641679028244/widget.png)](https://discord.gg/wZzFqd6dxP)
+Email: support@netdb.ga
    ## Donate
