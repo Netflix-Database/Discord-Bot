@@ -25,7 +25,6 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select netflixid from netflixdata where name_en = '{moviename}' or netflixid = '{moviename}' or name_de = '{moviename}';";
             var reader = cmd.ExecuteReader();
-            Program.openDataReaders.Add(reader);
 
             if (reader.Read())
             {
@@ -44,7 +43,6 @@ namespace Netdb
         /// <returns>bool</returns>
         public static bool ValidateSQLValues(string values, ISocketMessageChannel c)
         {
-            Program.PrepareForDatabaseUse();
             int sus = 0;
 
             values = values.ToLower();
@@ -107,7 +105,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select null from watchlistdata where userid = '{userid}' and netflixid = '{movieid}';";
             var reader = cmd.ExecuteReader();
-            Program.openDataReaders.Add(reader);
+    
             if (reader.Read())
             {
                 reader.Close();
@@ -129,29 +127,20 @@ namespace Netdb
         public static void GetMovieData(string search, out MovieData movie, ulong userid)
         {
             var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from netflixdata where name_en = '{search}' or name_de = '{search}';";
+            cmd.CommandText = $"select name_en,age,netflixid,type,releasedate,description_en,topGenre,length,desktopImg,searchcounter from netflixdata where name_en = '{search}' or name_de = '{search}';";
             var redar = cmd.ExecuteReader();
-            Program.openDataReaders.Add(redar);
+
             if (!redar.Read())
             {
                 redar.Close();
                 cmd = Program._con.CreateCommand();
-                cmd.CommandText = "select * from netflixdata where netflixid = '" + search + "';";
+                cmd.CommandText = "select name_en,age,netflixid,type,releasedate,description_en,topGenre,length,desktopImg,searchcounter from netflixdata where netflixid = '" + search + "';";
                 redar = cmd.ExecuteReader();
                 redar.Read();
             }
 
-            byte[] image;
-
-            if (redar["desktopImg"] == DBNull.Value)
-            {
-                image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
-            }
-            else
-            {
-                image = (byte[])redar["desktopImg"];
-            }
-  
+            byte[] image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
+ 
             movie = new MovieData
             {
                 Age = (int)redar["age"],
@@ -214,7 +203,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select null from netflixdata where name_en = '{search}' or name_de = '{search}';";
             var reader = cmd.ExecuteReader();
-            Program.openDataReaders.Add(reader);
+
             if (reader.Read())
             {
                 reader.Close();
@@ -240,7 +229,7 @@ namespace Netdb
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = "select name_en from netflixdata where netflixid = '" + search + "';";
                 var reader = cmd.ExecuteReader();
-                Program.openDataReaders.Add(reader);
+     
                 if (reader.Read())
                 {
                     if ((string)reader["name_en"] == "null")
@@ -281,7 +270,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = input;
             var reader = cmd.ExecuteReader();
-            Program.openDataReaders.Add(reader);
+   
             if (reader.Read())
             {
                 reader.Close();
@@ -314,7 +303,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select contentadded from moderation where userid = '{user.Id}';";
             var reader = cmd.ExecuteReader();
-            Program.openDataReaders.Add(reader);
+       
             reader.Read();
 
             int contentadded = (int)reader["contentadded"];
@@ -338,7 +327,7 @@ namespace Netdb
             var cmd = Program._con.CreateCommand();
             cmd.CommandText = $"select null from moderation where userid = '{user.Id}' and ismod = '{1}';";
             var reader = cmd.ExecuteReader();
-            Program.openDataReaders.Add(reader);
+  
             if (reader.Read())
             {
                 reader.Close();

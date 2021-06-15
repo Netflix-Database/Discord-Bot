@@ -7,3 +7,4 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~M:Netdb.Program._client_JoinedGuild(Discord.WebSocket.SocketGuild)~System.Threading.Tasks.Task")]
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~M:Netdb.Program._client_Ready~System.Threading.Tasks.Task")]
+[assembly: SuppressMessage("Style", "IDE0057:Use range operator", Justification = "<Pending>", Scope = "member", Target = "~M:Netdb.Program.HandleCommandAsync(Discord.WebSocket.SocketMessage)~System.Threading.Tasks.Task")]

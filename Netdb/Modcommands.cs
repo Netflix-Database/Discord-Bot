@@ -2,9 +2,6 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using System.IO;
-using MySql.Data.MySqlClient;
-using System.Reflection;
 
 namespace Netdb
 {
@@ -134,7 +131,7 @@ namespace Netdb
         {
             if (Tools.IsModerator(Context.User))
             {
-                Program.Perform5MinuteUpdate();
+                Program.Perform60MinuteUpdate();
 
                 await Context.Message.AddReactionAsync(new Emoji("✅"));
             }
@@ -249,111 +246,6 @@ namespace Netdb
 
             reader.Dispose();
             cmd.Dispose();
-        }
-
-        [Command("backup")]
-        [Alias("b")]
-        [Summary("Creates a database backup")]
-        public async Task Backup()
-        {
-            if (Context.User.Id == 487265499785199616 || Context.User.Id == 300571683507404800)
-            {
-                Program.BackupDB();
-                await Context.Message.AddReactionAsync(new Emoji("✅"));
-            }
-            else
-            {
-                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
-            }
-        }
-
-        [Command("listbackups")]
-        [Alias("lb")]
-        [Summary("Lists all Backups")]
-        public async Task ListBackups()
-        {
-            if (Context.User.Id == 487265499785199616 || Context.User.Id == 300571683507404800)
-            {
-                string[] files = Directory.GetFiles(Program.filepath + "DB_Backups");
-                FileInfo fi;
-                string backups = "";
-                long size = 0;
-
-                if (files.Length == 0)
-                {
-                    Tools.Embedbuilder("No backups available", Color.DarkRed, Context.Channel);
-                    return;
-                }
-
-                for (int i = 0; i < files.Length; i++)
-                {
-                    fi = new FileInfo(files[i]);
-
-                    backups += "`" + fi.Name + "`\n";
-                    size += fi.Length;
-                }
-
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.WithTitle("Netdb's Backups");
-                eb.AddField("Most recent Backups", backups);
-                eb.WithFooter(x => x.Text = ((double)size / (double)1000000000).ToString("F2") + "Gb");
-
-                await Context.Channel.SendMessageAsync("", false, eb.Build());
-            }
-            else
-            {
-                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
-            }
-        }
-
-        [Command("restore")]
-        [Alias("res")]
-        [Summary("Restores a database backup")]
-        public async Task Loadbackup(string filename)
-        {
-            if (Context.User.Id == 487265499785199616 || Context.User.Id == 300571683507404800)
-            {
-                try
-                {
-                    if (!File.Exists(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "DB_Backups" + Path.DirectorySeparatorChar + filename))
-                    {
-                        Tools.Embedbuilder("File does not exist", Color.DarkRed, Context.Channel);
-                        return;
-                    }
-
-                    MySqlCommand cmd = new MySqlCommand();
-                    MySqlBackup mb = new MySqlBackup(cmd);
-
-                    cmd.Connection = Program._con;
-
-                    await Context.Message.AddReactionAsync(new Emoji("⌛"));
-
-                    EmbedBuilder eb = new EmbedBuilder();
-                    eb.WithTitle("Restoring Database");
-                    eb.WithDescription("Restoring " + filename);
-                    await Program._client.GetUser(487265499785199616).SendMessageAsync("", false, eb.Build());
-                    await Program._client.GetUser(300571683507404800).SendMessageAsync("", false, eb.Build());
-
-                    mb.ImportFromFile(Path.Combine(Program.filepath + "DB_Backups", filename));
-
-                    await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Database restored"));
-
-                    await Context.Message.RemoveReactionAsync(new Emoji("⌛"), Program._client.CurrentUser);
-                    await Context.Message.AddReactionAsync(new Emoji("✅"));
-
-                    cmd.Dispose();
-                    mb.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    await Program.Client_Log(new LogMessage(LogSeverity.Info, "System", "Could't restore database", ex));
-                    await Context.Message.ReplyAsync(ex.ToString());
-                }
-            }
-            else
-            {
-                Tools.Embedbuilder("You are not allowed to do this", Color.DarkRed, Context.Channel);
-            }
         }
 
         [Command("disconnect")]

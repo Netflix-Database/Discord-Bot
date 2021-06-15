@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace Netdb
 {
@@ -24,7 +26,6 @@ namespace Netdb
         public static string token;
         public static MySqlConnection _con;
         public static string mainPrefix = "#";
-        public static List<MySqlDataReader> openDataReaders = new List<MySqlDataReader>();
 
         //BotData
         public static int memberCount = 0;
@@ -32,7 +33,11 @@ namespace Netdb
         public static int series = 0;
         public static int subscribers = 0;
         public static int reviews = 0;
-        public static DateTime dailymessagetime = new DateTime(2004, 09, 29, 12, 0, 0, DateTimeKind.Local);
+
+        public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 0, 0);
+        public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 0, 0);
+        public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 12, 0, 0);
+
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -45,97 +50,8 @@ namespace Netdb
         public static CommandService _commands;
         public static IServiceProvider _services;
 
-        public static void PrepareForDatabaseUse()
-        {
-            foreach (var item in openDataReaders)
-            {
-                if (item != null && !item.IsClosed)
-                {
-                    item.Close();
-                    item.Dispose();
-                }
-            }
-        }
-
-        public static void HandleError(Exception ex)
-        {
-            try
-            {
-                StackTrace trace = new StackTrace(ex, true);
-                var frame = trace.GetFrame(trace.FrameCount - 1);
-                EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
-                string insight = "";
-                b.WithTitle("Error");
-                b.WithCurrentTimestamp();
-                b.AddField("Exception type", ex.GetType().FullName);
-                b.AddField("Message", ex.Message);
-                b.AddField("Method", frame.GetMethod().Name);
-                if (frame.GetFileName() == "" || frame.GetFileName() == null || frame.GetFileName().Remove(' ') == "")
-                {
-                    b.AddField("File", "-");
-                }
-                else
-                {
-                    b.AddField("File", frame.GetFileName());
-                    string filePath = frame.GetFileName();
-                    if (File.Exists(filePath))
-                    {
-                        string[] lines = new string[5];
-                        var Read = File.ReadAllLines(filePath);
-                        int longest = -1;
-                        int longestIndex = 0;
-                        for (int i = Math.Max(frame.GetFileLineNumber() - 3, 0); i < Math.Min(frame.GetFileLineNumber() + 2, Read.Length); i++)
-                        {
-                            lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = (i+1) + " " + Read[i];
-                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > 60)
-                            {
-                                lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Substring(0, 57) + "...";
-                            }
-                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > longest)
-                            {
-                                longestIndex = i - Math.Max(frame.GetFileLineNumber() - 3, 0);
-                                longest = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length;
-                            }
-                        }
-
-                        if (longest > 60)
-                        {
-                            longest = 60;
-                        }
-
-                        for (int i = 0; i < lines.Length; i++)
-                        {
-                            int cnt = longest - lines[i].Length;
-                            for (int j = 0; j < cnt; j++)
-                            {
-                                lines[i] += " ";
-                            }
-                        }
-                        insight = $"`{frame.GetFileName().Split('/')[frame.GetFileName().Split('/').Length - 1]}:\n{lines[0]}\n{lines[1]}\n{lines[2]}` <--- `\n{lines[3]}\n{lines[4]}`";
-                    }
-                }
-                b.AddField("Line", frame.GetFileLineNumber().ToString());
-                if (insight != "")
-                {
-                    b.AddField("Insight", insight);
-                }
-                else
-                {
-                    b.AddField("Insight", "NA");
-                }
-                errors.Add(b);
-                Console.WriteLine("Error queued. Errors in queue: " + errors.Count);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Error while reading stack trace");
-            }
-        }
-
         public async Task RunBotAsync()
         {
-            try
-            {
                 _client = new DiscordSocketClient();
                 _commands = new CommandService();
 
@@ -197,21 +113,6 @@ namespace Netdb
 
                 try
                 {
-                    //BackupDB();
-                }
-                catch (Exception ex)
-                {
-                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Couldn't create a new backup"));
-                    error++;
-                    HandleError(ex);
-                }
-
-                try
-                {
-                    //GetMostsearched();
-
-                    //GetBestReviewed();
-
                     SetupDB();
                 }
                 catch (Exception ex)
@@ -223,22 +124,102 @@ namespace Netdb
 
                 updateTimer = new Timer((e) =>
                 {
-                    Perform5MinuteUpdate();
+                    Perform60MinuteUpdate();
                 }, null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(60));
 
 
                 await _client.StartAsync();
 
+                await SendMessages(dailymessagetime_AT, "de_AT");
+
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
 
                 await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
-            }
-            catch (Exception exx)
-            {
-                HandleError(exx);
-                error++;
-            }
+
             await Task.Delay(-1);
+        }
+
+        public static void HandleError(Exception ex)
+        {
+            try
+            {
+                StackTrace trace = new StackTrace(ex, true);
+                var frame = trace.GetFrame(trace.FrameCount - 1);
+
+                if (frame.GetMethod().Name == "MoveNext")
+                {
+                    return;
+                }
+
+                EmbedBuilder b = new EmbedBuilder().WithColor(Color.Red);
+                string insight = "";
+                b.WithTitle("Error");
+                b.WithCurrentTimestamp();
+                b.AddField("Exception type", ex.GetType().FullName);
+                b.AddField("Message", ex.Message);
+                b.AddField("Method", frame.GetMethod().Name);
+                if (frame.GetFileName() == "" || frame.GetFileName() == null || frame.GetFileName().Remove(' ') == "")
+                {
+                    b.AddField("File", "-");
+                }
+                else
+                {
+                    b.AddField("File", frame.GetFileName());
+                    string filePath = frame.GetFileName();
+                    if (File.Exists(filePath))
+                    {
+                        string[] lines = new string[5];
+                        var Read = File.ReadAllLines(filePath);
+                        int longest = -1;
+                        int longestIndex = 0;
+                        for (int i = Math.Max(frame.GetFileLineNumber() - 3, 0); i < Math.Min(frame.GetFileLineNumber() + 2, Read.Length); i++)
+                        {
+                            lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = (i + 1) + " " + Read[i];
+                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > 60)
+                            {
+                                lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)] = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Substring(0, 57) + "...";
+                            }
+                            if (lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length > longest)
+                            {
+                                longestIndex = i - Math.Max(frame.GetFileLineNumber() - 3, 0);
+                                longest = lines[i - Math.Max(frame.GetFileLineNumber() - 3, 0)].Length;
+                            }
+                        }
+
+                        if (longest > 60)
+                        {
+                            longest = 60;
+                        }
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            int cnt = longest - lines[i].Length;
+                            for (int j = 0; j < cnt; j++)
+                            {
+                                lines[i] += " ";
+                            }
+                        }
+                        insight = $"`{frame.GetFileName().Split('/')[frame.GetFileName().Split('/').Length - 1]}:\n{lines[0]}\n{lines[1]}\n{lines[2]}` <--- `\n{lines[3]}\n{lines[4]}`";
+                    }
+                }
+                b.AddField("Line", frame.GetFileLineNumber().ToString());
+                if (insight != "")
+                {
+                    b.AddField("Insight", insight);
+                }
+                else
+                {
+                    b.AddField("Insight", "NA");
+                }
+                
+                errors.Add(b);
+
+                Console.WriteLine("Error queued. Errors in queue: " + errors.Count);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error while reading stack trace");
+            }
         }
 
         public static void OutputErrors(object p)
@@ -251,7 +232,7 @@ namespace Netdb
             }
         }
 
-        public static void Perform5MinuteUpdate()
+        public static void Perform60MinuteUpdate()
         {
             memberCount = 0;
             movies = 0;
@@ -300,11 +281,11 @@ namespace Netdb
         public static void SetupDB()
         {
             var cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`commands` (id INT NOT NULL AUTO_INCREMENT Primary Key,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`commands` (id INT NOT NULL AUTO_INCREMENT,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`prefixes` (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(45) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id),UNIQUE INDEX id_UNIQUE (id ASC) VISIBLE,UNIQUE INDEX guildId_UNIQUE (guildId ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`prefixes` (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(45) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
@@ -320,11 +301,11 @@ namespace Netdb
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`watchlistdata` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`watchlistdata` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,PRIMARY KEY(`id`),UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,`country` VARCHAR(5) NULL, PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
@@ -372,189 +353,8 @@ namespace Netdb
 
             await arg.DefaultChannel.SendMessageAsync("", false, eb.Build());
         }
-
-        public static void GetMostsearched()
-        {
-            var cmd = _con.CreateCommand();
-            cmd.CommandText = "SELECT * FROM moviedata ORDER BY searchcounter DESC";
-            var reader = cmd.ExecuteReader();
-
-            MovieData[] movies = new MovieData[50];
-            MovieData[] series = new MovieData[50];
-
-           for (int i = 0; i < 50; i++)
-            {
-                movies[i] = new MovieData();
-                series[i] = new MovieData();
-            }
-
-            int moviecount = 0;
-            int seriescount = 0;
-
-            while (reader.Read() && (seriescount < 50 && moviecount < 50))
-            {
-                if ((int)reader["searchcounter"] != 0)
-                {
-                    if ((sbyte)reader["type"] == 0 && moviecount < 50)
-                    {
-
-                        movies[moviecount].Name = (string)reader["movieName"];
-                        moviecount++;
-                    }
-                    else if ((sbyte)reader["type"] == 1 && seriescount < 50)
-                    {
-                        series[seriescount].Name = (string)reader["movieName"];
-                        seriescount++;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Type Unknown");
-                    }
-                }
-            }
-
-            reader.Close();
-
-            for (int i = 0; i < movies.Length; i++)
-            {
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update mostsearched set name = '{movies[i].Name}' where id = '{i + 1}';";
-                cmd.ExecuteNonQuery();
-
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update mostsearched set name = '{series[i].Name}' where id = '{i + 51}';";
-                cmd.ExecuteNonQuery();
-            }
-
-            reader.Dispose();
-            cmd.Dispose();
-        }
-
-        public static void GetBestReviewed()
-        {
-            var cmd = _con.CreateCommand();
-            cmd.CommandText = "SELECT * FROM moviedata ORDER BY reviews DESC";
-            var reader = cmd.ExecuteReader();
-
-            MovieData[] movies = new MovieData[50];
-            MovieData[] series = new MovieData[50];
-
-            for (int i = 0; i < 50; i++)
-            {
-                movies[i] = new MovieData();
-                series[i] = new MovieData();
-            }
-
-            int moviecount = 0;
-            int seriescount = 0;
-
-            while (reader.Read() && (seriescount < 50 && moviecount < 50))
-            {
-
-                if ((int)reader["reviews"] != 0)
-                {
-                    if ((sbyte)reader["type"] == 0 && moviecount < 50)
-                    {
-                        movies[moviecount].Name = (string)reader["movieName"];
-                        movies[moviecount].Review = (int)reader["reviews"];
-                        movies[moviecount].AverageReview = (int)reader["reviewpoints"] / (int)reader["reviews"];
-                        moviecount++;
-                    }
-                    else if ((sbyte)reader["type"] == 1 && seriescount < 50)
-                    {
-                        series[seriescount].Name = (string)reader["movieName"];
-                        series[seriescount].Review = (int)reader["reviews"];
-                        series[seriescount].AverageReview = (int)reader["reviewpoints"] / (int)reader["reviews"];
-                        seriescount++;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Type Unknown");
-                    }
-                }
-            }
-
-            reader.Close();
-
-            int mostmoviereviews = movies[0].Review;
-            int mostseriesreviews = series[0].Review;
-
-            for (int i = 0; i < moviecount; i++)
-            {
-                movies[i].Totalreview = (movies[i].AverageReview / 10.0) * 100 * 0.7;
-                movies[i].Totalreview += ((double)movies[i].Review / (double)mostmoviereviews * 100) * 0.3;
-
-                series[i].Totalreview = (series[i].AverageReview / 10.0) * 100 * 0.7;
-                series[i].Totalreview += ((double)series[i].Review / (double)mostseriesreviews * 100) * 0.3;
-            }
-
-            for (int write = 0; write < movies.Length; write++)
-            {
-                for (int sort = 0; sort < movies.Length - 1; sort++)
-                {
-                    if (movies[sort].Totalreview < movies[sort + 1].Totalreview)
-                    {
-                        MovieData temp = movies[sort + 1];
-                        movies[sort + 1] = movies[sort];
-                        movies[sort] = temp;
-                    }
-                }
-            }
-
-            for (int write = 0; write < series.Length; write++)
-            {
-                for (int sort = 0; sort < series.Length - 1; sort++)
-                {
-                    if (series[sort].Totalreview < series[sort + 1].Totalreview)
-                    {
-                        MovieData temp = series[sort + 1];
-                        series[sort + 1] = series[sort];
-                        series[sort] = temp;
-                    }
-                }
-            }
-
-            for (int i = 0; i < movies.Length; i++)
-            {
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update bestreviewed set name = '{movies[i].Name}' where id = '{i + 1}';";
-                cmd.ExecuteNonQuery();
-
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update bestreviewed set name = '{series[i].Name}' where id = '{i + 51}';";
-                cmd.ExecuteNonQuery();
-            }
-
-            reader.Dispose();
-            cmd.Dispose();
-        }
-
-        public static void BackupDB()
-        {
-            try
-            {
-                string path = Path.Combine("DB_Backups", DateTime.Now.ToString().Replace(" ", "_").Replace(".", "_").Replace(":", "_").Replace("/","_") + "_backup.sql");
-
-                MySqlCommand cmd = new MySqlCommand();
-                MySqlBackup mb = new MySqlBackup(cmd);
-
-                cmd.Connection = _con;
-
-                mb.ExportToFile(filepath + path);
-
-                mb.Dispose();
-                cmd.Dispose();
-
-                Client_Log(new LogMessage(LogSeverity.Info, "System", "Database Backup Created")).GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            
-        }
          
-        private async Task SendMessages(DateTime executiontime)
+        private async Task SendMessages(DateTime executiontime, string country)
         {
             int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
 
@@ -565,50 +365,88 @@ namespace Netdb
 
             await Task.Delay(waitingtime);
 
-            var cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from comingsoon where releasedate = '{DateTime.Now.Date:yyyy-MM-dd}';";
-            var reader = cmd.ExecuteReader();
+            await Client_Log(new LogMessage(LogSeverity.Info, "System", "Sending daily message for " + country));
 
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.WithColor(Color.Blue);
-                eb.WithTitle("Today's releases");
-                eb.WithCurrentTimestamp();
+            string content = "";
+            WebClient client = new WebClient();
+            dynamic obj;
 
-                string content = "";
-
-            while(reader.Read())
+            do
             {
-                content += reader["moviename"] + "\n";
+                obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/" + country + "/new?body={\"providers\":[\"nfx\"],\"enable_provider_filter\":false,\"titles_per_provider\":100,\"monetization_types\":[\"ads\",\"buy\",\"flatrate\",\"rent\",\"free\"],\"page\":1,\"page_size\":2,\"fields\":[\"full_path\",\"id\",\"jw_entity_id\",\"object_type\",\"offers\",\"poster\",\"scoring\",\"season_number\",\"show_id\",\"show_title\",\"title\",\"tmdb_popularity\",\"backdrops\"]}&filter_price_changes=false&language=de"));
+            } while (obj == null);
+          
+            for (int i = 0; i < obj.days.Count; i++)
+            {
+                if (obj.days[i].date == DateTime.Now.Date.AddDays(-1).ToString("yyyy-MM-dd"))
+                {
+                    for (int y = 0; y < obj.days[i].providers[0].items.Count; y++)
+                    {
+                        if (obj.days[i].providers[0].items[y].object_type == "show_season")
+                        {
+                            content += obj.days[i].providers[0].items[y].show_title + " " + obj.days[i].providers[0].items[y].title + "\n";
+                        }
+                        else if (obj.days[i].providers[0].items[y].object_type == "movie")
+                        {
+                            content += obj.days[i].providers[0].items[y].title + "\n";
+                        }
+                    }
+                }
             }
 
-                reader.Close();
+            if (content == "")
+            {
+                content = "no releases today :(";
+            }
 
-            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"),content);
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.WithColor(Color.Blue);
+            eb.WithTitle("Today's releases");
+            eb.WithCurrentTimestamp();
+            eb.AddField(DateTime.Now.Date.ToString("MMMM dd"), content);
+            eb.WithFooter(country);
 
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from subscriberlist;";
-                reader = cmd.ExecuteReader();
+            var cmd = _con.CreateCommand();
+            cmd.CommandText = $"select * from subscriberdata where country = '{country}';";
+            var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
-                if ((ulong)(long)reader["guildid"] != 0)
+                if ((ulong)Convert.ToInt64(reader["guildid"]) != 0)
                 {
-                    ITextChannel channel = _client.GetGuild((ulong)(long)reader["guildid"]).GetTextChannel((ulong)(long)reader["channelid"]);
-                    await channel.SendMessageAsync("", false, eb.Build());
+                    try
+                    {
+                        ITextChannel channel = _client.GetGuild((ulong)Convert.ToInt64(reader["guildid"])).GetTextChannel((ulong)Convert.ToInt64(reader["channelid"]));
+                        await channel.SendMessageAsync("", false, eb.Build());
+
+                        cmd = _con.CreateCommand();
+                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where channelid = {reader["channelid"]};";
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception)
+                    {
+ 
+                    }
                 }
                 else
                 {
-                    IUser user = _client.GetUser((ulong)(long)reader["channelid"]);
-                    await user.SendMessageAsync("", false, eb.Build());
+                    try
+                    {
+                        IUser user = _client.GetUser((ulong)Convert.ToInt64(reader["channelid"]));
+                        await user.SendMessageAsync("", false, eb.Build());
+
+                        cmd = _con.CreateCommand();
+                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where guildid = {reader["guildid"]};";
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
             }
 
-                reader.Close();
-
-                cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"update subscriberlist set lastupdated = '{DateTime.Now:yyyy-MM-dd}'";
-                cmd.ExecuteNonQuery();
-
+            reader.Close();
             reader.Dispose();
             cmd.Dispose();
         }
@@ -616,7 +454,7 @@ namespace Netdb
         public static Task Client_Log(LogMessage arg)
         {
             Console.WriteLine(arg);
-            File.AppendAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "log.txt",DateTime.Now + ":  " + arg.Message + "  " + arg.Exception + "\n");
+            File.AppendAllText(filepath + "log.txt",DateTime.Now + ":  " + arg.Message + "  " + arg.Exception + "\n");
             return Task.CompletedTask;
         }
 
@@ -645,11 +483,15 @@ namespace Netdb
                     }
                     catch (Exception)
                     {
-                        var eb = new EmbedBuilder();
-                        eb.WithColor(Color.DarkRed);
-                        eb.WithDescription("The databse is currently offline. Try again later.");
+                        if (message.Content.StartsWith('#'))
+                        {
+                            var eb = new EmbedBuilder();
+                            eb.WithColor(Color.DarkRed);
+                            eb.WithDescription("The databse is currently offline. Try again later.");
 
-                        await message.Channel.SendMessageAsync("", false, eb.Build());
+                            await message.Channel.SendMessageAsync("", false, eb.Build());
+                        }
+                     
                         return;
                     }
                 }
