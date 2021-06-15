@@ -197,7 +197,7 @@ namespace Netdb
 
                 try
                 {
-                    BackupDB();
+                    //BackupDB();
                 }
                 catch (Exception ex)
                 {
