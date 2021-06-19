@@ -254,7 +254,7 @@ namespace Netdb
 
             if (_con.Ping())
             {
-                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='Movie'", _con))
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='Movie';", _con))
                 {
                     movies = Convert.ToInt32(cmd.ExecuteScalar());
                 }
