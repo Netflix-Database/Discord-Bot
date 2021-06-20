@@ -254,9 +254,7 @@ namespace Netdb
                 return;
             }
 
-            if (_con.Ping())
-            {
-                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='Movie'", _con))
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='Movie';", _con))
                 {
                     movies = Convert.ToInt32(cmd.ExecuteScalar());
                 }
@@ -279,7 +277,6 @@ namespace Netdb
                 Tools.RunCommand("update ");
 
                 Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
-            }
         }
 
         public static void SetupDB()
