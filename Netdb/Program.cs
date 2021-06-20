@@ -36,7 +36,7 @@ namespace Netdb
 
         public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 0, 0);
         public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 0, 0);
-        public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 12, 0, 0);
+        public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 19, 0, 0);
 
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
@@ -131,6 +131,8 @@ namespace Netdb
                 await _client.StartAsync();
 
                 await SendMessages(dailymessagetime_AT, "de_AT");
+                await SendMessages(dailymessagetime_DE, "de_DE");
+                await SendMessages(dailymessagetime_US, "en_US");
 
                 errorTimer = new Timer(OutputErrors, null, 10000, 1000);
 
@@ -274,6 +276,8 @@ namespace Netdb
                     subscribers = Convert.ToInt32(cmd.ExecuteScalar());
                 }
 
+                Tools.RunCommand("update ");
+
                 Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
             }
         }
@@ -373,7 +377,7 @@ namespace Netdb
 
             do
             {
-                obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/" + country + "/new?body={\"providers\":[\"nfx\"],\"enable_provider_filter\":false,\"titles_per_provider\":100,\"monetization_types\":[\"ads\",\"buy\",\"flatrate\",\"rent\",\"free\"],\"page\":1,\"page_size\":2,\"fields\":[\"full_path\",\"id\",\"jw_entity_id\",\"object_type\",\"offers\",\"poster\",\"scoring\",\"season_number\",\"show_id\",\"show_title\",\"title\",\"tmdb_popularity\",\"backdrops\"]}&filter_price_changes=false&language=de"));
+                obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/" + country + "/new?body={\"providers\":[\"nfx\"],\"enable_provider_filter\":false,\"titles_per_provider\":100,\"monetization_types\":[\"ads\",\"buy\",\"flatrate\",\"rent\",\"free\"],\"page\":1,\"page_size\":2,\"fields\":[\"full_path\",\"id\",\"jw_entity_id\",\"object_type\",\"offers\",\"poster\",\"scoring\",\"season_number\",\"show_id\",\"show_title\",\"title\",\"tmdb_popularity\",\"backdrops\"]}&filter_price_changes=false&language=" + country.Substring(0 , 2)));
             } while (obj == null);
           
             for (int i = 0; i < obj.days.Count; i++)
