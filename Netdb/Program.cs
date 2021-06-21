@@ -254,6 +254,8 @@ namespace Netdb
                 return;
             }
 
+            try
+            {
                 using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM netflixdata WHERE type='Movie';", _con))
                 {
                     movies = Convert.ToInt32(cmd.ExecuteScalar());
@@ -273,8 +275,11 @@ namespace Netdb
                 {
                     subscribers = Convert.ToInt32(cmd.ExecuteScalar());
                 }
+            }
+            catch (Exception)
+            {
 
-                Tools.RunCommand("update ");
+            }
 
                 Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
         }
