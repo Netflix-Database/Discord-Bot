@@ -134,13 +134,25 @@ namespace Netdb
             await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
 
             int waitingtime_de = (int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-            var Timer_de = new Timer(SendMessage_DE, null, waitingtime_de, 0);
+
+            if (waitingtime_de > 0)
+            {
+                var Timer_de = new Timer(SendMessage_DE, null, waitingtime_de, 0);
+            }
 
             int waitingtime_at = (int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-            var Timer_at = new Timer(SendMessage_AT, null, waitingtime_at, 0);
+
+            if (waitingtime_at > 0)
+            {
+                var Timer_at = new Timer(SendMessage_AT, null, waitingtime_at, 0);
+            }
 
             int waitingtime_us = (int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-            var Timer_us = new Timer(SendMessage_US, null, waitingtime_us, 0);
+
+            if (waitingtime_us > 0)
+            {
+                var Timer_us = new Timer(SendMessage_US, null, waitingtime_us, 0);
+            }
 
             await Task.Delay(-1);
         }
