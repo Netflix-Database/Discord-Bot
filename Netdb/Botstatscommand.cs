@@ -46,10 +46,9 @@ namespace Netdb
             eb.AddField("Reviews", Program.reviews);
             eb.AddField("Server", Program._client.Guilds.Count);
             eb.AddField("Users", Program.memberCount);
-
-            //int dailymessage = (int)Program.dailymessagetime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
-
-            eb.AddField("Daily Message", null + " min");
+            eb.AddField("Daily Message DE", (int)Program.dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes + " min");
+            eb.AddField("Daily Message AT", (int)Program.dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes + " min");
+            eb.AddField("Daily Message US", (int)Program.dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes + " min");
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }

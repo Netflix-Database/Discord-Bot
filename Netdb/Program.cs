@@ -122,23 +122,42 @@ namespace Netdb
                     HandleError(ex);
                 }
 
-                updateTimer = new Timer((e) =>
-                {
-                    Perform60MinuteUpdate();
-                }, null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(60));
+            await _client.StartAsync();
 
+            updateTimer = new Timer((e) =>
+            {
+                Perform60MinuteUpdate();
+            }, null, 10000, 360000);
 
-                await _client.StartAsync();
+            errorTimer = new Timer(OutputErrors, null, 10000, 1000);
 
-                await SendMessages(dailymessagetime_AT, "de_AT");
-                await SendMessages(dailymessagetime_DE, "de_DE");
-                await SendMessages(dailymessagetime_US, "en_US");
+            await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
 
-                errorTimer = new Timer(OutputErrors, null, 10000, 1000);
+            int waitingtime_de = (int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
+            var Timer_de = new Timer(SendMessage_DE, null, waitingtime_de, 0);
 
-                await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
+            int waitingtime_at = (int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
+            var Timer_at = new Timer(SendMessage_AT, null, waitingtime_at, 0);
+
+            int waitingtime_us = (int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
+            var Timer_us = new Timer(SendMessage_US, null, waitingtime_us, 0);
 
             await Task.Delay(-1);
+        }
+
+        public static void SendMessage_DE(object _)
+        {
+            SendMessages("de_DE");
+        }
+
+        public static void SendMessage_AT(object _)
+        {
+            SendMessages("de_AT");
+        }
+
+        public static void SendMessage_US(object _)
+        {
+            SendMessages("en_US");
         }
 
         public static void HandleError(Exception ex)
@@ -278,7 +297,7 @@ namespace Netdb
             }
             catch (Exception)
             {
-
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Boafsdftdata"));
             }
 
                 Client_Log(new LogMessage(LogSeverity.Info, "System", "Updated Botdata"));
@@ -360,44 +379,44 @@ namespace Netdb
             await arg.DefaultChannel.SendMessageAsync("", false, eb.Build());
         }
          
-        private async Task SendMessages(DateTime executiontime, string country)
+        public static void SendMessages(string country)
         {
-            int waitingtime = (int)executiontime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-
-            if (waitingtime < 0)
-            {
-                return;
-            }
-
-            await Task.Delay(waitingtime);
-
-            await Client_Log(new LogMessage(LogSeverity.Info, "System", "Sending daily message for " + country));
+            Client_Log(new LogMessage(LogSeverity.Info, "System", "Sending daily message for " + country));
 
             string content = "";
             WebClient client = new WebClient();
             dynamic obj;
+            int count = 0;
 
             do
             {
                 obj = JsonConvert.DeserializeObject(client.DownloadString("https://apis.justwatch.com/content/titles/" + country + "/new?body={\"providers\":[\"nfx\"],\"enable_provider_filter\":false,\"titles_per_provider\":100,\"monetization_types\":[\"ads\",\"buy\",\"flatrate\",\"rent\",\"free\"],\"page\":1,\"page_size\":2,\"fields\":[\"full_path\",\"id\",\"jw_entity_id\",\"object_type\",\"offers\",\"poster\",\"scoring\",\"season_number\",\"show_id\",\"show_title\",\"title\",\"tmdb_popularity\",\"backdrops\"]}&filter_price_changes=false&language=" + country.Substring(0 , 2)));
-            } while (obj == null);
-          
-            for (int i = 0; i < obj.days.Count; i++)
+                count++;
+            } while (obj == null || count > 10);
+
+            try
             {
-                if (obj.days[i].date == DateTime.Now.Date.AddDays(-1).ToString("yyyy-MM-dd"))
+                for (int i = 0; i < obj.days.Count; i++)
                 {
-                    for (int y = 0; y < obj.days[i].providers[0].items.Count; y++)
+                    if (obj.days[i].date == DateTime.Now.Date.AddDays(-1).ToString("yyyy-MM-dd"))
                     {
-                        if (obj.days[i].providers[0].items[y].object_type == "show_season")
+                        for (int y = 0; y < obj.days[i].providers[0].items.Count; y++)
                         {
-                            content += obj.days[i].providers[0].items[y].show_title + " " + obj.days[i].providers[0].items[y].title + "\n";
-                        }
-                        else if (obj.days[i].providers[0].items[y].object_type == "movie")
-                        {
-                            content += obj.days[i].providers[0].items[y].title + "\n";
+                            if (obj.days[i].providers[0].items[y].object_type == "show_season")
+                            {
+                                content += obj.days[i].providers[0].items[y].show_title + " " + obj.days[i].providers[0].items[y].title + "\n";
+                            }
+                            else if (obj.days[i].providers[0].items[y].object_type == "movie")
+                            {
+                                content += obj.days[i].providers[0].items[y].title + "\n";
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception)
+            {
+                Client_Log(new LogMessage(LogSeverity.Info, "System", obj));
             }
 
             if (content == "")
@@ -423,10 +442,10 @@ namespace Netdb
                     try
                     {
                         ITextChannel channel = _client.GetGuild((ulong)Convert.ToInt64(reader["guildid"])).GetTextChannel((ulong)Convert.ToInt64(reader["channelid"]));
-                        await channel.SendMessageAsync("", false, eb.Build());
+                        channel.SendMessageAsync("", false, eb.Build());
 
                         cmd = _con.CreateCommand();
-                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where channelid = {reader["channelid"]};";
+                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where channelid ='{reader["channelid"]}';";
                         cmd.ExecuteNonQuery();
                     }
                     catch (Exception)
@@ -439,10 +458,10 @@ namespace Netdb
                     try
                     {
                         IUser user = _client.GetUser((ulong)Convert.ToInt64(reader["channelid"]));
-                        await user.SendMessageAsync("", false, eb.Build());
+                        user.SendMessageAsync("", false, eb.Build());
 
                         cmd = _con.CreateCommand();
-                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where guildid = {reader["guildid"]};";
+                        cmd.CommandText = $"update subscriberdata set lastsent = '{DateTime.Now:yyyy-MM-dd}' where guildid ='{reader["guildid"]}';";
                         cmd.ExecuteNonQuery();
                     }
                     catch (Exception)
@@ -455,6 +474,8 @@ namespace Netdb
             reader.Close();
             reader.Dispose();
             cmd.Dispose();
+
+            Client_Log(new LogMessage(LogSeverity.Info, "System", "Sent daily message for " + country));
         }
 
         public static Task Client_Log(LogMessage arg)
