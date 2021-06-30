@@ -147,17 +147,38 @@ namespace Netdb
 
         public static void SendMessage_DE(object _)
         {
-            SendMessages("de_DE");
+            try
+            {
+                SendMessages("de_DE");
+            }
+            catch (Exception ex)
+            {
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while sending daily message " + ex));
+            }
         }
 
         public static void SendMessage_AT(object _)
         {
-            SendMessages("de_AT");
+            try
+            {
+                SendMessages("de_AT");
+            }
+            catch (Exception ex)
+            {
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while sending daily message " + ex));
+            }
         }
 
         public static void SendMessage_US(object _)
         {
-            SendMessages("en_US");
+            try
+            {
+                SendMessages("en_US");
+            }
+            catch (Exception ex)
+            {
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while sending daily message " + ex));
+            }
         }
 
         public static void HandleError(Exception ex)
