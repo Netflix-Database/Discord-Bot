@@ -139,7 +139,16 @@ namespace Netdb
                 redar.Read();
             }
 
-            byte[] image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
+            byte[] image;
+
+            if (File.Exists("/var/www/cdn/content/" + redar["netflixid"] + "/desktopImg.png"))
+            {
+                image = File.ReadAllBytes("/var/www/cdn/content/" + redar["netflixid"] + "/desktopImg.png");
+            }
+            else
+            {
+                image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
+            }
  
             movie = new MovieData
             {
@@ -155,7 +164,7 @@ namespace Netdb
                 Image = image,
             };
 
-            int searchcounter = (int)redar["searchcounter"] + 1;
+            int searchcounter = Convert.ToInt32(redar["searchcounter"]) + 1;
 
             redar.Close();
 

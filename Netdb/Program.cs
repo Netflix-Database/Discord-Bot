@@ -520,7 +520,6 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
-            try {
                 if (!(arg is SocketUserMessage message))
                 {
                     return;
@@ -610,11 +609,6 @@ namespace Netdb
 
                     if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
                 }
-            }
-            catch (Exception ex)
-            {
-                HandleError(ex);
-            }
         }
     }
 }
