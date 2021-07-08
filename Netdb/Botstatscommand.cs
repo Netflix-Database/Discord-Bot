@@ -18,18 +18,18 @@ namespace Netdb
         {
             int commandsexecutedlifetime = 0;
 
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from commands;";
-                var reader = await cmd.ExecuteReaderAsync();
+            var cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from commands;";
+            var reader = await cmd.ExecuteReaderAsync();
 
-                while (reader.Read())
-                {
-                    commandsexecutedlifetime += (int)reader["uses"];
-                }
-                reader.Close();
+            while (reader.Read())
+            {
+               commandsexecutedlifetime += (int)reader["uses"];
+            }
+            reader.Close();
 
-                await reader.DisposeAsync();
-                await cmd.DisposeAsync();
+            await reader.DisposeAsync();
+            await cmd.DisposeAsync();
 
             EmbedBuilder eb = new EmbedBuilder();
 
@@ -49,15 +49,15 @@ namespace Netdb
 
             int time = (int)Program.dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
 
-            eb.AddField("Daily Message DE", (time > 0 ? time.ToString() : "already sent") + " min");
+            eb.AddField("Daily Message DE", (time > 0 ? time.ToString() + " min" : "already sent"));
 
             time = (int)Program.dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
 
-            eb.AddField("Daily Message AT", (time > 0 ? time.ToString() : "already sent") + " min");
+            eb.AddField("Daily Message AT", (time > 0 ? time.ToString() + " min" : "already sent"));
 
             time = (int)Program.dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
 
-            eb.AddField("Daily Message US", (time > 0 ? time.ToString() : "already sent") + " min");
+            eb.AddField("Daily Message US", (time > 0 ? time.ToString() + " min" : "already sent"));
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }
