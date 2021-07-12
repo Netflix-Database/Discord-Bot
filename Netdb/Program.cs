@@ -147,6 +147,11 @@ namespace Netdb
 
         public static void SendMessage_DE()
         {
+            if ((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds <= 0)
+            {
+                return;
+            }
+
             Thread.Sleep((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
 
             try
@@ -161,6 +166,11 @@ namespace Netdb
 
         public static void SendMessage_AT()
         {
+            if ((int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds <= 0)
+            {
+                return;
+            }
+
             Thread.Sleep((int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
 
             try
@@ -175,6 +185,11 @@ namespace Netdb
 
         public static void SendMessage_US()
         {
+            if ((int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds <= 0)
+            {
+                return;
+            }
+
             Thread.Sleep((int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
 
             try
