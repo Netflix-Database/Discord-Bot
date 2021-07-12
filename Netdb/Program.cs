@@ -38,7 +38,6 @@ namespace Netdb
         public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 36, 0);
         public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 19, 0, 0);
 
-
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
         public static DateTime startedAt = DateTime.Now;
@@ -133,25 +132,29 @@ namespace Netdb
 
             await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
 
-            Thread thr = new Thread(SendMessage_DE);
-            thr.Start();
+            if ((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
+            {
+                Thread thr = new Thread(SendMessage_DE);
+                thr.Start();
+            }
 
-            Thread thr1 = new Thread(SendMessage_AT);
-            thr1.Start();
+            if ((int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
+            {
+                Thread thr1 = new Thread(SendMessage_AT);
+                thr1.Start();
+            }
 
-            Thread thr2 = new Thread(SendMessage_US);
-            thr2.Start();
+            if ((int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
+            {
+                Thread thr2 = new Thread(SendMessage_US);
+                thr2.Start();
+            }
          
             await Task.Delay(-1);
         }
 
         public static void SendMessage_DE()
         {
-            if ((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds <= 0)
-            {
-                return;
-            }
-
             Thread.Sleep((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
 
             try
@@ -166,11 +169,6 @@ namespace Netdb
 
         public static void SendMessage_AT()
         {
-            if ((int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds <= 0)
-            {
-                return;
-            }
-
             Thread.Sleep((int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
 
             try
@@ -185,11 +183,6 @@ namespace Netdb
 
         public static void SendMessage_US()
         {
-            if ((int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds <= 0)
-            {
-                return;
-            }
-
             Thread.Sleep((int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
 
             try
