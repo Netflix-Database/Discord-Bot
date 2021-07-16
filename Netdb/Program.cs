@@ -34,8 +34,8 @@ namespace Netdb
         public static int subscribers = 0;
         public static int reviews = 0;
 
-        public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 36, 0);
-        public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 36, 0);
+        public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 0, 0);
+        public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 10, 0);
         public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 19, 0, 0);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
