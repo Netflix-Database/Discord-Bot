@@ -8,7 +8,7 @@
 <br />
 <p align="center">
   <a href="https://netdb.ga">
-    <img src="images/netdb_Logo_medium.png" alt="Logo" width="480" height="270">
+    <img src="Logo.png" alt="Logo" width="480" height="270">
   </a>
 
   <h3 align="center">Netdb Discord Bot</h3>
@@ -80,4 +80,4 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 [issues-url]: https://github.com/Netflix-Database/Discord-Bot/issues
 [license-shield]: https://img.shields.io/github/license/Netflix-Database/Discord-Bot
 [license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE.txt
-[product-screenshot]: Logo.png
+[product-screenshot]: /Logo.png
