@@ -72,14 +72,14 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/YannickFuereder/Netdb.svg?style=for-the-badge
-[contributors-url]: https://github.com/YannickFuereder/Discord-Bot/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/YannickFuereder/Netdb.svg?style=for-the-badge
-[forks-url]: https://github.com/YannickFuereder/Discord-Bot/network/members
-[stars-shield]: https://img.shields.io/github/stars/YannickFuereder/Netdb.svg?style=for-the-badge
-[stars-url]: https://github.com/YannickFuereder/Discord-Bot/stargazers
-[issues-shield]: https://img.shields.io/github/issues/YannickFuereder/Netdb.svg?style=for-the-badge
-[issues-url]: https://github.com/YannickFuereder/Discord-Bot/issues
-[license-shield]: https://img.shields.io/github/license/YannickFuereder/Netdb.svg?style=for-the-badge
-[license-url]: https://github.com/YannickFuereder/Discord-Bot/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/Netflix-Database/Netdb.svg?style=for-the-badge
+[contributors-url]: https://github.com/Netflix-Database/Discord-Bot/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Netflix-Database/Netdb.svg?style=for-the-badge
+[forks-url]: https://github.com/Netflix-Database/Discord-Bot/network/members
+[stars-shield]: https://img.shields.io/github/stars/Netflix-Database/Netdb.svg?style=for-the-badge
+[stars-url]: https://github.com/Netflix-Database/Discord-Bot/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Netflix-Database/Netdb.svg?style=for-the-badge
+[issues-url]: https://github.com/Netflix-Database/Discord-Bot/issues
+[license-shield]: https://img.shields.io/github/license/Netflix-Database/Netdb.svg?style=for-the-badge
+[license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE.txt
 [product-screenshot]: images/screenshot.png
