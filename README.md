@@ -80,4 +80,4 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 [issues-url]: https://github.com/Netflix-Database/Discord-Bot/issues
 [license-shield]: https://img.shields.io/github/license/Netflix-Database/Discord-Bot
 [license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE.txt
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: Logo.png
