@@ -35,9 +35,8 @@ namespace Netdb
         public static int reviews = 0;
 
         public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 0, 0);
-        public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 0, 0);
+        public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 10, 0);
         public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 19, 0, 0);
-
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -133,32 +132,31 @@ namespace Netdb
 
             await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
 
-            int waitingtime_de = (int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-
-            if (waitingtime_de > 0)
+            if ((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
             {
-                var Timer_de = new Timer(SendMessage_DE, null, waitingtime_de, 0);
+                Thread thr = new Thread(SendMessage_DE);
+                thr.Start();
             }
 
-            int waitingtime_at = (int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-
-            if (waitingtime_at > 0)
+            if ((int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
             {
-                var Timer_at = new Timer(SendMessage_AT, null, waitingtime_at, 0);
+                Thread thr1 = new Thread(SendMessage_AT);
+                thr1.Start();
             }
 
-            int waitingtime_us = (int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds;
-
-            if (waitingtime_us > 0)
+            if ((int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
             {
-                var Timer_us = new Timer(SendMessage_US, null, waitingtime_us, 0);
+                Thread thr2 = new Thread(SendMessage_US);
+                thr2.Start();
             }
-
+         
             await Task.Delay(-1);
         }
 
-        public static void SendMessage_DE(object _)
+        public static void SendMessage_DE()
         {
+            Thread.Sleep((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
+
             try
             {
                 SendMessages("de_DE");
@@ -169,8 +167,10 @@ namespace Netdb
             }
         }
 
-        public static void SendMessage_AT(object _)
+        public static void SendMessage_AT()
         {
+            Thread.Sleep((int)dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
+
             try
             {
                 SendMessages("de_AT");
@@ -181,8 +181,10 @@ namespace Netdb
             }
         }
 
-        public static void SendMessage_US(object _)
+        public static void SendMessage_US()
         {
+            Thread.Sleep((int)dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
+
             try
             {
                 SendMessages("en_US");
@@ -339,39 +341,39 @@ namespace Netdb
         public static void SetupDB()
         {
             var cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`commands` (id INT NOT NULL AUTO_INCREMENT,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`commands` (id INT NOT NULL AUTO_INCREMENT,command VARCHAR(45) NULL,alias VARCHAR(10) NULL,short_description VARCHAR(100) NULL,syntax VARCHAR(100) NULL,mod_required TINYINT NULL,uses INT NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`prefixes` (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(45) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`prefixes` (id INT NOT NULL AUTO_INCREMENT,guildId VARCHAR(45) NULL,prefix VARCHAR(10) NULL DEFAULT '#',PRIMARY KEY(id));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE `netflixdata` ( `id` int NOT NULL AUTO_INCREMENT, `netflixid` int DEFAULT NULL, `type` varchar(10) DEFAULT NULL, `name_en` varchar(300) DEFAULT NULL, `name_de` varchar(300) DEFAULT NULL, `description_en` varchar(500) DEFAULT NULL, `description_de` varchar(500) DEFAULT NULL, `age` int DEFAULT NULL, `releasedate` int DEFAULT NULL, `topGenre` varchar(45) DEFAULT NULL, `length` varchar(45) DEFAULT NULL, `titleImg_en` varchar(60) DEFAULT NULL, `titleImg_de` varchar(60) DEFAULT NULL, `desktopImg` varchar(60) DEFAULT NULL, `mobileImg` varchar(60) DEFAULT NULL, `awards` varchar(500) DEFAULT NULL, `downloadable` tinyint DEFAULT NULL, `subtitles` varchar(500) DEFAULT NULL, `audio` varchar(2000) DEFAULT NULL, `emotions` varchar(200) DEFAULT NULL, `creator` varchar(300) DEFAULT NULL, `writer` varchar(100) DEFAULT NULL, `starring` varchar(700) DEFAULT NULL, `cast` varchar(2000) DEFAULT NULL, `allGenres` varchar(500) DEFAULT NULL, `searchcounter` int NOT NULL DEFAULT '0', PRIMARY KEY(`id`)) ENGINE = InnoDB AUTO_INCREMENT = 5295 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci; ";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`netflixdata` ( `id` int NOT NULL AUTO_INCREMENT, `netflixid` int DEFAULT NULL, `type` varchar(10) DEFAULT NULL, `name_en` varchar(300) DEFAULT NULL, `name_de` varchar(300) DEFAULT NULL, `description_en` varchar(500) DEFAULT NULL, `description_de` varchar(500) DEFAULT NULL, `age` int DEFAULT NULL, `releasedate` int DEFAULT NULL, `topGenre` varchar(45) DEFAULT NULL, `length` varchar(45) DEFAULT NULL, `titleImg_en` varchar(60) DEFAULT NULL, `titleImg_de` varchar(60) DEFAULT NULL, `desktopImg` varchar(60) DEFAULT NULL, `mobileImg` varchar(60) DEFAULT NULL, `awards` varchar(500) DEFAULT NULL, `downloadable` tinyint DEFAULT NULL, `subtitles` varchar(500) DEFAULT NULL, `audio` varchar(2000) DEFAULT NULL, `emotions` varchar(200) DEFAULT NULL, `creator` varchar(300) DEFAULT NULL, `writer` varchar(100) DEFAULT NULL, `starring` varchar(700) DEFAULT NULL, `cast` varchar(2000) DEFAULT NULL, `allGenres` varchar(500) DEFAULT NULL, `searchcounter` int NOT NULL DEFAULT '0', PRIMARY KEY(`id`)) ENGINE = InnoDB AUTO_INCREMENT = 5295 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci; ";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`reviews` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,`points` TINYINT UNSIGNED NULL,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`reviews` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,`points` TINYINT UNSIGNED NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();  
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`totalreviews` (`id` INT NOT NULL AUTO_INCREMENT,`netflixid` INT UNSIGNED NULL,`points` INT UNSIGNED NULL DEFAULT 0,`amount` INT UNSIGNED NULL DEFAULT 0,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`totalreviews` (`id` INT NOT NULL AUTO_INCREMENT,`netflixid` INT UNSIGNED NULL,`points` INT UNSIGNED NULL DEFAULT 0,`amount` INT UNSIGNED NULL DEFAULT 0,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`watchlistdata` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`watchlistdata` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`netflixid` INT UNSIGNED NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,`country` VARCHAR(5) NULL, PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`subscriberdata` (`id` INT NOT NULL AUTO_INCREMENT,`channelid` BIGINT UNSIGNED NULL,`guildid` BIGINT UNSIGNED NULL,`abostarted` DATE NULL,`lastsent` DATE NULL,`country` VARCHAR(5) NULL, PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`moderation` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`ismod` TINYINT UNSIGNED NULL,`contentadded` INT UNSIGNED NULL,`since` DATE NULL,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`moderation` (`id` INT NOT NULL AUTO_INCREMENT,`userid` BIGINT UNSIGNED NULL,`ismod` TINYINT UNSIGNED NULL,`contentadded` INT UNSIGNED NULL,`since` DATE NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd = _con.CreateCommand();
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `sys`.`comingsoon` (`id` INT NOT NULL AUTO_INCREMENT,`name` VARCHAR(100) NULL,`releasedate` DATE NULL,PRIMARY KEY(`id`));";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS `netdb`.`comingsoon` (`id` INT NOT NULL AUTO_INCREMENT,`name` VARCHAR(100) NULL,`releasedate` DATE NULL,PRIMARY KEY(`id`));";
             cmd.ExecuteNonQuery();
 
             cmd.Dispose();
@@ -526,7 +528,6 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
-            try {
                 if (!(arg is SocketUserMessage message))
                 {
                     return;
@@ -616,11 +617,6 @@ namespace Netdb
 
                     if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
                 }
-            }
-            catch (Exception ex)
-            {
-                HandleError(ex);
-            }
         }
     }
 }

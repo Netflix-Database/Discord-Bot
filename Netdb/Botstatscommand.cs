@@ -18,18 +18,18 @@ namespace Netdb
         {
             int commandsexecutedlifetime = 0;
 
-                var cmd = Program._con.CreateCommand();
-                cmd.CommandText = $"select * from commands;";
-                var reader = await cmd.ExecuteReaderAsync();
+            var cmd = Program._con.CreateCommand();
+            cmd.CommandText = $"select * from commands;";
+            var reader = await cmd.ExecuteReaderAsync();
 
-                while (reader.Read())
-                {
-                    commandsexecutedlifetime += (int)reader["uses"];
-                }
-                reader.Close();
+            while (reader.Read())
+            {
+               commandsexecutedlifetime += (int)reader["uses"];
+            }
+            reader.Close();
 
-                await reader.DisposeAsync();
-                await cmd.DisposeAsync();
+            await reader.DisposeAsync();
+            await cmd.DisposeAsync();
 
             EmbedBuilder eb = new EmbedBuilder();
 
@@ -46,9 +46,18 @@ namespace Netdb
             eb.AddField("Reviews", Program.reviews);
             eb.AddField("Server", Program._client.Guilds.Count);
             eb.AddField("Users", Program.memberCount);
-            eb.AddField("Daily Message DE", (int)Program.dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes + " min");
-            eb.AddField("Daily Message AT", (int)Program.dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes + " min");
-            eb.AddField("Daily Message US", (int)Program.dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes + " min");
+
+            int time = (int)Program.dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
+
+            eb.AddField("Daily Message DE", (time > 0 ? time.ToString() + " min" : "already sent"));
+
+            time = (int)Program.dailymessagetime_AT.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
+
+            eb.AddField("Daily Message AT", (time > 0 ? time.ToString() + " min" : "already sent"));
+
+            time = (int)Program.dailymessagetime_US.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMinutes;
+
+            eb.AddField("Daily Message US", (time > 0 ? time.ToString() + " min" : "already sent"));
 
             await Context.Channel.SendMessageAsync("", false, eb.Build());
         }

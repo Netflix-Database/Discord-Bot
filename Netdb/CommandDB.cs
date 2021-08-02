@@ -119,7 +119,7 @@ namespace Netdb
         /// <param name="command">Command to update count from</param>
         public static void CommandUsed(string command)
         {
-            Tools.RunCommand($"update sys.commands set uses = uses + 1 where command = '{command}';");
+            Tools.RunCommand($"update commands set uses = uses + 1 where command = '{command}';");
         }
     }
 }
