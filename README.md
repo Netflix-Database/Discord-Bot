@@ -70,14 +70,14 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/Netflix-Database/Discord-Bot
 [contributors-url]: https://github.com/Netflix-Database/Discord-Bot/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/Netflix-Database/Discord-Bot
 [forks-url]: https://github.com/Netflix-Database/Discord-Bot/network/members
-[stars-shield]: https://img.shields.io/github/stars/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/Netflix-Database/Discord-Bot
 [stars-url]: https://github.com/Netflix-Database/Discord-Bot/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/Netflix-Database/Discord-Bot
 [issues-url]: https://github.com/Netflix-Database/Discord-Bot/issues
-[license-shield]: https://img.shields.io/github/license/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/Netflix-Database/Discord-Bot
 [license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE.txt
 [product-screenshot]: images/screenshot.png
