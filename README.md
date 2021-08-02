@@ -44,7 +44,7 @@ new movie/show gets released.
 <!-- ROADMAP -->
 ## Roadmap
 
-See the [open issues](https://github.com/YannickFuereder/Discord-Bot/issues) for a list of proposed features (and known issues).
+See the [open issues](https://github.com/YannickFuereder/Discord-Bot/issues) for a list of proposed features (and known issues) or have a look at our [To-Do](https://github.com/Netflix-Database/Discord-Bot/projects/1) list.
 
 <!-- LICENSE -->
 ## License
