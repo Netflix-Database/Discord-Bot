@@ -38,7 +38,7 @@ Our rating system makes it easy to find our favourite movies/series! Subscribe w
 new movie/show gets released.
 
 ### Built With
-* [C#](https://getbootstrap.com)
+* [C#](https://docs.microsoft.com/en-us/dotnet/csharp)
 * [Mysql](https://www.mysql.com)
 
 <!-- ROADMAP -->
@@ -65,21 +65,20 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 * [Img Shields](https://shields.io)
-* [Charts.js](https://www.chartjs.org/)
 
 
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Netflix-Database/Netdb.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
 [contributors-url]: https://github.com/Netflix-Database/Discord-Bot/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Netflix-Database/Netdb.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
 [forks-url]: https://github.com/Netflix-Database/Discord-Bot/network/members
-[stars-shield]: https://img.shields.io/github/stars/Netflix-Database/Netdb.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
 [stars-url]: https://github.com/Netflix-Database/Discord-Bot/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Netflix-Database/Netdb.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
 [issues-url]: https://github.com/Netflix-Database/Discord-Bot/issues
-[license-shield]: https://img.shields.io/github/license/Netflix-Database/Netdb.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/Netflix-Database/Discord-Bot/Netdb.svg?style=for-the-badge
 [license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE.txt
 [product-screenshot]: images/screenshot.png
