@@ -139,8 +139,6 @@ namespace Netdb
                 redar.Read();
             }
 
-            byte[] image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
-
             byte[] image;
 
             if (File.Exists("/var/www/cdn/content/" + redar["netflixid"] + "/desktopImg.png"))
