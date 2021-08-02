@@ -65,8 +65,7 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 * [Img Shields](https://shields.io)
-
-
+* [Discord](https://discord.com)
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
