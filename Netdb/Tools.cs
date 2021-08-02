@@ -140,7 +140,7 @@ namespace Netdb
             }
 
             byte[] image = File.ReadAllBytes(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar + "NoImage.jpg");
- 
+
             movie = new MovieData
             {
                 Age = (int)redar["age"],
@@ -155,7 +155,7 @@ namespace Netdb
                 Image = image,
             };
 
-            int searchcounter = (int)redar["searchcounter"] + 1;
+            int searchcounter = Convert.ToInt32(redar["searchcounter"]) + 1;
 
             redar.Close();
 

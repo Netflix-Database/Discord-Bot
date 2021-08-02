@@ -294,12 +294,12 @@ namespace Netdb
             reviews = 0;
             subscribers = 0;
 
-            var guilds = _client.Guilds;
+            /*var guilds = _client.Guilds;
             _client.DownloadUsersAsync(guilds);
             foreach (var item in guilds)
             {
                 memberCount += item.MemberCount;
-            }
+            }*/
 
             if (_con.State != System.Data.ConnectionState.Open)
             {
