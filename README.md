@@ -53,8 +53,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <!-- CONTACT -->
 ## Contact
-Support Server: [![Discord](https://discord.com/api/guilds/623873641679028244/widget.png)](https://discord.gg/wZzFqd6dxP)
-Email: support@netdb.ga
+* Support Server: [![Discord](https://discord.com/api/guilds/623873641679028244/widget.png)](https://discord.gg/wZzFqd6dxP)
+* Email: support@netdb.ga
 
 Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.com/Netflix-Database/Discord-Bot)
 
