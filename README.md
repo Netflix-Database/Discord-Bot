@@ -77,5 +77,5 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 [issues-shield]: https://img.shields.io/github/issues/Netflix-Database/Discord-Bot?style=for-the-badge
 [issues-url]: https://github.com/Netflix-Database/Discord-Bot/issues
 [license-shield]: https://img.shields.io/github/license/Netflix-Database/Discord-Bot?style=for-the-badge
-[license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE.txt?style=for-the-badge
+[license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE?style=for-the-badge
 [product-screenshot]: /asLogo.png
