@@ -14,8 +14,9 @@
   <h3 align="center">Netdb Discord Bot</h3>
 
   <p align="center">
-    <br />
     <a href="https://discord.com/login?redirect_to=%2Foauth2%2Fauthorize%3Fclient_id%3D802237562625196084%26scope%3Dbot%26permissions%3D518208"><strong>Invite »</strong></a>
+    <br />
+    <br />
     <a href="https://netdb.ga/discordbot">View Page</a>
     ·
     <a href="https://github.com/YannickFuereder/Discord-Bot/issues">Report Bug</a>
