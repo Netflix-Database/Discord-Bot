@@ -29,8 +29,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://netdb.ga/discordbot)
-
 Netdb is a Discord Bot where you can always lookup various stats about a lot of Netflix Movies and Series in seconds!
 The Bot requires no setup on your Discord server and you can immediatly look up your favourite series or movies.
 Our rating system makes it easy to find our favourite movies/series! Subscribe with #sc to get notified when a
@@ -79,4 +77,3 @@ Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.c
 [issues-url]: https://github.com/Netflix-Database/Discord-Bot/issues
 [license-shield]: https://img.shields.io/github/license/Netflix-Database/Discord-Bot?style=for-the-badge
 [license-url]: https://github.com/Netflix-Database/Discord-Bot/blob/master/LICENSE
-[product-screenshot]: /asLogo.png
