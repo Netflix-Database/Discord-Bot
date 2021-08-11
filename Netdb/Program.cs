@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using Newtonsoft.Json;
+using Discord.Rest;
 
 namespace Netdb
 {
@@ -46,12 +47,14 @@ namespace Netdb
         static void Main() => new Program().RunBotAsync().GetAwaiter().GetResult();
 
         public static DiscordSocketClient _client;
+        public static DiscordRestClient _restClient;
         public static CommandService _commands;
         public static IServiceProvider _services;
 
         public async Task RunBotAsync()
         {
                 _client = new DiscordSocketClient();
+                _restClient = new DiscordRestClient();
                 _commands = new CommandService();
 
                 _services = new ServiceCollection()
@@ -89,6 +92,7 @@ namespace Netdb
 
                     await _client.SetActivityAsync(new Game("Netflix", ActivityType.Watching));
 
+                    await _restClient.LoginAsync(TokenType.Bot, token);
                     await _client.LoginAsync(TokenType.Bot, token);
                 }
                 catch (Exception ex)
@@ -492,7 +496,7 @@ namespace Netdb
                 {
                     try
                     {
-                        IUser user = _client.GetUser((ulong)Convert.ToInt64(reader["channelid"]));
+                        IUser user = _restClient.GetUserAsync((ulong)Convert.ToInt64(reader["channelid"])).GetAwaiter().GetResult();
                         user.SendMessageAsync("", false, eb.Build());
 
                         cmd = _con.CreateCommand();

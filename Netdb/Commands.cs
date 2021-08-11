@@ -5,6 +5,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.IO;
 using System.Collections.Generic;
+using Discord.Rest;
 
 namespace Netdb
 {
@@ -166,7 +167,7 @@ namespace Netdb
 
             if (ulong.TryParse(input, out ulong userid))
             {
-                user = Program._client.GetUser(userid);
+                user = await Program._restClient.GetUserAsync(userid);
             }
             else if (input[input.Length - 5] == '#')
             {
@@ -176,7 +177,7 @@ namespace Netdb
             {
                 if (ulong.TryParse(input.Substring(3, 18), out userid))
                 {
-                    user = Program._client.GetUser(userid);
+                    user = await Program._restClient.GetUserAsync(userid);
                 }
             }
 
