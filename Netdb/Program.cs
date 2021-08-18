@@ -567,7 +567,7 @@ namespace Netdb
                 {
                     var eb = new EmbedBuilder();
                     eb.WithColor(Color.Red);
-                    eb.WithDescription("You can search for Netflix movies and series by typing `" + prefix + "search`. The command accepts only the English names. See all commands here: `" + prefix + "help`.");
+                    eb.WithDescription("You can search for Netflix movies and shows by typing `" + prefix + "search (moviename)`.  View all commands here: `" + prefix + "help`.");
 
                     await message.Channel.SendMessageAsync("", false, eb.Build());
                 }

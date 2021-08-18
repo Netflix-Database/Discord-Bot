@@ -43,7 +43,13 @@ namespace Netdb
                 return;
             }
 
-            Tools.Search(search,out EmbedBuilder eb,out FileStream stream, Context.User.Id);
+            ulong userid = 0;
+            if (Context.Channel is IDMChannel)
+            {
+                userid = Context.User.Id;
+            }
+
+            Tools.Search(search, out EmbedBuilder eb, out FileStream stream, userid);
 
             await Context.Channel.SendFileAsync(stream, "example.png", embed: eb.Build());
 

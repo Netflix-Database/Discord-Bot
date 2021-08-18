@@ -181,17 +181,20 @@ namespace Netdb
 
             redar.Close();
 
-            cmd = Program._con.CreateCommand();
-            cmd.CommandText = $"select * from reviews where netflixid = '{movie.Id}' and userid = '{userid}';";
-            redar = cmd.ExecuteReader();
-
-            if (redar.Read())
+            if (userid != 0)
             {
-                movie.Hasreviewed = true;
-                movie.Review = Convert.ToInt32(redar["points"]);
-            }
+                cmd = Program._con.CreateCommand();
+                cmd.CommandText = $"select * from reviews where netflixid = '{movie.Id}' and userid = '{userid}';";
+                redar = cmd.ExecuteReader();
 
-            redar.Close();
+                if (redar.Read())
+                {
+                    movie.Hasreviewed = true;
+                    movie.Review = Convert.ToInt32(redar["points"]);
+                }
+
+                redar.Close();
+            }
 
             redar.Dispose();
             cmd.Dispose();
@@ -233,7 +236,7 @@ namespace Netdb
         /// <returns>true or false</returns>
         public static bool IsAvailableId(string search)
         {
-            if (!Tools.IsAvailable(search))
+            if (!IsAvailable(search))
             {
                 var cmd = Program._con.CreateCommand();
                 cmd.CommandText = "select name_en from netflixdata where netflixid = '" + search + "';";
@@ -274,6 +277,11 @@ namespace Netdb
             cmd.Dispose();
         }
 
+        /// <summary>
+        /// Checks if something is available in the db
+        /// </summary>
+        /// <param name="input">The sql command</param>
+        /// <returns>True or false</returns>
         public static bool Reader(string input)
         {
             var cmd = Program._con.CreateCommand();
