@@ -469,6 +469,7 @@ namespace Netdb
             countries.Add(new Tuple<string, string, string, IEmote>("Austria", "AT", "de_AT", new Emoji("😂")));
             countries.Add(new Tuple<string, string, string, IEmote>("Germany", "DE", "de_DE", new Emoji("😂")));
             countries.Add(new Tuple<string, string, string,  IEmote>("USA", "US", "en_US", new Emoji("😂")));
+            countries.Add(new Tuple<string, string, string, IEmote>("India", "IN", "en_In", new Emoji("😂")));
 
             if (country == null)
             {

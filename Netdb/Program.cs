@@ -38,6 +38,7 @@ namespace Netdb
         public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 0, 0);
         public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 10, 0);
         public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 19, 0, 0);
+        public static DateTime dailymessagetime_In = new DateTime(2004, 9, 29, 8, 30, 0);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -153,8 +154,28 @@ namespace Netdb
                 Thread thr2 = new Thread(SendMessage_US);
                 thr2.Start();
             }
-         
+
+            if ((int)dailymessagetime_In.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
+            {
+                Thread thr3 = new Thread(SendMessage_In);
+                thr3.Start();
+            }
+
             await Task.Delay(-1);
+        }
+
+        public static void SendMessage_In()
+        {
+            Thread.Sleep((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
+
+            try
+            {
+                SendMessages("en_IN");
+            }
+            catch (Exception ex)
+            {
+                Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while sending daily message " + ex));
+            }
         }
 
         public static void SendMessage_DE()
