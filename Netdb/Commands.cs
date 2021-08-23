@@ -490,7 +490,7 @@ namespace Netdb
             Tuple<string, string, string, IEmote> tuple = null;
             for (int i = 0; i < countries.Count; i++)
             {
-                if (country == countries[i].Item2.ToLower())
+                if (country.ToUpper() == countries[i].Item2)
                 {
                     tuple = countries[i];
                 }
