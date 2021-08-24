@@ -38,7 +38,7 @@ namespace Netdb
         public static DateTime dailymessagetime_AT = new DateTime(2004, 9, 29, 12, 0, 0);
         public static DateTime dailymessagetime_DE = new DateTime(2004, 9, 29, 12, 10, 0);
         public static DateTime dailymessagetime_US = new DateTime(2004, 9, 29, 19, 0, 0);
-        public static DateTime dailymessagetime_In = new DateTime(2004, 9, 29, 8, 30, 0);
+        public static DateTime dailymessagetime_IN = new DateTime(2004, 9, 29, 8, 30, 0);
 
         public static string filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + Path.DirectorySeparatorChar;
 
@@ -155,7 +155,7 @@ namespace Netdb
                 thr2.Start();
             }
 
-            if ((int)dailymessagetime_In.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
+            if ((int)dailymessagetime_IN.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
             {
                 Thread thr3 = new Thread(SendMessage_In);
                 thr3.Start();
@@ -166,7 +166,7 @@ namespace Netdb
 
         public static void SendMessage_In()
         {
-            Thread.Sleep((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
+            Thread.Sleep((int)dailymessagetime_IN.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds);
 
             try
             {
