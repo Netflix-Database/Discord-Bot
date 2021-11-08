@@ -579,6 +579,9 @@ namespace Netdb
         [Summary("Shows what's coming soon to Netflix")]
         public async Task Whatsnext()
         {
+            Tools.Embedbuilder("This command will be available soon", Color.DarkRed, Context.Channel);
+            return;
+
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithColor(Color.LightOrange);
             eb.WithTitle("What's next?");

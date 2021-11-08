@@ -21,8 +21,6 @@ namespace Netdb
     {
         static List<EmbedBuilder> errors = new List<EmbedBuilder>();
         static int error;
-        static Timer errorTimer;
-        static Timer updateTimer;
         string connectionstring;
         public static string token;
         public static MySqlConnection _con;
@@ -127,15 +125,6 @@ namespace Netdb
                 }
 
             await _client.StartAsync();
-
-            updateTimer = new Timer((e) =>
-            {
-                Perform60MinuteUpdate();
-            }, null, 10000, 360000);
-
-            errorTimer = new Timer(OutputErrors, null, 10000, 1000);
-
-            await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error setup finished"));
 
             if ((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
             {
@@ -300,16 +289,6 @@ namespace Netdb
             catch (Exception)
             {
                 Console.WriteLine("Error while reading stack trace");
-            }
-        }
-
-        public static void OutputErrors(object p)
-        {
-            if (errors.Count > 0)
-            {
-                var b = errors.ToArray()[0];
-                errors.RemoveAt(0);
-                ((ISocketMessageChannel)_client.GetChannel(835295047477231616)).SendMessageAsync("", false, b.Build()).GetAwaiter().GetResult();
             }
         }
 
