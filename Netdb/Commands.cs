@@ -385,6 +385,9 @@ namespace Netdb
         [Summary("Shows the searched list")]
         public async Task Top(int i)
         {
+            Tools.Embedbuilder("This feature will be available soon. Keep rating your favourite movies/shows.", Color.Red, Context.Channel);
+            return;
+
             EmbedBuilder eb = new EmbedBuilder();
 
             switch (i)
