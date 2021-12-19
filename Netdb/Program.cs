@@ -534,95 +534,94 @@ namespace Netdb
 
         private async Task HandleCommandAsync(SocketMessage arg)
         {
-                if (!(arg is SocketUserMessage message))
-                {
-                    return;
-                }
-
-                var context = new SocketCommandContext(_client, message);
-                if (message.Author.IsBot) return;
-
-                if (_con.State.ToString() == "Closed")
-                {
-                    try
-                    {
-                        _con.Open();
-                    }
-                    catch (Exception)
-                    {
-                        if (message.Content.StartsWith('#'))
-                        {
-                            var eb = new EmbedBuilder();
-                            eb.WithColor(Color.DarkRed);
-                            eb.WithDescription("The databse is currently offline. Try again later.");
-
-                            await message.Channel.SendMessageAsync("", false, eb.Build());
-                        }
-                     
-                        return;
-                    }
-                }
-
-                string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
-
-                if (message.ToString() == _client.CurrentUser.Mention)
-                {
-                    var eb = new EmbedBuilder();
-                    eb.WithColor(Color.Red);
-                    eb.WithDescription("You can search for Netflix movies and shows by typing `" + prefix + "search (moviename)`.  View all commands here: `" + prefix + "help`.");
-
-                    await message.Channel.SendMessageAsync("", false, eb.Build());
-                }
-
-
-                int argPos = 0;
-
-                if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            if (!(arg is SocketUserMessage message))
             {
-               
+                return;
+            }
 
-                CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
+            var context = new SocketCommandContext(_client, message);
+            if (message.Author.IsBot) return;
 
-                    var result = await _commands.ExecuteAsync(context, argPos, _services);
-                    commandsexecuted++;
-
-                    if (!result.IsSuccess)
+            if (_con.State.ToString() == "Closed")
+            {
+                try
+                {
+                    _con.Open();
+                }
+                catch (Exception)
+                {
+                    if (message.Content.StartsWith('#'))
                     {
-                        await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while executing command  " + result.ErrorReason));
-
                         var eb = new EmbedBuilder();
                         eb.WithColor(Color.DarkRed);
-
-                        if (result.ErrorReason == "Unknown command.")
-                        {
-                            eb.WithDescription("This command doesn't exist. Use `" + prefix + "help {commandname}` to see the exact syntax.");
-                        }
-                        else if (result.ErrorReason == "User not found.")
-                        {
-                            eb.WithDescription("Couldn't find this user");
-                        }
-                        else if (result.ErrorReason == "Failed to parse Int32.")
-                        {
-                            eb.WithDescription("wrong number");
-                        }
-                        else if (result.ErrorReason == "The input text has too few parameters.")
-                        {
-                            eb.WithDescription("Something is missing");
-                        }
-                        else if (result.ErrorReason == "The input text has too many parameters.")
-                        {
-                            eb.WithDescription("There are too many parameters");
-                        }
-                        else
-                        {
-                            eb.WithDescription("An error occured");
-                        }
+                        eb.WithDescription("The databse is currently offline. Try again later.");
 
                         await message.Channel.SendMessageAsync("", false, eb.Build());
                     }
 
-                    if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
+                    return;
                 }
+            }
+
+            string prefix = PrefixManager.GetPrefixFromGuildId(arg.Channel);
+
+            if (message.ToString() == _client.CurrentUser.Mention)
+            {
+                var eb = new EmbedBuilder();
+                eb.WithColor(Color.Red);
+                eb.WithDescription("You can search for Netflix movies and shows by typing `" + prefix + "search (moviename)`.  View all commands here: `" + prefix + "help`.");
+
+                await message.Channel.SendMessageAsync("", false, eb.Build());
+            }
+
+            int argPos = 0;
+
+            if (message.HasStringPrefix(prefix, ref argPos) || message.HasStringPrefix("#", ref argPos))
+            {
+
+
+                CommandDB.CommandUsed(message.Content.Substring(prefix.Length).Split(" ")[0]);
+
+                var result = await _commands.ExecuteAsync(context, argPos, _services);
+                commandsexecuted++;
+
+                if (!result.IsSuccess)
+                {
+                    await Client_Log(new LogMessage(LogSeverity.Info, "System", "Error while executing command  " + result.ErrorReason));
+
+                    var eb = new EmbedBuilder();
+                    eb.WithColor(Color.DarkRed);
+
+                    if (result.ErrorReason == "Unknown command.")
+                    {
+                        eb.WithDescription("This command doesn't exist. Use `" + prefix + "help {commandname}` to see the exact syntax.");
+                    }
+                    else if (result.ErrorReason == "User not found.")
+                    {
+                        eb.WithDescription("Couldn't find this user");
+                    }
+                    else if (result.ErrorReason == "Failed to parse Int32.")
+                    {
+                        eb.WithDescription("wrong number");
+                    }
+                    else if (result.ErrorReason == "The input text has too few parameters.")
+                    {
+                        eb.WithDescription("Something is missing");
+                    }
+                    else if (result.ErrorReason == "The input text has too many parameters.")
+                    {
+                        eb.WithDescription("There are too many parameters");
+                    }
+                    else
+                    {
+                        eb.WithDescription("An error occured");
+                    }
+
+                    await message.Channel.SendMessageAsync("", false, eb.Build());
+                }
+
+                if (result.Error.Equals(CommandError.UnmetPrecondition)) await message.Channel.SendMessageAsync(result.ErrorReason);
+            }
         }
     }
 }
