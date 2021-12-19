@@ -126,8 +126,6 @@ namespace Netdb
 
             await _client.StartAsync();
 
-            Perform60MinuteUpdate();
-
             if ((int)dailymessagetime_DE.TimeOfDay.Subtract(DateTime.Now.TimeOfDay).TotalMilliseconds > 0)
             {
                 Thread thr = new Thread(SendMessage_DE);
@@ -387,6 +385,8 @@ namespace Netdb
 
         private async Task _client_Ready()
         {
+            Perform60MinuteUpdate();
+
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithTitle("Bot started");
 
