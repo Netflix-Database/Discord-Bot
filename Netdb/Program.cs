@@ -150,8 +150,6 @@ namespace Netdb
                 thr3.Start();
             }
 
-            Perform60MinuteUpdate();
-
             await Task.Delay(-1);
         }
 
@@ -387,6 +385,8 @@ namespace Netdb
 
         private async Task _client_Ready()
         {
+            Perform60MinuteUpdate();
+
             EmbedBuilder eb = new EmbedBuilder();
             eb.WithTitle("Bot started");
 
