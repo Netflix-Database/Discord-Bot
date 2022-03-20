@@ -7,7 +7,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://netdb.ga">
+  <a href="https://netdb.at">
     <img src="Logo.png" alt="Logo" width="480" height="480">
   </a>
 
@@ -17,7 +17,7 @@
     <a href="https://discord.com/login?redirect_to=%2Foauth2%2Fauthorize%3Fclient_id%3D802237562625196084%26scope%3Dbot%26permissions%3D518208"><strong>Invite »</strong></a>
     <br />
     <br />
-    <a href="https://netdb.ga/discordbot">View Page</a>
+    <a href="https://netdb.at/discordbot">View Page</a>
     ·
     <a href="https://github.com/YannickFuereder/Discord-Bot/issues">Report Bug</a>
     ·
@@ -53,7 +53,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 * Support Server: [![Discord](https://discord.com/api/guilds/623873641679028244/widget.png)](https://discord.gg/wZzFqd6dxP)
-* Email: support@netdb.ga
 
 Project Link: [https://github.com/Netflix-Database/Discord-Bot](https://github.com/Netflix-Database/Discord-Bot)
 
