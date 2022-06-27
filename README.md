@@ -37,6 +37,7 @@ new movie/show gets released.
 ### Built With
 * [C#](https://docs.microsoft.com/en-us/dotnet/csharp)
 * [Mysql](https://www.mysql.com)
+* [Discord .Net](https://github.com/discord-net/Discord.Net)
 
 <!-- ROADMAP -->
 ## Roadmap
